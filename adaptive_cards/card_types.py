@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from typing import Optional, Any
 from dataclasses_json import config, dataclass_json, LetterCase
 from enum import StrEnum, auto
-import src.utils as utils
+import adaptive_cards.utils as utils
 
 class ImageFillMode(StrEnum):
     COVER = auto()

@@ -1,7 +1,7 @@
-from src.cards import AdaptiveCard
-from src.card_elements import TextBlock, Media, MediaSource
-from src.card_containers import Container, ColumnSet, Column, FactSet, Fact
-from src.card_types import Colors, VerticalAlignment, ContainerStyle, FontType
+from adaptive_cards.card import AdaptiveCard
+from adaptive_cards.elements import TextBlock, Media, MediaSource
+from adaptive_cards.containers import Container, ColumnSet, Column, FactSet, Fact
+from adaptive_cards.card_types import Colors, VerticalAlignment, ContainerStyle, FontType
 
 url = "https://adaptivecards.io/content/cats/1.png"
 

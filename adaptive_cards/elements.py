@@ -3,9 +3,9 @@ from dataclasses_json import LetterCase, dataclass_json, config, Undefined
 from typing import TypeVar, Self, Optional
 from interfaces.interface import Builder
 
-import src.actions as actions
-import src.utils as utils
-import src.card_types as ct
+import adaptive_cards.actions as actions
+import adaptive_cards.utils as utils
+import adaptive_cards.card_types as ct
 
 Image = TypeVar("Image", bound="Image")
 TextBlock = TypeVar("TextBlock", bound="TextBlock")

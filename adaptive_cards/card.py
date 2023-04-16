@@ -1,14 +1,14 @@
 
-from typing import Self, TypeVar, Optional
-from src.card_elements import ElementT, TextBlock, Image, Media, MediaSource, CaptionSource, RichTextBlock, TextRun
-import src.card_elements as card_elements
-from src.card_containers import Container, ContainerT
-from interfaces.interface import Builder
+from adaptive_cards.actions import SelectAction, Action
+from adaptive_cards.containers import Container, ContainerT
+from adaptive_cards.elements import ElementT, TextBlock, Image, Media, MediaSource, CaptionSource, RichTextBlock, TextRun
 from dataclasses import dataclass, field
 from dataclasses_json import dataclass_json, LetterCase, config
-import src.card_types as ct
-import src.utils as utils
-from src.actions import SelectAction, Action
+from interfaces.interface import Builder
+from typing import Self, TypeVar, Optional
+import adaptive_cards.card_types as ct
+import adaptive_cards.elements as elements
+import adaptive_cards.utils as utils
 
 SCHEMA: str = "http://adaptivecards.io/schemas/adaptive-card.json"
 TYPE: str = "AdaptiveCard"

@@ -3,11 +3,10 @@ from dataclasses_json import LetterCase, dataclass_json, config
 from typing import TypeVar, Self, Optional
 from interfaces.interface import Builder
 
-import src.actions as action
-import src.utils as utils
-import src.card_types as ct
-import src.cards as cards
-import src.card_elements as card_elements
+import adaptive_cards.actions as action
+import adaptive_cards.utils as utils
+import adaptive_cards.card_types as ct
+import adaptive_cards.elements as elements
 
 ActionSet = TypeVar("ActionSet", bound="ActionSet")
 Container = TypeVar("Container", bound="Container")
@@ -42,10 +41,10 @@ class ActionSet:
         return ActionSetBuilder(actions)
     
 class ContainerBuilder(Builder):
-    def __init__(self, items: list[card_elements.ElementT]) -> None:
+    def __init__(self, items: list[elements.ElementT]) -> None:
         self.__reset(items)
         
-    def __reset(self, items: list[card_elements.ElementT]) -> None:    
+    def __reset(self, items: list[elements.ElementT]) -> None:    
         self.__container = Container(items=items)
         
     def select_action(self, select_action: action.SelectAction) -> Self:
@@ -83,7 +82,7 @@ class ContainerBuilder(Builder):
 @dataclass
 class Container:
     type: str = "Container"
-    items: list[card_elements.ElementT] = field(default_factory=list)
+    items: list[elements.ElementT] = field(default_factory=list)
     select_action: Optional[action.SelectAction] = field(default=None, metadata=config(exclude=utils.is_none))
     style: Optional[ct.ContainerStyle] = field(default=None, metadata=config(exclude=utils.is_none))
     vertical_content_alignment: Optional[ct.VerticalAlignment] = field(default=None, metadata=config(exclude=utils.is_none))
@@ -93,7 +92,7 @@ class Container:
     rtl: Optional[bool]= field(default=None, metadata=config(exclude=utils.is_none))
 
     @staticmethod
-    def new(items: list[card_elements.ElementT]) -> ContainerBuilder:
+    def new(items: list[elements.ElementT]) -> ContainerBuilder:
         return ContainerBuilder(items)
     
 class ColumnSetBuilder(Builder):
@@ -152,7 +151,7 @@ class ColumnBuilder(Builder):
     def __reset(self) -> None:    
         self.__column = Column()
         
-    def items(self, items: list[card_elements.ElementT]) -> Self:
+    def items(self, items: list[elements.ElementT]) -> Self:
         self.__column.items = items
         return self
     
@@ -206,7 +205,7 @@ class ColumnBuilder(Builder):
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class Column:
-    items: Optional[list[card_elements.ElementT]] = field(default=None, metadata=config(exclude=utils.is_none))
+    items: Optional[list[elements.ElementT]] = field(default=None, metadata=config(exclude=utils.is_none))
     background_image: Optional[ct.BackgroundImage | str] = field(default=None, metadata=config(exclude=utils.is_none))
     bleed: Optional[bool] = field(default=None, metadata=config(exclude=utils.is_none))
     fallback: Optional[Self | str] = field(default=None, metadata=config(exclude=utils.is_none))
@@ -264,10 +263,10 @@ class Fact:
         return FactBuilder(title, value)
 
 class ImageSetBuilder(Builder):
-    def __init__(self, images: list[card_elements.Image]) -> None:
+    def __init__(self, images: list[elements.Image]) -> None:
         self.__reset(images)
         
-    def __reset(self, images: list[card_elements.Image]) -> None:    
+    def __reset(self, images: list[elements.Image]) -> None:    
         self.__image_set = ImageSet(images=images)
         
     def image_size(self, image_size: ct.ImageSize) -> Self:
@@ -281,11 +280,11 @@ class ImageSetBuilder(Builder):
 @dataclass
 class ImageSet:
     type: str = "ImageSet"
-    images: list[card_elements.Image] = field(default_factory=list)
+    images: list[elements.Image] = field(default_factory=list)
     image_size: Optional[ct.ImageSize] = field(default=None, metadata=config(exclude=utils.is_none))
 
     @staticmethod
-    def new(images: list[card_elements.Image]) -> ImageSetBuilder:
+    def new(images: list[elements.Image]) -> ImageSetBuilder:
         return ImageSetBuilder(images)
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
@@ -358,10 +357,10 @@ class Table:
         return TableBuilder()
 
 class TableCellBuilder(Builder):
-    def __init__(self, items: list[card_elements.ElementT]) -> None:
+    def __init__(self, items: list[elements.ElementT]) -> None:
         self.__reset(items)
         
-    def __reset(self, items: list[card_elements.ElementT]) -> None:    
+    def __reset(self, items: list[elements.ElementT]) -> None:    
         self.__table_cell = TableCell(items=items)
         
     def select_action(self, select_action: action.SelectAction) -> Self:
@@ -398,7 +397,7 @@ class TableCellBuilder(Builder):
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class TableCell:
-    items: list[card_elements.ElementT] = field(default_factory=list)
+    items: list[elements.ElementT] = field(default_factory=list)
     select_action: Optional[action.SelectAction] = field(default=None, metadata=config(exclude=utils.is_none))
     style: Optional[ct.ContainerStyle] = field(default=None, metadata=config(exclude=utils.is_none))
     vertical_content_alignment: Optional[ct.VerticalAlignment] = field(default=None, metadata=config(exclude=utils.is_none))
@@ -408,5 +407,5 @@ class TableCell:
     rtl: Optional[bool] = field(default=None, metadata=config(exclude=utils.is_none))    
     
     @staticmethod
-    def new(items: list[card_elements.ElementT]) -> TableCellBuilder:
+    def new(items: list[elements.ElementT]) -> TableCellBuilder:
         return TableCellBuilder(items)
