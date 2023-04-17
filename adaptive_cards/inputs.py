@@ -1,10 +1,9 @@
 from dataclasses import dataclass, field
-from typing import TypeVar, Optional, Any, Self
+from typing import TypeVar, Optional
 from dataclasses_json import dataclass_json, LetterCase , config
 import adaptive_cards.utils as utils
 import adaptive_cards.card_types as ct
 import adaptive_cards.actions as actions
-from abc import ABC
 
 InputText = TypeVar("InputText", bound="InputText")
 InputNumber = TypeVar("InputNumber", bound="InputNumber")
@@ -13,7 +12,8 @@ InputTime = TypeVar("InputTime", bound="InputTime")
 InputToggle = TypeVar("InputToggle", bound="InputToggle")
 InputChoiceSet = TypeVar("InputChoiceSet", bound="InputChoiceSet")
 InputChoice = TypeVar("InputChoice", bound="InputChoice")
-InputT = InputText | InputNumber | InputDate | InputTime | InputToggle | InputChoiceSet | InputChoice
+
+InputT = InputText | InputNumber | InputDate | InputTime | InputToggle | InputChoiceSet
     
     
 class Input:

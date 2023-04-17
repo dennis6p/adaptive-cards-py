@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Optional, Any
+from typing import Optional
 from dataclasses_json import config, dataclass_json, LetterCase
 from enum import StrEnum, auto
 import adaptive_cards.utils as utils

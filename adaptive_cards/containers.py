@@ -1,12 +1,12 @@
 from dataclasses import dataclass, field
 from dataclasses_json import LetterCase, dataclass_json, config
-from typing import TypeVar, Self, Optional, Any
-from interfaces.interface import Builder
+from typing import TypeVar, Optional, Any
 
 import adaptive_cards.actions as action
 import adaptive_cards.utils as utils
 import adaptive_cards.card_types as ct
 import adaptive_cards.elements as elements
+import adaptive_cards.inputs as inputs
 
 ActionSet = TypeVar("ActionSet", bound="ActionSet")
 Container = TypeVar("Container", bound="Container")
@@ -18,7 +18,7 @@ ImageSet = TypeVar("ImageSet", bound="ImageSet")
 Table = TypeVar("Table", bound="Table")
 TableCell = TypeVar("TableCell", bound="TableCell")
 
-ContainerT = ActionSet | Container | ColumnSet | Column | FactSet | Fact | ImageSet | Table | TableCell
+ContainerT = ActionSet | Container | ColumnSet | FactSet | ImageSet | Table
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
@@ -41,7 +41,7 @@ class ActionSet(ContainerBase):
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class Container(ContainerBase):
-    items: list[elements.ElementT]
+    items: list[elements.ElementT | ContainerT | inputs.InputT]
     type: str = "Container"
     select_action: Optional[action.SelectAction] = field(default=None, metadata=config(exclude=utils.is_none))
     style: Optional[ct.ContainerStyle] = field(default=None, metadata=config(exclude=utils.is_none))

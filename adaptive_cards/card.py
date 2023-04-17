@@ -1,13 +1,13 @@
 
 from adaptive_cards.actions import SelectAction, ActionT
-from adaptive_cards.containers import Container, ContainerT
-from adaptive_cards.elements import ElementT, TextBlock, Image, Media, MediaSource, CaptionSource, RichTextBlock, TextRun
+from adaptive_cards.containers import ContainerT
+from adaptive_cards.elements import ElementT
+from adaptive_cards.inputs import InputT
 from dataclasses import dataclass, field
 from dataclasses_json import dataclass_json, LetterCase, config
 from interfaces.interface import Builder
 from typing import Self, TypeVar, Optional
 import adaptive_cards.card_types as ct
-import adaptive_cards.elements as elements
 import adaptive_cards.utils as utils
 
 SCHEMA: str = "http://adaptivecards.io/schemas/adaptive-card.json"
@@ -27,13 +27,13 @@ class AdaptiveCardBuilder(Builder):
         self.__card.version = version
         return self
     
-    def add_item(self, item: ElementT | ContainerT) -> Self:
+    def add_item(self, item: ElementT | ContainerT | InputT) -> Self:
         if self.__card.body is None:
             self.__card.body = list()
         self.__card.body.append(item)
         return self
     
-    def add_items(self, items: list[ElementT | ContainerT]) -> Self:
+    def add_items(self, items: list[ElementT | ContainerT | InputT]) -> Self:
         if self.__card.body is None:
             self.__card.body = list()
         for item in items:
@@ -65,7 +65,7 @@ class AdaptiveCard:
     version: str = VERSION
     refresh: Optional[ct.Refresh] = field(default=None, metadata=config(exclude=utils.is_none))
     authentication: Optional[ct.Authentication] = field(default=None, metadata=config(exclude=utils.is_none))
-    body: Optional[list[ElementT | ContainerT]] = field(default=None, metadata=config(exclude=utils.is_none))
+    body: Optional[list[ElementT | ContainerT | InputT]] = field(default=None, metadata=config(exclude=utils.is_none))
     actions: Optional[list[ActionT]] = field(default=None, metadata=config(exclude=utils.is_none))
     select_action: Optional[SelectAction] = field(default=None, metadata=config(exclude=utils.is_none))
     fallback_text: Optional[str] = field(default=None, metadata=config(exclude=utils.is_none))

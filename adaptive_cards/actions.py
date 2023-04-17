@@ -1,10 +1,8 @@
 from dataclasses import dataclass, field
-from typing import TypeVar, Optional, Any, Self
-from interfaces.interface import Builder
+from typing import TypeVar, Optional, Any
 from dataclasses_json import dataclass_json, LetterCase , config
 import adaptive_cards.utils as utils
 import adaptive_cards.card_types as ct
-from abc import ABC
 
 ActionOpenUrl = TypeVar("ActionOpenUrl", bound="ActionOpenUrl")
 ActionSubmit = TypeVar("ActionSubmit", bound="ActionSubmit")

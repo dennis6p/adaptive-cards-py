@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
-from dataclasses_json import LetterCase, dataclass_json, config, Undefined
-from typing import TypeVar, Self, Optional, Any
-from interfaces.interface import Builder
+from dataclasses_json import LetterCase, dataclass_json, config
+from typing import TypeVar, Optional, Any
 
 import adaptive_cards.actions as actions
 import adaptive_cards.utils as utils
@@ -15,11 +14,7 @@ CaptionSource = TypeVar("CaptionSource", bound="CaptionSource")
 RichTextBlock = TypeVar("RichTextBlock", bound="RichTextBlock")
 TextRun = TypeVar("TextRun", bound="TextRun")
 
-ElementT = CaptionSource | \
-           Image | \
-           Media | \
-           RichTextBlock | \
-           TextBlock
+ElementT = CaptionSource | Image | Media | RichTextBlock | TextBlock
            
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True) 
