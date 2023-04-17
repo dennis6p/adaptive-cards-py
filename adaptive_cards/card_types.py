@@ -81,6 +81,31 @@ class Spacing(StrEnum):
     EXTRA_LARGE = "extraLarge"
     PADDING = auto()
     
+class AssociatedInputs(StrEnum):
+    AUTO = auto()
+    NONE = auto()
+    
+class ActionStyle(StrEnum):
+    DEFAULT = auto()
+    POSITIVE = auto()
+    DESTRUCTIVE = auto()
+    
+class ActionMode(StrEnum):
+    PRIMARY = auto()
+    SECONDARY = auto()
+    
+class TextInputStyle(StrEnum):
+    TEXT = auto()
+    TEL = auto()
+    URL = auto()
+    EMAIL = auto()
+    PASSWORD = auto()
+    
+class ChoiceInputStyle(StrEnum):
+    COMPACT = auto()
+    EXPANDED = auto()
+    FILTERED = auto()
+    
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class BackgroundImage:

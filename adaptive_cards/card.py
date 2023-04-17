@@ -1,5 +1,5 @@
 
-from adaptive_cards.actions import SelectAction, Action
+from adaptive_cards.actions import SelectAction, ActionT
 from adaptive_cards.containers import Container, ContainerT
 from adaptive_cards.elements import ElementT, TextBlock, Image, Media, MediaSource, CaptionSource, RichTextBlock, TextRun
 from dataclasses import dataclass, field
@@ -41,6 +41,20 @@ class AdaptiveCardBuilder(Builder):
         
         return self    
     
+    def add_action(self, action: ActionT) -> Self:
+        if self.__card.actions is None:
+            self.__card.actions = list()
+        self.__card.actions.append(action)
+        return self
+    
+    def add_actions(self, actions: list[ActionT]) -> Self:
+        if self.__card.actions is None:
+            self.__card.actions = list()
+        for action in actions:
+            self.add_action(action)
+        
+        return self    
+    
     def create(self) -> AdaptiveCard:
         return self.__card
 
@@ -52,7 +66,7 @@ class AdaptiveCard:
     refresh: Optional[ct.Refresh] = field(default=None, metadata=config(exclude=utils.is_none))
     authentication: Optional[ct.Authentication] = field(default=None, metadata=config(exclude=utils.is_none))
     body: Optional[list[ElementT | ContainerT]] = field(default=None, metadata=config(exclude=utils.is_none))
-    actions: Optional[list[Action]] = field(default=None, metadata=config(exclude=utils.is_none))
+    actions: Optional[list[ActionT]] = field(default=None, metadata=config(exclude=utils.is_none))
     select_action: Optional[SelectAction] = field(default=None, metadata=config(exclude=utils.is_none))
     fallback_text: Optional[str] = field(default=None, metadata=config(exclude=utils.is_none))
     background_image: Optional[ct.BackgroundImage | str] = field(default=None, metadata=config(exclude=utils.is_none))
