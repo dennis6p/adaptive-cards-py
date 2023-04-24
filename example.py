@@ -3,6 +3,7 @@ from adaptive_cards.elements import TextBlock, Image
 from adaptive_cards.containers import Container, ContainerT, ColumnSet, Column
 import adaptive_cards.card_types as types
 from adaptive_cards.actions import ActionToggleVisibility, TargetElement
+from adaptive_cards.validator import SchemaValidator
 
 # ------------ PR examples ------------ #
 
@@ -13,7 +14,8 @@ containers.append(
             TextBlock(
                 text="**Results**",
                 size=types.FontSize.EXTRA_LARGE,
-                horizontal_alignment=types.HorizontalAlignment.CENTER
+                horizontal_alignment=types.HorizontalAlignment.CENTER,
+                style=types.TextBlockStyle.HEADING
             ),
         ],
         style=types.ContainerStyle.EMPHASIS,
@@ -131,8 +133,9 @@ containers.append(
     )
 )
 
-
-card = AdaptiveCard.new().version("1.4").add_items(containers).create()
+card = AdaptiveCard.new().version("1.2").add_items(containers).create()
+  
+print(SchemaValidator(card).validate())
   
 with open("examples/tasks.json", "w+") as f:
     f.write(card.to_json())
