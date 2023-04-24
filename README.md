@@ -3,6 +3,9 @@
 A thin python wrapper for creating [**Adaptive Cards**](https://adaptivecards.io/) easily on code level. 
 See here for the official and [**binding scheme**](https://adaptivecards.io/explorer/). 
 
+**Please note:** This library is still in progress on not yet ready for real world usage. The code as well 
+as the documentation are missing substantial parts. They are planned to be added soon. 
+
 
 ## About
 
@@ -48,3 +51,25 @@ card: AdaptiveCard = AdaptiveCard.new(version).body([element_1, element_2]).crea
 ```
 After the building of the object is done, the `create(...)` method must be called in order to create the final object. In this case, the object will be of type `AdaptiveCard`.
 
+Since the common format is `json`, the `AdaptiveCard` provides an `to_json()` method, 
+which you can use to create a formatted string. 
+
+```python
+with open("<path/to/your/file.json>", "w") as f:
+    f.write(card.to_json())
+```
+
+The card is ready to be used with any of the compatible apps (e.g. MS Teams) now. 
+Please keep in mind, that not all features and versions are available for every platform.
+[**Here**](https://learn.microsoft.com/en-us/adaptive-cards/resources/partners), you can find more information about it. 
+
+## Examples
+
+Have a look in the examples folder. 
+
+## Roadmap
+
++ More complete valdidation
++ More and better examples
++ Documentation on code level
++ Ready to use Python package
