@@ -107,44 +107,44 @@ class ChoiceInputStyle(StrEnum):
     FILTERED = auto()
     
 @dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass
+@dataclass(kw_only=True)
 class BackgroundImage:
-    uri: str = field(default="", metadata=config(exclude=utils.is_none))
-    fill_mode: Optional[ImageFillMode] = field(default=None, metadata=config(exclude=utils.is_none))
-    horizontal_alignment: Optional[HorizontalAlignment] = field(default=None, metadata=config(exclude=utils.is_none))
-    vertical_alignment: Optional[VerticalAlignment] = field(default=None, metadata=config(exclude=utils.is_none))
+    uri: str = field(metadata=utils.get_metadata("1.0"))
+    fill_mode: Optional[ImageFillMode] = field(default=None, metadata=utils.get_metadata("1.2"))
+    horizontal_alignment: Optional[HorizontalAlignment] = field(default=None, metadata=utils.get_metadata("1.2"))
+    vertical_alignment: Optional[VerticalAlignment] = field(default=None, metadata=utils.get_metadata("1.2"))
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass
+@dataclass(kw_only=True)
 class Refresh:
-    action: Optional[str] = field(default=None, metadata=config(exclude=utils.is_none))
-    expires: Optional[str] = field(default=None, metadata=config(exclude=utils.is_none))
-    user_ids: Optional[list[str]] = field(default=None, metadata=config(exclude=utils.is_none))
+    action: Optional[str] = field(default=None, metadata=utils.get_metadata("1.4"))
+    expires: Optional[str] = field(default=None, metadata=utils.get_metadata("1.6"))
+    user_ids: Optional[list[str]] = field(default=None, metadata=utils.get_metadata("1.4"))
     
 @dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass
+@dataclass(kw_only=True)
 class TokenExchangeResource:
-    id: str = field(default="", metadata=config(exclude=utils.is_none))
-    uri: str = field(default="", metadata=config(exclude=utils.is_none))
-    provider_id: str = field(default="", metadata=config(exclude=utils.is_none))
+    id: str = field(default="", metadata=utils.get_metadata("1.4"))
+    uri: str = field(default="", metadata=utils.get_metadata("1.4"))
+    provider_id: str = field(default="", metadata=utils.get_metadata("1.4"))
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass
+@dataclass(kw_only=True)
 class AuthCardButtons:
-    type: str = field(default="", metadata=config(exclude=utils.is_none))
-    value: str = field(default="", metadata=config(exclude=utils.is_none))
-    title: Optional[str] = field(default=None, metadata=config(exclude=utils.is_none))
-    image: Optional[str] = field(default=None, metadata=config(exclude=utils.is_none))
+    type: str = field(default="", metadata=utils.get_metadata("1.4"))
+    value: str = field(default="", metadata=utils.get_metadata("1.4"))
+    title: Optional[str] = field(default=None, metadata=utils.get_metadata("1.4"))
+    image: Optional[str] = field(default=None, metadata=utils.get_metadata("1.4"))
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass
+@dataclass(kw_only=True)
 class Authentication:
-    text: Optional[str] = field(default=None, metadata=config(exclude=utils.is_none))
-    connection_name: Optional[str] = field(default=None, metadata=config(exclude=utils.is_none))
-    token_exchange_resource: Optional[TokenExchangeResource] = field(default=None, metadata=config(exclude=utils.is_none))
-    buttons: Optional[AuthCardButtons] = field(default=None, metadata=config(exclude=utils.is_none))
+    text: Optional[str] = field(default=None, metadata=utils.get_metadata("1.4"))
+    connection_name: Optional[str] = field(default=None, metadata=utils.get_metadata("1.4"))
+    token_exchange_resource: Optional[TokenExchangeResource] = field(default=None, metadata=utils.get_metadata("1.4"))
+    buttons: Optional[AuthCardButtons] = field(default=None, metadata=utils.get_metadata("1.4"))
     
 @dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass
+@dataclass(kw_only=True)
 class Metadata:
-    web_url: Optional[str] = field(default=None, metadata=config(exclude=utils.is_none))
+    web_url: Optional[str] = field(default=None, metadata=utils.get_metadata("1.6"))

@@ -23,112 +23,114 @@ ContainerT = ActionSet | Container | ColumnSet | FactSet | ImageSet | Table
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class ContainerBase:
-   Element: Optional[Any] = field(default=None, metadata=config(exclude=utils.is_none))
-   separator: Optional[bool] = field(default=None, metadata=config(exclude=utils.is_none))
-   spacing: Optional[ct.Spacing] = field(default=None, metadata=config(exclude=utils.is_none))
-   id: Optional[str] = field(default=None, metadata=config(exclude=utils.is_none))
-   is_visible: Optional[bool] = field(default=None, metadata=config(exclude=utils.is_none))
-   requires: Optional[dict[str, str]] = field(default=None, metadata=config(exclude=utils.is_none))   
-   height: Optional[ct.BlockElementHeight] = field(default=None, metadata=config(exclude=utils.is_none))    
+   fallback: Optional[elements.ElementT | action.ActionT | inputs.InputT] = field(default=None, metadata=utils.get_metadata("1.2"))
+   separator: Optional[bool] = field(default=None, metadata=utils.get_metadata("1.2"))
+   spacing: Optional[ct.Spacing] = field(default=None, metadata=utils.get_metadata("1.2"))
+   id: Optional[str] = field(default=None, metadata=utils.get_metadata("1.2"))
+   is_visible: Optional[bool] = field(default=None, metadata=utils.get_metadata("1.2"))
+   requires: Optional[dict[str, str]] = field(default=None, metadata=utils.get_metadata("1.2"))   
+   height: Optional[ct.BlockElementHeight] = field(default=None, metadata=utils.get_metadata("1.1"))    
            
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class ActionSet(ContainerBase):
-    actions: list[action.ActionT]
-    type: str = "ActionSet"
+    actions: list[action.ActionT] = field(metadata=utils.get_metadata("1.2"))
+    type: str = field(default="ActionSet", metadata=utils.get_metadata("1.2"))
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class Container(ContainerBase):
-    items: list[elements.ElementT | ContainerT | inputs.InputT]
-    type: str = "Container"
-    select_action: Optional[action.SelectAction] = field(default=None, metadata=config(exclude=utils.is_none))
-    style: Optional[ct.ContainerStyle] = field(default=None, metadata=config(exclude=utils.is_none))
-    vertical_content_alignment: Optional[ct.VerticalAlignment] = field(default=None, metadata=config(exclude=utils.is_none))
-    bleed: Optional[bool] = field(default=None, metadata=config(exclude=utils.is_none))
-    background_image: Optional[ct.BackgroundImage | str] = field(default=None, metadata=config(exclude=utils.is_none))
-    min_height: Optional[str] = field(default=None, metadata=config(exclude=utils.is_none))
-    rtl: Optional[bool]= field(default=None, metadata=config(exclude=utils.is_none))
+    items: list[elements.ElementT | ContainerT | inputs.InputT] = field(metadata=utils.get_metadata("1.0"))
+    type: str = field(default="Container", metadata=utils.get_metadata("1.0"))
+    select_action: Optional[action.SelectAction] = field(default=None, metadata=utils.get_metadata("1.1"))
+    style: Optional[ct.ContainerStyle] = field(default=None, metadata=utils.get_metadata("1.0"))
+    vertical_content_alignment: Optional[ct.VerticalAlignment] = field(default=None, metadata=utils.get_metadata("1.1"))
+    bleed: Optional[bool] = field(default=None, metadata=utils.get_metadata("1.2"))
+    background_image: Optional[ct.BackgroundImage | str] = field(default=None, metadata=utils.get_metadata("1.2"))
+    min_height: Optional[str] = field(default=None, metadata=utils.get_metadata("1.2"))
+    rtl: Optional[bool]= field(default=None, metadata=utils.get_metadata("1.5"))
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class ColumnSet(ContainerBase):
-    type: str = "ColumnSet"
-    columns: Optional[list[Column]] = field(default=None, metadata=config(exclude=utils.is_none))
-    select_action: Optional[action.SelectAction] = field(default=None, metadata=config(exclude=utils.is_none))
-    style: Optional[ct.ContainerStyle] = field(default=None, metadata=config(exclude=utils.is_none))
-    bleed: Optional[bool] = field(default=None, metadata=config(exclude=utils.is_none))
-    min_height: Optional[str] = field(default=None, metadata=config(exclude=utils.is_none))
-    horizontal_alignment: Optional[ct.HorizontalAlignment] = field(default=None, metadata=config(exclude=utils.is_none))
+    type: str = field(default="ColumnSet", metadata=utils.get_metadata("1.0"))
+    columns: Optional[list[Column]] = field(default=None, metadata=utils.get_metadata("1.0"))
+    select_action: Optional[action.SelectAction] = field(default=None, metadata=utils.get_metadata("1.1"))
+    style: Optional[ct.ContainerStyle] = field(default=None, metadata=utils.get_metadata("1.2"))
+    bleed: Optional[bool] = field(default=None, metadata=utils.get_metadata("1.2"))
+    min_height: Optional[str] = field(default=None, metadata=utils.get_metadata("1.2"))
+    horizontal_alignment: Optional[ct.HorizontalAlignment] = field(default=None, metadata=utils.get_metadata("1.0"))
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class Column(ContainerBase):
-    items: Optional[list[elements.ElementT]] = field(default=None, metadata=config(exclude=utils.is_none))
-    background_image: Optional[ct.BackgroundImage | str] = field(default=None, metadata=config(exclude=utils.is_none))
-    bleed: Optional[bool] = field(default=None, metadata=config(exclude=utils.is_none))
-    min_height: Optional[str] = field(default=None, metadata=config(exclude=utils.is_none))
-    rtl: Optional[bool] = field(default=None, metadata=config(exclude=utils.is_none))
-    select_action: Optional[action.SelectAction] = field(default=None, metadata=config(exclude=utils.is_none))
-    style: Optional[ct.ContainerStyle] = field(default=None, metadata=config(exclude=utils.is_none))
-    vertical_content_alignment: Optional[ct.VerticalAlignment] = field(default=None, metadata=config(exclude=utils.is_none))
-    width: Optional[str | int] = field(default=None, metadata=config(exclude=utils.is_none))
+    items: Optional[list[elements.ElementT]] = field(default=None, metadata=utils.get_metadata("1.0"))
+    background_image: Optional[ct.BackgroundImage | str] = field(default=None, metadata=utils.get_metadata("1.2"))
+    bleed: Optional[bool] = field(default=None, metadata=utils.get_metadata("1.2"))
+    min_height: Optional[str] = field(default=None, metadata=utils.get_metadata("1.2"))
+    rtl: Optional[bool] = field(default=None, metadata=utils.get_metadata("1.5"))
+    separator: Optional[bool] = field(default=None, metadata=utils.get_metadata("1.0"))
+    spacing: Optional[ct.Spacing] = field(default=None, metadata=utils.get_metadata("1.0"))
+    select_action: Optional[action.SelectAction] = field(default=None, metadata=utils.get_metadata("1.1"))
+    style: Optional[ct.ContainerStyle] = field(default=None, metadata=utils.get_metadata("1.0"))
+    vertical_content_alignment: Optional[ct.VerticalAlignment] = field(default=None, metadata=utils.get_metadata("1.1"))
+    width: Optional[str | int] = field(default=None, metadata=utils.get_metadata("1.0"))
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class FactSet(ContainerBase):
-    facts: list[Fact]
-    type: str = "FactSet"
+    facts: list[Fact] = field(metadata=utils.get_metadata("1.0"))
+    type: str = field(default="FactSet", metadata=utils.get_metadata("1.0"))
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class Fact:
-    title: str
-    value: str
+    title: str = field(metadata=utils.get_metadata("1.0"))
+    value: str = field(metadata=utils.get_metadata("1.0"))
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class ImageSet(ContainerBase):
-    images: list[elements.Image]
-    type: str = "ImageSet"
-    image_size: Optional[ct.ImageSize] = field(default=None, metadata=config(exclude=utils.is_none))
+    images: list[elements.Image] = field(metadata=utils.get_metadata("1.0"))
+    type: str = field(default="ImageSet", metadata=utils.get_metadata("1.2"))
+    image_size: Optional[ct.ImageSize] = field(default=None, metadata=utils.get_metadata("1.0"))
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class TableColumnDefinition:
-    horizontal_cell_content_alignment: Optional[ct.HorizontalAlignment] = field(default=None, metadata=config(exclude=utils.is_none))
-    vertical_cell_content_alignment: Optional[ct.VerticalAlignment] = field(default=None, metadata=config(exclude=utils.is_none))
-    width: Optional[str | int] = field(default=None, metadata=config(exclude=utils.is_none))
+    horizontal_cell_content_alignment: Optional[ct.HorizontalAlignment] = field(default=None, metadata=utils.get_metadata("1.5"))
+    vertical_cell_content_alignment: Optional[ct.VerticalAlignment] = field(default=None, metadata=utils.get_metadata("1.5"))
+    width: Optional[str | int] = field(default=None, metadata=utils.get_metadata("1.5"))
     
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class TableRow:
-    cells: Optional[TableCell] = field(default=None, metadata=config(exclude=utils.is_none))
-    horizontal_cell_content_alignment: Optional[ct.HorizontalAlignment] = field(default=None, metadata=config(exclude=utils.is_none))
-    vertical_cell_content_alignment: Optional[ct.VerticalAlignment] = field(default=None, metadata=config(exclude=utils.is_none))
-    style: Optional[str] = field(default=None, metadata=config(exclude=utils.is_none))
+    cells: Optional[TableCell] = field(default=None, metadata=utils.get_metadata("1.5"))
+    horizontal_cell_content_alignment: Optional[ct.HorizontalAlignment] = field(default=None, metadata=utils.get_metadata("1.5"))
+    vertical_cell_content_alignment: Optional[ct.VerticalAlignment] = field(default=None, metadata=utils.get_metadata("1.5"))
+    style: Optional[str] = field(default=None, metadata=utils.get_metadata("1.5"))
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class Table(ContainerBase):
-    type: str = "Table"
-    columns: Optional[list[TableColumnDefinition]] = field(default=None, metadata=config(exclude=utils.is_none))
-    rows: Optional[list[TableRow]] = field(default=None, metadata=config(exclude=utils.is_none))
-    first_row_as_header: Optional[bool] = field(default=None, metadata=config(exclude=utils.is_none))
-    show_grid_lines: Optional[bool] = field(default=None, metadata=config(exclude=utils.is_none))
-    grid_style: Optional[ct.ContainerStyle] = field(default=None, metadata=config(exclude=utils.is_none))
-    horizontal_cell_content_alignment: Optional[ct.HorizontalAlignment] = field(default=None, metadata=config(exclude=utils.is_none))
-    vertical_cell_content_alignment: Optional[ct.VerticalAlignment] = field(default=None, metadata=config(exclude=utils.is_none))
+    type: str = field(default="Table", metadata=utils.get_metadata("1.5"))
+    columns: Optional[list[TableColumnDefinition]] = field(default=None, metadata=utils.get_metadata("1.5"))
+    rows: Optional[list[TableRow]] = field(default=None, metadata=utils.get_metadata("1.5"))
+    first_row_as_header: Optional[bool] = field(default=None, metadata=utils.get_metadata("1.5"))
+    show_grid_lines: Optional[bool] = field(default=None, metadata=utils.get_metadata("1.5"))
+    grid_style: Optional[ct.ContainerStyle] = field(default=None, metadata=utils.get_metadata("1.5"))
+    horizontal_cell_content_alignment: Optional[ct.HorizontalAlignment] = field(default=None, metadata=utils.get_metadata("1.5"))
+    vertical_cell_content_alignment: Optional[ct.VerticalAlignment] = field(default=None, metadata=utils.get_metadata("1.5"))
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class TableCell:
-    items: list[elements.ElementT]
-    select_action: Optional[action.SelectAction] = field(default=None, metadata=config(exclude=utils.is_none))
-    style: Optional[ct.ContainerStyle] = field(default=None, metadata=config(exclude=utils.is_none))
-    vertical_content_alignment: Optional[ct.VerticalAlignment] = field(default=None, metadata=config(exclude=utils.is_none))
-    bleed: Optional[bool] = field(default=None, metadata=config(exclude=utils.is_none))
-    background_image: Optional[ct.BackgroundImage | str] = field(default=None, metadata=config(exclude=utils.is_none))
-    min_height: Optional[str] = field(default=None, metadata=config(exclude=utils.is_none))
-    rtl: Optional[bool] = field(default=None, metadata=config(exclude=utils.is_none))    
+    items: list[elements.ElementT] = field(metadata=utils.get_metadata("1.5"))
+    select_action: Optional[action.SelectAction] = field(default=None, metadata=utils.get_metadata("1.1"))
+    style: Optional[ct.ContainerStyle] = field(default=None, metadata=utils.get_metadata("1.5"))
+    vertical_content_alignment: Optional[ct.VerticalAlignment] = field(default=None, metadata=utils.get_metadata("1.1"))
+    bleed: Optional[bool] = field(default=None, metadata=utils.get_metadata("1.2"))
+    background_image: Optional[ct.BackgroundImage | str] = field(default=None, metadata=utils.get_metadata("1.2"))
+    min_height: Optional[str] = field(default=None, metadata=utils.get_metadata("1.2"))
+    rtl: Optional[bool] = field(default=None, metadata=utils.get_metadata("1.5"))    
