@@ -22,11 +22,11 @@ class InvalidField:
     version: str
 
 class SchemaValidator:
-    def __init__(self, card: AdaptiveCard) -> None:
-        self.__card = card
-        self.__reset()
+    def __init__(self) -> None:
+        ...
         
-    def validate(self) -> Result:
+    def validate(self, card: AdaptiveCard) -> Result:
+        self.__card = card
         self.__reset()
         result: Result = self.__validate_body()
         self.__debug()
