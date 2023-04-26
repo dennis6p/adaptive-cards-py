@@ -10,7 +10,6 @@ import adaptive_cards.card_types as types
 from adaptive_cards.actions import ActionToggleVisibility, TargetElement
 from adaptive_cards.validation import SchemaValidator, Result
 
-# ------------ PR examples ------------ #
 containers: list[ContainerT] = list()
 containers.append(
     Container(
