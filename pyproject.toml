@@ -1,0 +1,29 @@
+# pyproject.toml
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "adaptive-cards-py"
+version = "0.0.4"
+description = "Python wrapper library for building beautiful adaptive cards"
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+readme = "README.md"
+license = { file = "LICENSE" }
+keywords = ["bot", "ui", "adaptivecards", "cards", "adaptivecardsio", "python"]
+dependencies = [
+    "dataclasses-json",
+    "StrEnum"
+]
+requires-python = ">=3.10"
+
+[options]
+package_dir = ["adaptive_cards"]
+
+[project.urls]
+Homepage = "https://github.com/dennis6p/adaptive-cards-py"

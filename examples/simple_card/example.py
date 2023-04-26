@@ -1,12 +1,16 @@
+import sys
+
+
+sys.path.append('../../')
+
 from adaptive_cards.card import AdaptiveCard
 from adaptive_cards.elements import TextBlock, Image
 from adaptive_cards.containers import Container, ContainerT, ColumnSet, Column
 import adaptive_cards.card_types as types
 from adaptive_cards.actions import ActionToggleVisibility, TargetElement
-from adaptive_cards.validator import SchemaValidator
+from adaptive_cards.validation import SchemaValidator, Result
 
 # ------------ PR examples ------------ #
-
 containers: list[ContainerT] = list()
 containers.append(
     Container(
@@ -15,7 +19,6 @@ containers.append(
                 text="**Results**",
                 size=types.FontSize.EXTRA_LARGE,
                 horizontal_alignment=types.HorizontalAlignment.CENTER,
-                style=types.TextBlockStyle.HEADING
             ),
         ],
         style=types.ContainerStyle.EMPHASIS,
@@ -132,11 +135,15 @@ containers.append(
         ],
     )
 )
+image: Image = Image(url="https://adaptivecards.io/content/bf-logo.png")
 
-card = AdaptiveCard.new().version("1.2").add_items(containers).create()
+card = AdaptiveCard.new().version("1.5").add_items(containers).create()
   
-print(SchemaValidator(card).validate())
+validator: SchemaValidator = SchemaValidator()
+result: Result = validator.validate(card)
+
+print(f"Validation was successful: {result == Result.SUCCESS}")
   
-with open("examples/tasks.json", "w+") as f:
+with open("task.json", "w+") as f:
     f.write(card.to_json())
 

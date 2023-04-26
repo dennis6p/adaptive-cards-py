@@ -1,26 +1,27 @@
 from dataclasses import dataclass, field
 from typing import Optional
 from dataclasses_json import config, dataclass_json, LetterCase
-from enum import StrEnum, auto
+from enum import auto
+from strenum import LowercaseStrEnum
 import adaptive_cards.utils as utils
 
-class ImageFillMode(StrEnum):
+class ImageFillMode(LowercaseStrEnum):
     COVER = auto()
     REPEAT_HORIZONTALLY = "repeatHorizontally"
     REPEAT_VERTICALLY = "repeatVertically" 
     REPEAT = auto()
       
-class HorizontalAlignment(StrEnum):
+class HorizontalAlignment(LowercaseStrEnum):
     LEFT = auto()
     CENTER = auto()
     RIGHT = auto()   
 
-class VerticalAlignment(StrEnum):
+class VerticalAlignment(LowercaseStrEnum):
     TOP = auto()
     CENTER = auto()
     BOTTOM = auto()  
 
-class Colors(StrEnum):
+class Colors(LowercaseStrEnum):
     DEFAULT = auto()
     DARK = auto()
     LIGHT = auto()
@@ -29,42 +30,42 @@ class Colors(StrEnum):
     WARNING = auto()
     ATTENTION = auto()
     
-class FontType(StrEnum):
+class FontType(LowercaseStrEnum):
     DEFAULT = auto()
     MONOSPACE = auto()
     
-class FontSize(StrEnum):
+class FontSize(LowercaseStrEnum):
     DEFAULT = auto()
     SMALL = auto()
     MEDIUM = auto()
     LARGE = auto()
     EXTRA_LARGE = "extraLarge"
 
-class FontWeight(StrEnum):
+class FontWeight(LowercaseStrEnum):
     DEFAULT = auto()
     LIGHTER = auto()
     BOLDER = auto()
     
-class TextBlockStyle(StrEnum):
+class TextBlockStyle(LowercaseStrEnum):
     DEFAULT = auto()
     HEADING = auto()
     
-class BlockElementHeight(StrEnum):
+class BlockElementHeight(LowercaseStrEnum):
     AUTO = auto()
     STRETCH = auto()
 
-class ImageSize(StrEnum):
+class ImageSize(LowercaseStrEnum):
     AUTO = auto()
     STRETCH = auto()
     SMALL = auto()
     MEDIUM = auto()
     LARGE = auto()
     
-class ImageStyle(StrEnum):
+class ImageStyle(LowercaseStrEnum):
     DEFAULT = auto()
     PERSON = auto()
 
-class ContainerStyle(StrEnum):
+class ContainerStyle(LowercaseStrEnum):
     DEFAULT = auto()
     EMPHASIS = auto()
     GOOD = auto()
@@ -72,7 +73,7 @@ class ContainerStyle(StrEnum):
     WARNING = auto()
     ACCENT = auto()
 
-class Spacing(StrEnum):
+class Spacing(LowercaseStrEnum):
     DEFAULT = auto()
     NONE = auto()
     SMALL = auto()
@@ -81,27 +82,27 @@ class Spacing(StrEnum):
     EXTRA_LARGE = "extraLarge"
     PADDING = auto()
     
-class AssociatedInputs(StrEnum):
+class AssociatedInputs(LowercaseStrEnum):
     AUTO = auto()
     NONE = auto()
     
-class ActionStyle(StrEnum):
+class ActionStyle(LowercaseStrEnum):
     DEFAULT = auto()
     POSITIVE = auto()
     DESTRUCTIVE = auto()
     
-class ActionMode(StrEnum):
+class ActionMode(LowercaseStrEnum):
     PRIMARY = auto()
     SECONDARY = auto()
     
-class TextInputStyle(StrEnum):
+class TextInputStyle(LowercaseStrEnum):
     TEXT = auto()
     TEL = auto()
     URL = auto()
     EMAIL = auto()
     PASSWORD = auto()
     
-class ChoiceInputStyle(StrEnum):
+class ChoiceInputStyle(LowercaseStrEnum):
     COMPACT = auto()
     EXPANDED = auto()
     FILTERED = auto()
