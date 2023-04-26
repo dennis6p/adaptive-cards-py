@@ -28,6 +28,7 @@ For a comprehensive introduction into the main ideas and patterns of adaptive ca
 
 * Python 3.10+
 * `dataclasses-json`
+* `StrEnum`
 
 ## Library structure
 
