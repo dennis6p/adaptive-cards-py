@@ -24,11 +24,17 @@ For a comprehensive introduction into the main ideas and patterns of adaptive ca
 + Simple `JSON` export
 + Compliant with the official structures and ideas
 
-## Requirements
+## Dependencies
 
 * Python 3.10+
 * `dataclasses-json`
 * `StrEnum`
+
+## Installation
+
+```bash
+pip install adaptive-cards-py
+```
 
 ## Library structure
 

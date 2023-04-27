@@ -119,22 +119,22 @@ class AdaptiveCardBuilder(Builder):
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class AdaptiveCard:
-    type: str = TYPE
-    version: str = VERSION
-    refresh: Optional[ct.Refresh] = field(default=None, metadata=config(exclude=utils.is_none))
-    authentication: Optional[ct.Authentication] = field(default=None, metadata=config(exclude=utils.is_none))
-    body: Optional[list[ElementT | ContainerT | InputT]] = field(default=None, metadata=config(exclude=utils.is_none))
-    actions: Optional[list[ActionT]] = field(default=None, metadata=config(exclude=utils.is_none))
-    select_action: Optional[SelectAction] = field(default=None, metadata=config(exclude=utils.is_none))
-    fallback_text: Optional[str] = field(default=None, metadata=config(exclude=utils.is_none))
-    background_image: Optional[ct.BackgroundImage | str] = field(default=None, metadata=config(exclude=utils.is_none))
-    metadata: Optional[ct.Metadata] = field(default=None, metadata=config(exclude=utils.is_none))
-    min_height: Optional[str] = field(default=None, metadata=config(exclude=utils.is_none))
-    rtl: Optional[bool] = field(default=None, metadata=config(exclude=utils.is_none))
-    speak: Optional[str] = field(default=None, metadata=config(exclude=utils.is_none))
-    lang: Optional[str] = field(default=None, metadata=config(exclude=utils.is_none))
-    vertical_content_align: Optional[ct.VerticalAlignment] = field(default=None, metadata=config(exclude=utils.is_none))
-    schema: str = field(default=SCHEMA, metadata=config(field_name=f"$schema"))
+    type: str = field(default=TYPE, metadata=utils.get_metadata("1.0"))
+    version: str = field(default=VERSION, metadata=utils.get_metadata("1.0"))
+    schema: str = field(default=SCHEMA, metadata=utils.get_metadata("1.0") | dict(field_name="$schema"))
+    refresh: Optional[ct.Refresh] = field(default=None, metadata=utils.get_metadata("1.4"))
+    authentication: Optional[ct.Authentication] = field(default=None, metadata=utils.get_metadata("1.4"))
+    body: Optional[list[ElementT | ContainerT | InputT]] = field(default=None, metadata=utils.get_metadata("1.0"))
+    actions: Optional[list[ActionT]] = field(default=None, metadata=utils.get_metadata("1.0"))
+    select_action: Optional[SelectAction] = field(default=None, metadata=utils.get_metadata("1.1"))
+    fallback_text: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
+    background_image: Optional[ct.BackgroundImage | str] = field(default=None, metadata=utils.get_metadata("1.0"))
+    metadata: Optional[ct.Metadata] = field(default=None, metadata=utils.get_metadata("1.6"))
+    min_height: Optional[str] = field(default=None, metadata=utils.get_metadata("1.2"))
+    rtl: Optional[bool] = field(default=None, metadata=utils.get_metadata("1.5"))
+    speak: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
+    lang: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
+    vertical_content_align: Optional[ct.VerticalAlignment] = field(default=None, metadata=utils.get_metadata("1.1"))
        
     @staticmethod
     def new():
