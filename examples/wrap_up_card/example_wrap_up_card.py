@@ -3,7 +3,7 @@ import sys
 sys.path.append("../../")
 
 import adaptive_cards.card_types as types
-from adaptive_cards.actions import ActionToggleVisibility, TargetElement
+from adaptive_cards.actions import ActionToggleVisibility, TargetElement, ActionShowCard
 from adaptive_cards.validation import SchemaValidator, Result
 from adaptive_cards.card import AdaptiveCard
 from adaptive_cards.elements import TextBlock, Image
