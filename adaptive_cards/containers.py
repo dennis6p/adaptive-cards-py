@@ -1,24 +1,18 @@
+"""Implementations for all adaptive card container types"""
+
 from dataclasses import dataclass, field
-from dataclasses_json import LetterCase, dataclass_json, config
-from typing import TypeVar, Optional, Any
+from typing import Optional, Union
+from dataclasses_json import LetterCase, dataclass_json
 
+from adaptive_cards import elements
+from adaptive_cards import inputs
+from adaptive_cards import utils
 import adaptive_cards.actions as action
-import adaptive_cards.utils as utils
 import adaptive_cards.card_types as ct
-import adaptive_cards.elements as elements
-import adaptive_cards.inputs as inputs
 
-ActionSet = TypeVar("ActionSet", bound="ActionSet")
-Container = TypeVar("Container", bound="Container")
-ColumnSet = TypeVar("ColumnSet", bound="ColumnSet")
-Column = TypeVar("Column", bound="Column")
-FactSet = TypeVar("FactSet", bound="FactSet")
-Fact = TypeVar("Fact", bound="Fact")
-ImageSet = TypeVar("ImageSet", bound="ImageSet")
-Table = TypeVar("Table", bound="Table")
-TableCell = TypeVar("TableCell", bound="TableCell")
-
-ContainerT = ActionSet | Container | ColumnSet | FactSet | ImageSet | Table
+ContainerT = Union[
+    "ActionSet", "Container", "ColumnSet", "FactSet", "ImageSet", "Table"
+]
 
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
@@ -28,13 +22,15 @@ class ContainerBase:
     The ContainerBase class represents a base container for elements with various properties.
 
     Attributes:
-        fallback: The fallback element, if any, to be displayed when the container cannot be rendered. Defaults to None.
-        separator: Determines whether a separator should be shown above the container. Defaults to None.
-        spacing: The spacing style to be applied within the container. Defaults to None.
-        id: The unique identifier of the container. Defaults to None.
-        is_visible: Determines whether the container is visible. Defaults to None.
-        requires: A dictionary of requirements that must be satisfied for the container to be displayed. Defaults to None.
-        height: The height style to be applied to the container. Defaults to None.
+        fallback: The fallback element, if any, to be displayed when the container
+        cannot be rendered.
+        separator: Determines whether a separator should be shown above the container.
+        spacing: The spacing style to be applied within the container.
+        id: The unique identifier of the container.
+        is_visible: Determines whether the container is visible.
+        requires: A dictionary of requirements that must be satisfied for the container
+        to be displayed.
+        height: The height style to be applied to the container.
     """
 
     fallback: Optional[elements.ElementT | action.ActionT | inputs.InputT] = field(
@@ -80,13 +76,13 @@ class Container(ContainerBase):
     Attributes:
         items: A list of elements, sub-containers, or input elements contained within the container.
         type: The type of the container. Defaults to "Container".
-        select_action: An optional select action associated with the container. Defaults to None.
-        style: The style of the container. Defaults to None.
-        vertical_content_alignment: The vertical alignment of the container's content. Defaults to None.
-        bleed: Determines whether the container bleeds beyond its boundary. Defaults to None.
-        background_image: The background image of the container. Defaults to None.
-        min_height: The minimum height of the container. Defaults to None.
-        rtl: Determines whether the container's content is displayed right-to-left. Defaults to None.
+        select_action: An optional select action associated with the container.
+        style: The style of the container.
+        vertical_content_alignment: The vertical alignment of the container's content.
+        bleed: Determines whether the container bleeds beyond its boundary.
+        background_image: The background image of the container.
+        min_height: The minimum height of the container.
+        rtl: Determines whether the container's content is displayed right-to-left.
     """
 
     items: list[elements.ElementT | ContainerT | inputs.InputT] = field(
@@ -119,16 +115,16 @@ class ColumnSet(ContainerBase):
 
     Attributes:
         type: The type of the column set. Defaults to "ColumnSet".
-        columns: An optional list of Column objects within the column set. Defaults to None.
-        select_action: An optional select action associated with the column set. Defaults to None.
-        style: The style of the column set. Defaults to None.
-        bleed: Determines whether the column set bleeds beyond its boundary. Defaults to None.
-        min_height: The minimum height of the column set. Defaults to None.
-        horizontal_alignment: The horizontal alignment of the column set. Defaults to None.
+        columns: An optional list of Column objects within the column set.
+        select_action: An optional select action associated with the column set.
+        style: The style of the column set.
+        bleed: Determines whether the column set bleeds beyond its boundary.
+        min_height: The minimum height of the column set.
+        horizontal_alignment: The horizontal alignment of the column set.
     """
 
     type: str = field(default="ColumnSet", metadata=utils.get_metadata("1.0"))
-    columns: Optional[list[Column]] = field(
+    columns: Optional[list["Column"]] = field(
         default=None, metadata=utils.get_metadata("1.0")
     )
     select_action: Optional[action.SelectAction] = field(
@@ -152,17 +148,17 @@ class Column(ContainerBase):
     Inherits from ContainerBase.
 
     Attributes:
-        items: An optional list of elements contained within the column. Defaults to None.
-        background_image: The background image of the column. Defaults to None.
-        bleed: Determines whether the column bleeds beyond its boundary. Defaults to None.
-        min_height: The minimum height of the column. Defaults to None.
-        rtl: Determines whether the column's content is displayed right-to-left. Defaults to None.
-        separator: Determines whether a separator should be shown above the column. Defaults to None.
-        spacing: The spacing style to be applied within the column. Defaults to None.
-        select_action: An optional select action associated with the column. Defaults to None.
-        style: The style of the column. Defaults to None.
-        vertical_content_alignment: The vertical alignment of the column's content. Defaults to None.
-        width: The width of the column. Defaults to None.
+        items: An optional list of elements contained within the column.
+        background_image: The background image of the column.
+        bleed: Determines whether the column bleeds beyond its boundary.
+        min_height: The minimum height of the column.
+        rtl: Determines whether the column's content is displayed right-to-left.
+        separator: Determines whether a separator should be shown above the column.
+        spacing: The spacing style to be applied within the column.
+        select_action: An optional select action associated with the column.
+        style: The style of the column.
+        vertical_content_alignment: The vertical alignment of the column's content.
+        width: The width of the column.
     """
 
     items: Optional[list[elements.ElementT]] = field(
@@ -202,7 +198,7 @@ class FactSet(ContainerBase):
         type: The type of the fact set. Defaults to "FactSet".
     """
 
-    facts: list[Fact] = field(metadata=utils.get_metadata("1.0"))
+    facts: list["Fact"] = field(metadata=utils.get_metadata("1.0"))
     type: str = field(default="FactSet", metadata=utils.get_metadata("1.0"))
 
 
@@ -230,7 +226,7 @@ class ImageSet(ContainerBase):
     Attributes:
         images: A list of Image objects within the image set.
         type: The type of the image set. Defaults to "ImageSet".
-        image_size: The size of the images within the image set. Defaults to None.
+        image_size: The size of the images within the image set.
     """
 
     images: list[elements.Image] = field(metadata=utils.get_metadata("1.0"))
@@ -246,9 +242,9 @@ class TableColumnDefinition:
     """Represents a definition for a table column.
 
     Attributes:
-        horizontal_cell_content_alignment: The horizontal alignment of cell content. Defaults to None.
-        vertical_cell_content_alignment: The vertical alignment of cell content. Defaults to None.
-        width: The width of the table column. Defaults to None.
+        horizontal_cell_content_alignment: The horizontal alignment of cell content.
+        vertical_cell_content_alignment: The vertical alignment of cell content.
+        width: The width of the table column.
     """
 
     horizontal_cell_content_alignment: Optional[ct.HorizontalAlignment] = field(
@@ -266,13 +262,15 @@ class TableRow:
     """Represents a row within a table.
 
     Attributes:
-        cells: The cells within the table row. Defaults to None.
-        horizontal_cell_content_alignment: The horizontal alignment of cell content. Defaults to None.
-        vertical_cell_content_alignment: The vertical alignment of cell content. Defaults to None.
-        style: The style of the table row. Defaults to None.
+        cells: The cells within the table row.
+        horizontal_cell_content_alignment: The horizontal alignment of cell content.
+        vertical_cell_content_alignment: The vertical alignment of cell content.
+        style: The style of the table row.
     """
 
-    cells: Optional[TableCell] = field(default=None, metadata=utils.get_metadata("1.5"))
+    cells: Optional["TableCell"] = field(
+        default=None, metadata=utils.get_metadata("1.5")
+    )
     horizontal_cell_content_alignment: Optional[ct.HorizontalAlignment] = field(
         default=None, metadata=utils.get_metadata("1.5")
     )
@@ -291,13 +289,13 @@ class Table(ContainerBase):
 
     Attributes:
         type: The type of the table. Defaults to "Table".
-        columns: The column definitions of the table. Defaults to None.
-        rows: The rows of the table. Defaults to None.
-        first_row_as_header: Whether the first row should be treated as a header. Defaults to None.
-        show_grid_lines: Whether to show grid lines in the table. Defaults to None.
-        grid_style: The style of the table grid. Defaults to None.
-        horizontal_cell_content_alignment: The horizontal alignment of cell content. Defaults to None.
-        vertical_cell_content_alignment: The vertical alignment of cell content. Defaults to None.
+        columns: The column definitions of the table.
+        rows: The rows of the table.
+        first_row_as_header: Whether the first row should be treated as a header.
+        show_grid_lines: Whether to show grid lines in the table.
+        grid_style: The style of the table grid.
+        horizontal_cell_content_alignment: The horizontal alignment of cell content.
+        vertical_cell_content_alignment: The vertical alignment of cell content.
     """
 
     type: str = field(default="Table", metadata=utils.get_metadata("1.5"))
@@ -331,13 +329,13 @@ class TableCell:
 
     Attributes:
         items: The elements within the cell.
-        select_action: The action to perform when the cell is selected. Defaults to None.
-        style: The style of the cell. Defaults to None.
-        vertical_content_alignment: The vertical alignment of cell content. Defaults to None.
-        bleed: Whether the cell should bleed beyond its boundaries. Defaults to None.
-        background_image: The background image of the cell. Defaults to None.
-        min_height: The minimum height of the cell. Defaults to None.
-        rtl: Whether the cell should be rendered in right-to-left direction. Defaults to None.
+        select_action: The action to perform when the cell is selected.
+        style: The style of the cell.
+        vertical_content_alignment: The vertical alignment of cell content.
+        bleed: Whether the cell should bleed beyond its boundaries.
+        background_image: The background image of the cell.
+        min_height: The minimum height of the cell.
+        rtl: Whether the cell should be rendered in right-to-left direction.
     """
 
     items: list[elements.ElementT] = field(metadata=utils.get_metadata("1.5"))
