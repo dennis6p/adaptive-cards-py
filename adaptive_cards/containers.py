@@ -339,6 +339,7 @@ class TableCell:
         min_height: The minimum height of the cell. Defaults to None.
         rtl: Whether the cell should be rendered in right-to-left direction. Defaults to None.
     """
+
     items: list[elements.ElementT] = field(metadata=utils.get_metadata("1.5"))
     select_action: Optional[action.SelectAction] = field(
         default=None, metadata=utils.get_metadata("1.1")
