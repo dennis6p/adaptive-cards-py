@@ -15,7 +15,7 @@ def get_metadata(min_version: str) -> dict[str, Any]:
     Args:
         min_version (str): Minimum version number of the field the result will
                            be appliead to.
-                           
+
     Returns:
         dict[str, Any]: Metadata information
     """

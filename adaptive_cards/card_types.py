@@ -13,7 +13,7 @@ class ImageFillMode(LowercaseStrEnum):
     Enumerates the different fill modes for an image.
 
     Attributes:
-        COVER: The image will be scaled to cover the entire area, possibly cropping parts of the 
+        COVER: The image will be scaled to cover the entire area, possibly cropping parts of the
         image.
         REPEAT_HORIZONTALLY: The image will be repeated horizontally to fill the area.
         REPEAT_VERTICALLY: The image will be repeated vertically to fill the area.
@@ -376,6 +376,7 @@ class AuthCardButtons:
         title: The title of the button.
         image: The image URL of the button.
     """
+
     type: str = field(default="", metadata=utils.get_metadata("1.4"))
     value: str = field(default="", metadata=utils.get_metadata("1.4"))
     title: Optional[str] = field(default=None, metadata=utils.get_metadata("1.4"))
@@ -394,6 +395,7 @@ class Authentication:
         token_exchange_resource: The token exchange resource.
         buttons: The authentication buttons.
     """
+
     text: Optional[str] = field(default=None, metadata=utils.get_metadata("1.4"))
     connection_name: Optional[str] = field(
         default=None, metadata=utils.get_metadata("1.4")
@@ -415,4 +417,5 @@ class Metadata:
     Attributes:
         web_url: The web URL.
     """
+
     web_url: Optional[str] = field(default=None, metadata=utils.get_metadata("1.6"))

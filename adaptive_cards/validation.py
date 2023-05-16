@@ -8,16 +8,18 @@ from adaptive_cards.card import AdaptiveCard
 
 MINIMUM_VERSION_KEY: str = "min_version"
 
+
 class Result(Flag):
     """
-        Represents a result value as a combination of flags.
+    Represents a result value as a combination of flags.
 
-        Arguments:
-        SUCCESS = 0: Represents a successful result.
-        EMPTY_CARD = 1: Represents an empty card result.
-        INVALID_FIELD_VERSION = 2: Represents an invalid field version result.
-        UNDEFINED = 3: Represents an undefined result.
+    Arguments:
+    SUCCESS = 0: Represents a successful result.
+    EMPTY_CARD = 1: Represents an empty card result.
+    INVALID_FIELD_VERSION = 2: Represents an invalid field version result.
+    UNDEFINED = 3: Represents an undefined result.
     """
+
     SUCCESS = 0
     EMPTY_CARD = 1
     INVALID_FIELD_VERSION = 2
@@ -33,7 +35,9 @@ class InvalidField:
 
 class SchemaValidator:
     def __init__(self) -> None:
-        ...
+        self.__card: AdaptiveCard
+        self.__item: Any
+        self.__invalid_fields: list[InvalidField]
 
     def validate(self, card: AdaptiveCard) -> Result:
         self.__card = card
@@ -44,7 +48,6 @@ class SchemaValidator:
         return result
 
     def __reset(self) -> None:
-        self.__is_valid = True
         self.__invalid_fields: list[InvalidField] = list()
 
     def __validate_body(self) -> Result:

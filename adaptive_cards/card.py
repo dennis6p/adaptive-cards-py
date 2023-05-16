@@ -18,6 +18,7 @@ VERSION: str = "1.0"
 
 class AdaptiveCardBuilder:
     """Builder class for creating adaptive cards dynamically"""
+
     def __init__(self) -> None:
         self.__reset()
 
@@ -63,7 +64,9 @@ class AdaptiveCardBuilder:
         self.__card.refresh = refresh
         return self
 
-    def authentication(self, authentication: ct.Authentication) -> "AdaptiveCardBuilder":
+    def authentication(
+        self, authentication: ct.Authentication
+    ) -> "AdaptiveCardBuilder":
         """
         Set authentication mode
 
@@ -278,8 +281,8 @@ class AdaptiveCardBuilder:
 
     def create(self) -> "AdaptiveCard":
         """
-        Create final card object. 
-        
+        Create final card object.
+
         Please note: This method must be called to get a actual card object from the card builder.
 
         Returns:
@@ -312,6 +315,7 @@ class AdaptiveCard:
         lang: The language for the card.
         vertical_content_align: The vertical alignment of the card's content.
     """
+
     type: str = field(default=TYPE, metadata=utils.get_metadata("1.0"))
     version: str = field(default=VERSION, metadata=utils.get_metadata("1.0"))
     schema: str = field(
@@ -362,7 +366,7 @@ class AdaptiveCard:
 
     def to_json(self) -> str:
         """
-        Converts the full adaptive card schema into a json string. 
+        Converts the full adaptive card schema into a json string.
 
         Returns:
             str: Adaptive card schema as JSON string.
