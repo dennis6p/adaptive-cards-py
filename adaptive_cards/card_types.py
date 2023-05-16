@@ -13,7 +13,8 @@ class ImageFillMode(LowercaseStrEnum):
     Enumerates the different fill modes for an image.
 
     Attributes:
-        COVER: The image will be scaled to cover the entire area, possibly cropping parts of the image.
+        COVER: The image will be scaled to cover the entire area, possibly cropping parts of the 
+        image.
         REPEAT_HORIZONTALLY: The image will be repeated horizontally to fill the area.
         REPEAT_VERTICALLY: The image will be repeated vertically to fill the area.
         REPEAT: The image will be repeated both horizontally and vertically to fill the area.

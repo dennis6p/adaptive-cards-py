@@ -1,16 +1,23 @@
-from adaptive_cards.card import AdaptiveCard
-from dataclasses import dataclass, fields
+"""Validation class for evaluating a cards schema"""
+
 import dataclasses
-from adaptive_cards.elements import ElementT
-from adaptive_cards.containers import ContainerT
-from adaptive_cards.inputs import InputT
-from typing import Any
+from dataclasses import dataclass, fields
 from enum import Flag
+from typing import Any
+from adaptive_cards.card import AdaptiveCard
 
 MINIMUM_VERSION_KEY: str = "min_version"
 
-
 class Result(Flag):
+    """
+        Represents a result value as a combination of flags.
+
+        Arguments:
+        SUCCESS = 0: Represents a successful result.
+        EMPTY_CARD = 1: Represents an empty card result.
+        INVALID_FIELD_VERSION = 2: Represents an invalid field version result.
+        UNDEFINED = 3: Represents an undefined result.
+    """
     SUCCESS = 0
     EMPTY_CARD = 1
     INVALID_FIELD_VERSION = 2
