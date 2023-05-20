@@ -28,18 +28,38 @@ class Result(Flag):
 
 @dataclass
 class InvalidField:
+    """
+    Represents an invalid field within a parent type.
+
+    Attributes:
+        parent_type: The type of the parent object.
+        field_name: The name of the invalid field.
+        version: The version of the field.
+    """
     parent_type: str
     field_name: str
     version: str
 
 
 class SchemaValidator:
+    """
+    Validator class for checking a cards schema w.r.t. to version numbers of individual fields.
+    """
     def __init__(self) -> None:
         self.__card: AdaptiveCard
         self.__item: Any
         self.__invalid_fields: list[InvalidField]
 
     def validate(self, card: AdaptiveCard) -> Result:
+        """
+        Run validation on card.
+
+        Args:
+            card (AdaptiveCard): Card to be validated
+
+        Returns:
+            Result: Validation result
+        """
         self.__card = card
         self.__reset()
         result: Result = self.__validate_body()
@@ -108,5 +128,6 @@ class SchemaValidator:
             print(
                 f"Wrong version for field <{invalid_field.field_name}> "
                 f"in type <{invalid_field.parent_type}> | "
-                f"selected card version {self.__card.version} < minimum field version {invalid_field.version}"
+                f"selected card version {self.__card.version} < minimum field version "
+                f"{invalid_field.version}"
             )

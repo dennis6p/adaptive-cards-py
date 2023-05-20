@@ -49,6 +49,8 @@ class CardElement:
 class TextBlock(CardElement):
     """
     Represents a text block card element.
+    
+    Inherits from CardElement.
 
     Attributes:
         text: The text content of the text block.
@@ -92,6 +94,8 @@ class TextBlock(CardElement):
 class Image(CardElement):
     """
     Represents an image card element.
+    
+    Inherits from CardElement.
 
     Attributes:
         url: The URL of the image.
@@ -131,6 +135,8 @@ class Image(CardElement):
 class Media(CardElement):
     """
     Represents a media card element.
+    
+    Inherits from CardElement.
 
     Attributes:
         type: The type of the card element.
@@ -186,6 +192,8 @@ class CaptionSource:
 class RichTextBlock(CardElement):
     """
     Represents a rich text block.
+    
+    Inherits from CardElement.
 
     Attributes:
         inlines: A list of inlines in the rich text block. Each inline can be a string
