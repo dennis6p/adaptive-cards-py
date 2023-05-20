@@ -359,7 +359,7 @@ class TokenExchangeResource:
         provider_id: The provider ID associated with the resource.
     """
 
-    id: str = field(default="", metadata=utils.get_metadata("1.4"))
+    id: str = field(default="", metadata=utils.get_metadata("1.4")) # pylint: disable=C0103
     uri: str = field(default="", metadata=utils.get_metadata("1.4"))
     provider_id: str = field(default="", metadata=utils.get_metadata("1.4"))
 
