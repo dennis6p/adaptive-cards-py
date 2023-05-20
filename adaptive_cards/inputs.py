@@ -7,7 +7,7 @@ from adaptive_cards import utils
 import adaptive_cards.card_types as ct
 from adaptive_cards import actions
 
-InputT = Union[
+InputTypes = Union[
     "InputText",
     "InputNumber",
     "InputDate",
@@ -40,7 +40,7 @@ class Input:
         default=None, metadata=utils.get_metadata("1.3")
     )
     label: Optional[bool] = field(default=None, metadata=utils.get_metadata("1.3"))
-    fallback: Optional[InputT] = field(default=None, metadata=utils.get_metadata("1.2"))
+    fallback: Optional[InputTypes] = field(default=None, metadata=utils.get_metadata("1.2"))
     height: Optional[ct.BlockElementHeight] = field(
         default=None, metadata=utils.get_metadata("1.1")
     )

@@ -10,7 +10,7 @@ from adaptive_cards import utils
 import adaptive_cards.actions as action
 import adaptive_cards.card_types as ct
 
-ContainerT = Union[
+ContainerTypes = Union[
     "ActionSet", "Container", "ColumnSet", "FactSet", "ImageSet", "Table"
 ]
 
@@ -33,7 +33,7 @@ class ContainerBase:
         height: The height style to be applied to the container.
     """
 
-    fallback: Optional[elements.ElementT | action.ActionT | inputs.InputT] = field(
+    fallback: Optional[elements.Element | action.ActionT | inputs.InputTypes] = field(
         default=None, metadata=utils.get_metadata("1.2")
     )
     separator: Optional[bool] = field(default=None, metadata=utils.get_metadata("1.2"))
@@ -85,7 +85,7 @@ class Container(ContainerBase):
         rtl: Determines whether the container's content is displayed right-to-left.
     """
 
-    items: list[elements.ElementT | ContainerT | inputs.InputT] = field(
+    items: list[elements.Element | ContainerTypes | inputs.InputTypes] = field(
         metadata=utils.get_metadata("1.0")
     )
     type: str = field(default="Container", metadata=utils.get_metadata("1.0"))
@@ -161,7 +161,7 @@ class Column(ContainerBase):
         width: The width of the column.
     """
 
-    items: Optional[list[elements.ElementT]] = field(
+    items: Optional[list[elements.Element]] = field(
         default=None, metadata=utils.get_metadata("1.0")
     )
     background_image: Optional[ct.BackgroundImage | str] = field(
@@ -338,7 +338,7 @@ class TableCell:
         rtl: Whether the cell should be rendered in right-to-left direction.
     """
 
-    items: list[elements.ElementT] = field(metadata=utils.get_metadata("1.5"))
+    items: list[elements.Element] = field(metadata=utils.get_metadata("1.5"))
     select_action: Optional[action.SelectAction] = field(
         default=None, metadata=utils.get_metadata("1.1")
     )

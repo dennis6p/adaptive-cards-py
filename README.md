@@ -151,9 +151,9 @@ from adaptive_cards.actions import ActionToggleVisibility, TargetElement
 from adaptive_cards.validation import SchemaValidator, Result
 from adaptive_cards.card import AdaptiveCard
 from adaptive_cards.elements import TextBlock, Image
-from adaptive_cards.containers import Container, ContainerT, ColumnSet, Column
+from adaptive_cards.containers import Container, ContainerTypes, ColumnSet, Column
 
-containers: list[ContainerT] = []
+containers: list[ContainerTypes] = []
 
 icon_source: str = "https://icons8.com/icon/vNXFqyQtOSbb/launch"
 icon_url: str = "https://img.icons8.com/3d-fluency/94/launched-rocket.png"

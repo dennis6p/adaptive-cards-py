@@ -8,7 +8,7 @@ from adaptive_cards import actions
 from adaptive_cards import utils
 import adaptive_cards.card_types as ct
 
-ElementT = Union["Image", "TextBlock", "Media", "CaptionSource", "RichTextBlock"]
+Element = Union["Image", "TextBlock", "Media", "CaptionSource", "RichTextBlock"]
 
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
@@ -27,7 +27,7 @@ class CardElement:
         height: The height of the element.
     """
 
-    element: Optional[Any | ElementT] = field(
+    element: Optional[Any | Element] = field(
         default=None, metadata=utils.get_metadata("1.2")
     )
     separator: Optional[bool] = field(default=None, metadata=utils.get_metadata("1.0"))
@@ -49,7 +49,7 @@ class CardElement:
 class TextBlock(CardElement):
     """
     Represents a text block card element.
-    
+
     Inherits from CardElement.
 
     Attributes:
@@ -94,7 +94,7 @@ class TextBlock(CardElement):
 class Image(CardElement):
     """
     Represents an image card element.
-    
+
     Inherits from CardElement.
 
     Attributes:
@@ -135,7 +135,7 @@ class Image(CardElement):
 class Media(CardElement):
     """
     Represents a media card element.
-    
+
     Inherits from CardElement.
 
     Attributes:
@@ -192,7 +192,7 @@ class CaptionSource:
 class RichTextBlock(CardElement):
     """
     Represents a rich text block.
-    
+
     Inherits from CardElement.
 
     Attributes:

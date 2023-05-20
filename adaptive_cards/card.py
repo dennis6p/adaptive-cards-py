@@ -4,9 +4,9 @@ from dataclasses import dataclass, field
 from typing import Optional
 from dataclasses_json import dataclass_json, LetterCase
 from adaptive_cards.actions import SelectAction, ActionT
-from adaptive_cards.containers import ContainerT
-from adaptive_cards.elements import ElementT
-from adaptive_cards.inputs import InputT
+from adaptive_cards.containers import ContainerTypes
+from adaptive_cards.elements import Element
+from adaptive_cards.inputs import InputTypes
 from adaptive_cards import utils
 import adaptive_cards.card_types as ct
 
@@ -213,35 +213,35 @@ class AdaptiveCardBuilder:
         self.__card.schema = schema
         return self
 
-    def add_item(self, item: ElementT | ContainerT | InputT) -> "AdaptiveCardBuilder":
+    def add_item(self, item: Element | ContainerTypes | InputTypes) -> "AdaptiveCardBuilder":
         """
         Add single element, container or input to card
 
         Args:
-            item (ElementT | ContainerT | InputT): Item to be added to card
+            item (Element | ContainerTypes | InputTypes): Item to be added to card
 
         Returns:
             AdaptiveCardBuilder: Builder object
         """
         if self.__card.body is None:
-            self.__card.body = list()
+            self.__card.body = []
         self.__card.body.append(item)
         return self
 
     def add_items(
-        self, items: list[ElementT | ContainerT | InputT]
+        self, items: list[Element | ContainerTypes | InputTypes]
     ) -> "AdaptiveCardBuilder":
         """
         Add multiple elements, containers or inputs to card
 
         Args:
-            items (list[ElementT  |  ContainerT  |  InputT]): Items to be added to card
+            items (list[Element  |  ContainerTypes  |  InputTypes]): Items to be added to card
 
         Returns:
             AdaptiveCardBuilder: Builder object
         """
         if self.__card.body is None:
-            self.__card.body = list()
+            self.__card.body = []
         for item in items:
             self.add_item(item)
 
@@ -258,7 +258,7 @@ class AdaptiveCardBuilder:
             AdaptiveCardBuilder: Builder object
         """
         if self.__card.actions is None:
-            self.__card.actions = list()
+            self.__card.actions = []
         self.__card.actions.append(action)
         return self
 
@@ -273,7 +273,7 @@ class AdaptiveCardBuilder:
             AdaptiveCardBuilder: Builder object
         """
         if self.__card.actions is None:
-            self.__card.actions = list()
+            self.__card.actions = []
         for action in actions:
             self.add_action(action)
 
@@ -319,7 +319,7 @@ class AdaptiveCard:
     type: str = field(default=TYPE, metadata=utils.get_metadata("1.0"))
     version: str = field(default=VERSION, metadata=utils.get_metadata("1.0"))
     schema: str = field(
-        default=SCHEMA, metadata=utils.get_metadata("1.0") | dict(field_name="$schema")
+        default=SCHEMA, metadata=utils.get_metadata("1.0") | {"field_name": "$schema"}
     )
     refresh: Optional[ct.Refresh] = field(
         default=None, metadata=utils.get_metadata("1.4")
@@ -327,7 +327,7 @@ class AdaptiveCard:
     authentication: Optional[ct.Authentication] = field(
         default=None, metadata=utils.get_metadata("1.4")
     )
-    body: Optional[list[ElementT | ContainerT | InputT]] = field(
+    body: Optional[list[Element | ContainerTypes | InputTypes]] = field(
         default=None, metadata=utils.get_metadata("1.0")
     )
     actions: Optional[list[ActionT]] = field(

@@ -68,7 +68,7 @@ class SchemaValidator:
         return result
 
     def __reset(self) -> None:
-        self.__invalid_fields: list[InvalidField] = list()
+        self.__invalid_fields: list[InvalidField] = []
 
     def __validate_body(self) -> Result:
         if self.__card.body is None:
