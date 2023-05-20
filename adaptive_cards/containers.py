@@ -33,7 +33,7 @@ class ContainerBase:
         height: The height style to be applied to the container.
     """
 
-    fallback: Optional[elements.Element | action.ActionT | inputs.InputTypes] = field(
+    fallback: Optional[elements.Element | action.ActionTypes | inputs.InputTypes] = field(
         default=None, metadata=utils.get_metadata("1.2")
     )
     separator: Optional[bool] = field(default=None, metadata=utils.get_metadata("1.2"))
@@ -62,7 +62,7 @@ class ActionSet(ContainerBase):
         type: The type of the action set. Defaults to "ActionSet".
     """
 
-    actions: list[action.ActionT] = field(metadata=utils.get_metadata("1.2"))
+    actions: list[action.ActionTypes] = field(metadata=utils.get_metadata("1.2"))
     type: str = field(default="ActionSet", metadata=utils.get_metadata("1.2"))
 
 

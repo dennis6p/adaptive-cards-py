@@ -3,7 +3,7 @@
 from dataclasses import dataclass, field
 from typing import Optional
 from dataclasses_json import dataclass_json, LetterCase
-from adaptive_cards.actions import SelectAction, ActionT
+from adaptive_cards.actions import SelectAction, ActionTypes
 from adaptive_cards.containers import ContainerTypes
 from adaptive_cards.elements import Element
 from adaptive_cards.inputs import InputTypes
@@ -247,12 +247,12 @@ class AdaptiveCardBuilder:
 
         return self
 
-    def add_action(self, action: ActionT) -> "AdaptiveCardBuilder":
+    def add_action(self, action: ActionTypes) -> "AdaptiveCardBuilder":
         """
         Add single action to card
 
         Args:
-            action (ActionT): Action to be added
+            action (ActionTypes): Action to be added
 
         Returns:
             AdaptiveCardBuilder: Builder object
@@ -262,12 +262,12 @@ class AdaptiveCardBuilder:
         self.__card.actions.append(action)
         return self
 
-    def add_actions(self, actions: list[ActionT]) -> "AdaptiveCardBuilder":
+    def add_actions(self, actions: list[ActionTypes]) -> "AdaptiveCardBuilder":
         """
         Add multiple actions to card
 
         Args:
-            actions (list[ActionT]): Actions to be added
+            actions (list[ActionTypes]): Actions to be added
 
         Returns:
             AdaptiveCardBuilder: Builder object
@@ -330,7 +330,7 @@ class AdaptiveCard:
     body: Optional[list[Element | ContainerTypes | InputTypes]] = field(
         default=None, metadata=utils.get_metadata("1.0")
     )
-    actions: Optional[list[ActionT]] = field(
+    actions: Optional[list[ActionTypes]] = field(
         default=None, metadata=utils.get_metadata("1.0")
     )
     select_action: Optional[SelectAction] = field(
