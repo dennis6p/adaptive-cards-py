@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "adaptive-cards-py"
-version = "0.0.5"
+version = "0.0.6"
 description = "Python wrapper library for building beautiful adaptive cards"
 classifiers = [
     "License :: OSI Approved :: MIT License",
