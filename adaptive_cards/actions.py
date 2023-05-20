@@ -21,6 +21,7 @@ SelectAction = Union[
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class Action:
+    # pylint: disable=too-many-instance-attributes
     """
     Represents an action that can be performed.
 

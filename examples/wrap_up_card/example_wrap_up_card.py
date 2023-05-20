@@ -1,4 +1,7 @@
 """Example: wrap-up card"""
+# pylint: disable=R0801
+# pylint: disable=C0413
+
 import sys
 
 sys.path.append("../../")

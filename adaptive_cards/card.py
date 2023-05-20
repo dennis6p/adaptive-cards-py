@@ -25,7 +25,7 @@ class AdaptiveCardBuilder:
     def __reset(self) -> None:
         self.__card = AdaptiveCard()
 
-    def type(self, type: str) -> "AdaptiveCardBuilder":
+    def type(self, _type: str) -> "AdaptiveCardBuilder":
         """
         Set type of card
 
@@ -35,7 +35,7 @@ class AdaptiveCardBuilder:
         Returns:
             AdaptiveCardBuilder: Builder object
         """
-        self.__card.type = type
+        self.__card.type = _type
         return self
 
     def version(self, version: str) -> "AdaptiveCardBuilder":
