@@ -17,6 +17,8 @@ InputTypes = Union[
 ]
 
 
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass(kw_only=True)
 class Input:
     """
     Represents an input.
@@ -40,7 +42,9 @@ class Input:
         default=None, metadata=utils.get_metadata("1.3")
     )
     label: Optional[bool] = field(default=None, metadata=utils.get_metadata("1.3"))
-    fallback: Optional[InputTypes] = field(default=None, metadata=utils.get_metadata("1.2"))
+    fallback: Optional[InputTypes] = field(
+        default=None, metadata=utils.get_metadata("1.2")
+    )
     height: Optional[ct.BlockElementHeight] = field(
         default=None, metadata=utils.get_metadata("1.1")
     )

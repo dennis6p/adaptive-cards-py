@@ -41,6 +41,7 @@ class InvalidField:
     version: str
 
 
+@dataclass
 class SchemaValidator:
     """
     Validator class for checking a cards schema w.r.t. to version numbers of individual fields.
