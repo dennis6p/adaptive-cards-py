@@ -34,7 +34,7 @@ class CardElement:
     spacing: Optional[ct.Spacing] = field(
         default=None, metadata=utils.get_metadata("1.0")
     )
-    id: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
+    id: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0")) # pylint: disable=C0103
     is_visible: Optional[bool] = field(default=None, metadata=utils.get_metadata("1.2"))
     requires: Optional[dict[str, str]] = field(
         default=None, metadata=utils.get_metadata("1.2")

@@ -40,7 +40,7 @@ class Action:
 
     title: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
     icon_url: Optional[str] = field(default=None, metadata=utils.get_metadata("1.1"))
-    id: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
+    id: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0")) # pylint: disable=C0103
     style: Optional[ct.ActionStyle] = field(
         default=None, metadata=utils.get_metadata("1.2")
     )
