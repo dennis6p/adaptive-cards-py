@@ -20,6 +20,7 @@ InputTypes = Union[
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class Input:
+    # pylint: disable=too-many-instance-attributes
     """
     Represents an input.
 
@@ -61,6 +62,7 @@ class Input:
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class InputText(Input):
+    # pylint: disable=too-many-instance-attributes
     """
     Represents a text input.
 
@@ -78,7 +80,7 @@ class InputText(Input):
         value: The initial value of the input.
     """
 
-    id: str = field(metadata=utils.get_metadata("1.0")) # pylint: disable=C0103
+    id: str = field(metadata=utils.get_metadata("1.0"))  # pylint: disable=C0103
     type: str = field(default="Input.Text", metadata=utils.get_metadata("1.0"))
     is_multiline: Optional[bool] = field(
         default=None, metadata=utils.get_metadata("1.0")
@@ -112,7 +114,7 @@ class InputNumber(Input):
         value: The initial value of the input. Optional.
     """
 
-    id: str = field(metadata=utils.get_metadata("1.0")) # pylint: disable=C0103
+    id: str = field(metadata=utils.get_metadata("1.0"))  # pylint: disable=C0103
     type: str = field(default="Input.Number", metadata=utils.get_metadata("1.0"))
     max: Optional[int] = field(default=None, metadata=utils.get_metadata("1.0"))
     max: Optional[int] = field(default=None, metadata=utils.get_metadata("1.0"))
@@ -136,7 +138,7 @@ class InputDate(Input):
         value: The initial value of the input. Optional.
     """
 
-    id: str = field(metadata=utils.get_metadata("1.0")) # pylint: disable=C0103
+    id: str = field(metadata=utils.get_metadata("1.0"))  # pylint: disable=C0103
     type: str = field(default="Input.Date", metadata=utils.get_metadata("1.0"))
     max: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
     placeholder: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
@@ -159,7 +161,7 @@ class InputTime(Input):
         value: The initial value of the input. Optional.
     """
 
-    id: str = field(metadata=utils.get_metadata("1.0")) # pylint: disable=C0103
+    id: str = field(metadata=utils.get_metadata("1.0"))  # pylint: disable=C0103
     type: str = field(default="Input.Time", metadata=utils.get_metadata("1.0"))
     max: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
     max: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
@@ -185,7 +187,7 @@ class InputToggle(Input):
         wrap: Indicates whether the input should wrap to the next line if needed. Optional.
     """
 
-    id: str = field(metadata=utils.get_metadata("1.0")) # pylint: disable=C0103
+    id: str = field(metadata=utils.get_metadata("1.0"))  # pylint: disable=C0103
     title: str = field(metadata=utils.get_metadata("1.0"))
     type: str = field(default="Input.Toggle", metadata=utils.get_metadata("1.0"))
     value: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
@@ -197,6 +199,7 @@ class InputToggle(Input):
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class InputChoiceSet(Input):
+    # pylint: disable=too-many-instance-attributes
     """
     Represents a choice set input field.
 
@@ -213,7 +216,7 @@ class InputChoiceSet(Input):
         wrap: Indicates whether the input should wrap to the next line if needed. Optional.
     """
 
-    id: str = field(metadata=utils.get_metadata("1.0")) # pylint: disable=C0103
+    id: str = field(metadata=utils.get_metadata("1.0"))  # pylint: disable=C0103
     type: str = field(default="Input.ChoiceSet", metadata=utils.get_metadata("1.0"))
     choices: Optional[list["InputChoice"]] = field(
         default=None, metadata=utils.get_metadata("1.0")

@@ -291,6 +291,7 @@ class AdaptiveCardBuilder:
         return self.__card
 
 
+# pylint: disable=too-many-instance-attributes
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class AdaptiveCard:

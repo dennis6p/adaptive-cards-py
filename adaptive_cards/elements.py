@@ -47,6 +47,7 @@ class CardElement:
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class TextBlock(CardElement):
+    # pylint: disable=too-many-instance-attributes
     """
     Represents a text block card element.
 
@@ -92,6 +93,7 @@ class TextBlock(CardElement):
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class Image(CardElement):
+    # pylint: disable=too-many-instance-attributes
     """
     Represents an image card element.
 
@@ -212,6 +214,7 @@ class RichTextBlock(CardElement):
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class TextRun:
+    # pylint: disable=too-many-instance-attributes
     """
     Represents a text run.
 

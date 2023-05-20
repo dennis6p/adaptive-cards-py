@@ -33,14 +33,15 @@ class ContainerBase:
         height: The height style to be applied to the container.
     """
 
-    fallback: Optional[elements.Element | action.ActionTypes | inputs.InputTypes] = field(
-        default=None, metadata=utils.get_metadata("1.2")
-    )
+    fallback: Optional[
+        elements.Element | action.ActionTypes | inputs.InputTypes
+    ] = field(default=None, metadata=utils.get_metadata("1.2"))
     separator: Optional[bool] = field(default=None, metadata=utils.get_metadata("1.2"))
     spacing: Optional[ct.Spacing] = field(
         default=None, metadata=utils.get_metadata("1.2")
     )
-    id: Optional[str] = field(default=None, metadata=utils.get_metadata("1.2")) # pylint: disable=C0103
+    # pylint: disable=C0103
+    id: Optional[str] = field(default=None, metadata=utils.get_metadata("1.2"))
     is_visible: Optional[bool] = field(default=None, metadata=utils.get_metadata("1.2"))
     requires: Optional[dict[str, str]] = field(
         default=None, metadata=utils.get_metadata("1.2")
@@ -69,6 +70,7 @@ class ActionSet(ContainerBase):
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class Container(ContainerBase):
+    # pylint: disable=too-many-instance-attributes
     """Represents a container for elements with various properties.
 
     Inherits from ContainerBase.
@@ -143,6 +145,7 @@ class ColumnSet(ContainerBase):
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class Column(ContainerBase):
+    # pylint: disable=too-many-instance-attributes
     """Represents a column within a container.
 
     Inherits from ContainerBase.
@@ -283,6 +286,7 @@ class TableRow:
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class Table(ContainerBase):
+    # pylint: disable=too-many-instance-attributes
     """Represents a table within a container.
 
     Inherits from ContainerBase.
@@ -325,6 +329,7 @@ class Table(ContainerBase):
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class TableCell:
+    # pylint: disable=too-many-instance-attributes
     """Represents a cell within a table.
 
     Attributes:
