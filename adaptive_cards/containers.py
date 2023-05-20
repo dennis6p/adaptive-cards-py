@@ -10,7 +10,7 @@ from adaptive_cards import utils
 import adaptive_cards.actions as action
 import adaptive_cards.card_types as ct
 
-ContainerT = Union[
+ContainerTypes = Union[
     "ActionSet", "Container", "ColumnSet", "FactSet", "ImageSet", "Table"
 ]
 
@@ -33,13 +33,14 @@ class ContainerBase:
         height: The height style to be applied to the container.
     """
 
-    fallback: Optional[elements.ElementT | action.ActionT | inputs.InputT] = field(
-        default=None, metadata=utils.get_metadata("1.2")
-    )
+    fallback: Optional[
+        elements.Element | action.ActionTypes | inputs.InputTypes
+    ] = field(default=None, metadata=utils.get_metadata("1.2"))
     separator: Optional[bool] = field(default=None, metadata=utils.get_metadata("1.2"))
     spacing: Optional[ct.Spacing] = field(
         default=None, metadata=utils.get_metadata("1.2")
     )
+    # pylint: disable=C0103
     id: Optional[str] = field(default=None, metadata=utils.get_metadata("1.2"))
     is_visible: Optional[bool] = field(default=None, metadata=utils.get_metadata("1.2"))
     requires: Optional[dict[str, str]] = field(
@@ -62,13 +63,14 @@ class ActionSet(ContainerBase):
         type: The type of the action set. Defaults to "ActionSet".
     """
 
-    actions: list[action.ActionT] = field(metadata=utils.get_metadata("1.2"))
+    actions: list[action.ActionTypes] = field(metadata=utils.get_metadata("1.2"))
     type: str = field(default="ActionSet", metadata=utils.get_metadata("1.2"))
 
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class Container(ContainerBase):
+    # pylint: disable=too-many-instance-attributes
     """Represents a container for elements with various properties.
 
     Inherits from ContainerBase.
@@ -85,7 +87,7 @@ class Container(ContainerBase):
         rtl: Determines whether the container's content is displayed right-to-left.
     """
 
-    items: list[elements.ElementT | ContainerT | inputs.InputT] = field(
+    items: list[elements.Element | ContainerTypes | inputs.InputTypes] = field(
         metadata=utils.get_metadata("1.0")
     )
     type: str = field(default="Container", metadata=utils.get_metadata("1.0"))
@@ -143,6 +145,7 @@ class ColumnSet(ContainerBase):
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class Column(ContainerBase):
+    # pylint: disable=too-many-instance-attributes
     """Represents a column within a container.
 
     Inherits from ContainerBase.
@@ -161,7 +164,7 @@ class Column(ContainerBase):
         width: The width of the column.
     """
 
-    items: Optional[list[elements.ElementT]] = field(
+    items: Optional[list[elements.Element]] = field(
         default=None, metadata=utils.get_metadata("1.0")
     )
     background_image: Optional[ct.BackgroundImage | str] = field(
@@ -283,6 +286,7 @@ class TableRow:
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class Table(ContainerBase):
+    # pylint: disable=too-many-instance-attributes
     """Represents a table within a container.
 
     Inherits from ContainerBase.
@@ -325,6 +329,7 @@ class Table(ContainerBase):
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class TableCell:
+    # pylint: disable=too-many-instance-attributes
     """Represents a cell within a table.
 
     Attributes:
@@ -338,7 +343,7 @@ class TableCell:
         rtl: Whether the cell should be rendered in right-to-left direction.
     """
 
-    items: list[elements.ElementT] = field(metadata=utils.get_metadata("1.5"))
+    items: list[elements.Element] = field(metadata=utils.get_metadata("1.5"))
     select_action: Optional[action.SelectAction] = field(
         default=None, metadata=utils.get_metadata("1.1")
     )

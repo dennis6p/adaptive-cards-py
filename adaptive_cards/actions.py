@@ -6,7 +6,7 @@ from dataclasses_json import dataclass_json, LetterCase
 from adaptive_cards import utils
 import adaptive_cards.card_types as ct
 
-ActionT = Union[
+ActionTypes = Union[
     "ActionOpenUrl",
     "ActionSubmit",
     "ActionShowCard",
@@ -21,6 +21,7 @@ SelectAction = Union[
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class Action:
+    # pylint: disable=too-many-instance-attributes
     """
     Represents an action that can be performed.
 
@@ -29,7 +30,7 @@ class Action:
         icon_url: An optional string representing the URL of the icon associated with the action.
         id: An optional string representing the ID of the action.
         style: An optional ActionStyle enum value representing the style of the action.
-        fallback: An optional fallback ActionT object representing the fallback action to be 
+        fallback: An optional fallback ActionTypes object representing the fallback action to be 
         performed.
         tooltip: An optional string representing the tooltip text for the action.
         is_enabled: An optional boolean indicating whether the action is enabled or disabled.
@@ -40,11 +41,11 @@ class Action:
 
     title: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
     icon_url: Optional[str] = field(default=None, metadata=utils.get_metadata("1.1"))
-    id: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
+    id: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0")) # pylint: disable=C0103
     style: Optional[ct.ActionStyle] = field(
         default=None, metadata=utils.get_metadata("1.2")
     )
-    fallback: Optional[ActionT] = field(
+    fallback: Optional[ActionTypes] = field(
         default=None, metadata=utils.get_metadata("1.2")
     )
     tooltip: Optional[str] = field(default=None, metadata=utils.get_metadata("1.5"))

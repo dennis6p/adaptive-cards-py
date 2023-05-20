@@ -8,7 +8,7 @@ from adaptive_cards import actions
 from adaptive_cards import utils
 import adaptive_cards.card_types as ct
 
-ElementT = Union["Image", "TextBlock", "Media", "CaptionSource", "RichTextBlock"]
+Element = Union["Image", "TextBlock", "Media", "CaptionSource", "RichTextBlock"]
 
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
@@ -27,14 +27,14 @@ class CardElement:
         height: The height of the element.
     """
 
-    element: Optional[Any | ElementT] = field(
+    element: Optional[Any | Element] = field(
         default=None, metadata=utils.get_metadata("1.2")
     )
     separator: Optional[bool] = field(default=None, metadata=utils.get_metadata("1.0"))
     spacing: Optional[ct.Spacing] = field(
         default=None, metadata=utils.get_metadata("1.0")
     )
-    id: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
+    id: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0")) # pylint: disable=C0103
     is_visible: Optional[bool] = field(default=None, metadata=utils.get_metadata("1.2"))
     requires: Optional[dict[str, str]] = field(
         default=None, metadata=utils.get_metadata("1.2")
@@ -47,9 +47,10 @@ class CardElement:
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class TextBlock(CardElement):
+    # pylint: disable=too-many-instance-attributes
     """
     Represents a text block card element.
-    
+
     Inherits from CardElement.
 
     Attributes:
@@ -92,9 +93,10 @@ class TextBlock(CardElement):
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class Image(CardElement):
+    # pylint: disable=too-many-instance-attributes
     """
     Represents an image card element.
-    
+
     Inherits from CardElement.
 
     Attributes:
@@ -135,7 +137,7 @@ class Image(CardElement):
 class Media(CardElement):
     """
     Represents a media card element.
-    
+
     Inherits from CardElement.
 
     Attributes:
@@ -192,7 +194,7 @@ class CaptionSource:
 class RichTextBlock(CardElement):
     """
     Represents a rich text block.
-    
+
     Inherits from CardElement.
 
     Attributes:
@@ -212,6 +214,7 @@ class RichTextBlock(CardElement):
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass(kw_only=True)
 class TextRun:
+    # pylint: disable=too-many-instance-attributes
     """
     Represents a text run.
 
