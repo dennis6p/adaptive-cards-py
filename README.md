@@ -84,7 +84,7 @@ card: AdaptiveCard = AdaptiveCard.new(version) \
 
 Find your final layout below.
 
-![simple card](examples/simple_card/simple_card.jpg)
+![simple card](https://github.com/dennis6p/adaptive-cards-py/blob/main/examples/simple_card/simple_card.jpg?raw=true)
 
 💡 **Please note**
 <br>After building the object is done, the `create(...)` method must be called in order to create the final object. In this case, the object will be of type `AdaptiveCard`.
@@ -133,14 +133,14 @@ with open("path/to/out/file.json", "w+") as f:
 
 This will result in a card like shown below.
 
-![simple card](examples/simple_card/simple_card_2.jpg)
+![simple card 2](https://github.com/dennis6p/adaptive-cards-py/blob/main/examples/simple_card/simple_card_2.jpg?raw=true)
 
 ### Finally, a more complex card
 
-You can have a look on the following sample for getting an idea of what's actually possible
+You can have a look on the following example for getting an idea of what's actually possible
 with adaptive cards. 
 
-![wrap up card](examples/wrap_up_card/wrap_up_card.jpg)
+![wrap up card](https://github.com/dennis6p/adaptive-cards-py/blob/main/examples/wrap_up_card/wrap_up_card.jpg?raw=true)
 
 <details>
 <summary>Code</summary>
@@ -592,7 +592,7 @@ print(f"Validation was successful: {result == Result.SUCCESS}")
 
 ## Examples
 
-If you are interested in more comprehensive examples or the actual source code, have a look into the `examples` folder (coming soon!) or visit the samples page of the official documentation. 
+If you are interested in more comprehensive examples or the actual source code, have a look into the `examples` folder. 
 
 ## Contribution
 
@@ -601,7 +601,7 @@ to hear your feedback!
 
 ## Roadmap
 
-+ 🔎 More complete valdidation
-+ 🚀 Better examples
-+ 📕 Comprehensive documentation on code level
-+ 🐍 Ready to use Python package
+- [x] 📕 Comprehensive documentation on code level
+- [x] 🐍 Ready to use Python package
+- [ ] 🚀 More and better examples
+- [ ] 🔎 Comprehensive validation
