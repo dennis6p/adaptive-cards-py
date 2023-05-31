@@ -62,7 +62,7 @@ from adaptive_cards.elements import TextBlock
 import adaptive_cards.card_types as types
 
 text_block: TextBlock = TextBlock(
-    text="It's your second card"
+    text="It's your second card",
     color=types.Colors.ACCENT,
     size=types.FontSize.EXTRA_LARGE,
     horizontal_alignment=types.HorizontalAlignment.CENTER,
@@ -77,7 +77,8 @@ from adaptive_cards.card import AdaptiveCard
 ...
 
 version: str = "1.4"
-card: AdaptiveCard = AdaptiveCard.new(version) \
+card: AdaptiveCard = AdaptiveCard.new() \
+                                 .version(version) \
                                  .add_item(text_block) \
                                  .create()
 ```
@@ -116,12 +117,14 @@ text_block: TextBlock = TextBlock(
 image: Image = Image(url="https://adaptivecards.io/content/bf-logo.png")
 
 version: str = "1.4"
-card: AdaptiveCard = AdaptiveCard.new(version) \
+card: AdaptiveCard = AdaptiveCard.new() \
+                                 .version(version) \
                                  .add_items([text_block, image]) \
                                  .create()
 
 # Alternatively, you can also chain multiple add_item(...) functions:
-# card = AdaptiveCard.new(version) \
+# card = AdaptiveCard.new() \
+#                    .version(version) \
 #                    .add_item(text_block) \
 #                    .add_item(image) \
 #                    .create()
@@ -579,7 +582,8 @@ from adaptive_cards.validator import SchemaValidator, Result
 ...
 
 version: str = "1.4"
-card: AdaptiveCard = AdaptiveCard.new(version) \
+card: AdaptiveCard = AdaptiveCard.new() \
+                                 .version(version) \
                                  .add_items([text_block, image]) \
                                  .create()
 
