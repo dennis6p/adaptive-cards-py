@@ -1,3 +1,4 @@
+"""Example: simple card"""
 from adaptive_cards.elements import TextBlock
 import adaptive_cards.card_types as types
 from adaptive_cards.card import AdaptiveCard
