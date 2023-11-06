@@ -151,6 +151,7 @@ class Column(ContainerBase):
     Inherits from ContainerBase.
 
     Attributes:
+        type: The type of the column. Defaults to "Column".
         items: An optional list of elements contained within the column.
         background_image: The background image of the column.
         bleed: Determines whether the column bleeds beyond its boundary.
@@ -164,6 +165,7 @@ class Column(ContainerBase):
         width: The width of the column.
     """
 
+    type: str = field(default="Column", metadata=utils.get_metadata("1.0"))
     items: Optional[list[elements.Element]] = field(
         default=None, metadata=utils.get_metadata("1.0")
     )
