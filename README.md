@@ -108,7 +108,7 @@ from adaptive_cards.elements import TextBlock, Image
 import adaptive_cards.card_types as types
 
 text_block: TextBlock = TextBlock(
-    text="It's your third card"
+    text="It's your third card",
     color=types.Colors.ACCENT,
     size=types.FontSize.EXTRA_LARGE,
     horizontal_alignment=types.HorizontalAlignment.CENTER,
