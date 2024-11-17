@@ -1,5 +1,6 @@
 """
-This package provides small components for building adaptive cards compliant to the current interface definite with Python. 
+This package provides small components for building adaptive cards compliant to 
+the current interface definite with Python. 
 
 [Schema Explorer](https://adaptivecards.io/explorer/)
 
