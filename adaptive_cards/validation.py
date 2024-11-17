@@ -36,6 +36,7 @@ class InvalidField:
         field_name: The name of the invalid field.
         version: The version of the field.
     """
+
     parent_type: str
     field_name: str
     version: str
@@ -46,6 +47,7 @@ class SchemaValidator:
     """
     Validator class for checking a cards schema w.r.t. to version numbers of individual fields.
     """
+
     def __init__(self) -> None:
         self.__card: AdaptiveCard
         self.__item: Any
