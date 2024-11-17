@@ -8,8 +8,8 @@
 
 from typing import Any
 from dataclasses import asdict
-import requests
 from http import HTTPStatus
+import requests
 
 from requests import Response
 from adaptive_cards.card import AdaptiveCard
