@@ -9,6 +9,7 @@
 from typing import Any
 from dataclasses import asdict
 import requests
+from http import HTTPStatus
 
 from requests import Response
 from adaptive_cards.card import AdaptiveCard
@@ -83,7 +84,7 @@ class TeamsClient:
         response = requests.post(
             self._webhook_url, headers=headers, json=payload, timeout=timeout
         )
-        if response.status_code not in (200, 202):
+        if response.status_code not in (HTTPStatus.OK, HTTPStatus.ACCEPTED):
             raise RuntimeError(
                 f"Failed to send card: {response.status_code}, {response.text}"
             )
