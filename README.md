@@ -10,7 +10,7 @@
   - [Adding multiple elements at once](#adding-multiple-elements-at-once)
   - [A more complex card](#a-more-complex-card)
   - [Validate schema](#validate-schema)
-  - [Send your card](#send-your-card)
+  - [Send card to MS Teams](#send-card-to-ms-teams)
 - [Examples](#examples)
 - [Contribution](#contribution)
 
@@ -607,7 +607,7 @@ print(f"Validation was successful: {result == Result.SUCCESS}")
 
 ```
 
-### Send your card
+### Send card to MS Teams
 
 Of course, you want to create those cards for a reason. So once you did that, you might want to send it to one of the compatible services like MS Teams. See the following example, how this can be done, assuming that all previously mentioned steps are done prior to that:
 
@@ -621,8 +621,8 @@ from requests import Response
 ...
 
 # send card
-url: str = "YOUR-URL"
-client: TeamsClient = TeamsClient(url)
+webhook_url: str = "YOUR-URL"
+client: TeamsClient = TeamsClient(webhook_url)
 response: Response = client.send(card)
 
 ...
