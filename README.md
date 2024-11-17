@@ -625,13 +625,17 @@ webhook_url: str = "YOUR-URL"
 client: TeamsClient = TeamsClient(webhook_url)
 response: Response = client.send(card)
 
+new_webhook_url: str = "YOUR-URL-OF-SECOND-CHANNEL"
+client.set_webhook_url(new_webhook_url)
+response: Response = client.send(card)
+
 ...
 
 ```
 
 So far, there is only a MS Teams client available. If further services should be supported, give me some feedback by opening an Issue for instance.
 
-Find further information about sending cards or creating Webhooks to/in MS Teams [here](https://support.microsoft.com/en-us/office/create-incoming-webhooks-with-workflows-for-microsoft-teams-8ae491c7-0394-4861-ba59-055e33f75498).
+Find further information about sending cards or creating Webhooks to/in MS Teams [__here__](https://support.microsoft.com/en-us/office/create-incoming-webhooks-with-workflows-for-microsoft-teams-8ae491c7-0394-4861-ba59-055e33f75498).
 
 ## Examples
 
