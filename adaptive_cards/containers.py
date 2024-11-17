@@ -273,6 +273,7 @@ class TableRow:
         style: The style of the table row.
     """
 
+    type: str = field(default="TableRow", metadata=utils.get_metadata("1.5"))
     cells: Optional["TableCell"] = field(
         default=None, metadata=utils.get_metadata("1.5")
     )
@@ -345,6 +346,7 @@ class TableCell:
         rtl: Whether the cell should be rendered in right-to-left direction.
     """
 
+    type: str = field(default="TableCell", metadata=utils.get_metadata("1.5"))
     items: list[elements.Element] = field(metadata=utils.get_metadata("1.5"))
     select_action: Optional[action.SelectAction] = field(
         default=None, metadata=utils.get_metadata("1.1")

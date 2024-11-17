@@ -14,7 +14,7 @@
 - [Examples](#examples)
 - [Contribution](#contribution)
 
-
+[![PyPI version](https://badge.fury.io/py/adaptive-cards-py.svg)](https://pypi.org/project/adaptive-cards-py/)
 
 A thin Python wrapper for creating [**Adaptive Cards**](https://adaptivecards.io/) easily on code level. The deep integration of Python's `typing` package prevents you from creating invalid schemes and guides you while creating visual apealing cards.
 
@@ -124,7 +124,7 @@ from adaptive_cards.elements import TextBlock, Image
 import adaptive_cards.card_types as types
 
 text_block: TextBlock = TextBlock(
-    text="It's your third card"
+    text="It's your third card",
     color=types.Colors.ACCENT,
     size=types.FontSize.EXTRA_LARGE,
     horizontal_alignment=types.HorizontalAlignment.CENTER,
