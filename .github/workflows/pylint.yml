@@ -26,4 +26,4 @@ jobs:
         uv pip install -r pyproject.toml
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files '*.py') --rcfile pylintrc
+        uv pylint $(git ls-files '*.py') --rcfile pylintrc
