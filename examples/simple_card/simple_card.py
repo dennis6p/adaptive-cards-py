@@ -1,7 +1,10 @@
 """Example: simple card"""
+
 from adaptive_cards.elements import TextBlock
 import adaptive_cards.card_types as types
 from adaptive_cards.card import AdaptiveCard
+from adaptive_cards.validation import SchemaValidator, Result
+from adaptive_cards.clients import TeamsClient
 
 text_block: TextBlock = TextBlock(
     text="It's your second card",
@@ -10,7 +13,17 @@ text_block: TextBlock = TextBlock(
     horizontal_alignment=types.HorizontalAlignment.CENTER,
 )
 
+# build card
 version: str = "1.4"
 card: AdaptiveCard = AdaptiveCard.new().version(version).add_item(text_block).create()
-output = card.to_json()
-print(output)
+
+# validate card
+validator: SchemaValidator = SchemaValidator()
+result: Result = validator.validate(card)
+
+print(f"Validation was successful: {result == Result.SUCCESS}")
+
+# send card
+url: str = "YOUR-URL"
+client: TeamsClient = TeamsClient(url)
+client.send(card)
