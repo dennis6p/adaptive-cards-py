@@ -4,10 +4,10 @@
 
 - [Adaptive Cards for Python](https://github.com/dennis6p/adaptive-cards-py)
 - [Creating incoming web hooks with workflows](https://support.microsoft.com/en-us/office/create-incoming-webhooks-with-workflows-for-microsoft-teams-8ae491c7-0394-4861-ba59-055e33f75498)
-"""
+"""  # pylint: disable=line-too-long
 
 from typing import Any
-from dataclasses import asdict, dataclass
+from dataclasses import asdict
 import requests
 
 from requests import Response
@@ -38,6 +38,24 @@ class TeamsClient:
             "contentUrl": None,
             "content": content,
         }
+
+    def webhook_url(self) -> str:
+        """
+        Returns webhook URL the current client has been initialized with
+
+        Returns:
+            str: _description_
+        """
+        return self._webhook_url
+
+    def set_webhook_url(self, webhook_url: str) -> None:
+        """
+        Update webhook URL the client should use when sending a card
+
+        Args:
+            webhook_url (str): Webhook URL
+        """
+        self._webhook_url = webhook_url
 
     def send(self, *cards: AdaptiveCard, timeout: int = 1000) -> Response:
         """
