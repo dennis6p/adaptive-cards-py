@@ -19,8 +19,5 @@ keywords = ["bot", "ui", "adaptivecards", "cards", "adaptivecardsio", "python"]
 dependencies = ["dataclasses-json", "StrEnum", "requests"]
 requires-python = ">=3.10"
 
-[options]
-package_dir = ["adaptive_cards"]
-
 [project.urls]
 Homepage = "https://github.com/dennis6p/adaptive-cards-py"
