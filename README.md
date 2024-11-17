@@ -1,18 +1,32 @@
-# Adaptive Cards
+# Adaptive Cards <!-- omit in toc -->
+
+- [About](#about)
+- [Features](#features)
+- [Dependencies](#dependencies)
+- [Installation](#installation)
+- [Library structure](#library-structure)
+- [Usage](#usage)
+  - [A simple card](#a-simple-card)
+  - [Adding multiple elements at once](#adding-multiple-elements-at-once)
+  - [A more complex card](#a-more-complex-card)
+  - [Validate schema](#validate-schema)
+  - [Send card to MS Teams](#send-card-to-ms-teams)
+- [Examples](#examples)
+- [Contribution](#contribution)
 
 [![PyPI version](https://badge.fury.io/py/adaptive-cards-py.svg)](https://pypi.org/project/adaptive-cards-py/)
 
-A thin Python wrapper for creating [**Adaptive Cards**](https://adaptivecards.io/) easily on code level. The deep integration of Python's `typing` package prevents you from creating invalid schemes and guides you while creating visual apealing cards. 
+A thin Python wrapper for creating [**Adaptive Cards**](https://adaptivecards.io/) easily on code level. The deep integration of Python's `typing` package prevents you from creating invalid schemes and guides you while creating visual apealing cards.
 
 If you are interested in the general concepts of adaptive cards and want to dig a bit deeper, have a look into the [**official documentation**](https://learn.microsoft.com/en-us/adaptive-cards/) or start a jump start and get used to the [**schema**](https://adaptivecards.io/explorer/).
 
 💡 **Please note**
-<br>This library is still in progress and is lacking some features. However, missing fractions are planned to be added soon. 
+<br>This library is still in progress and is lacking some features. However, missing fractions are planned to be added soon.
 
 ## About
 
 This library is intended to provide a clear and simple interface for creating adaptive cards with only a few lines of code in a more robust way. The heavy usage of Python's typing library should
-prevent one from creating invalid schemes and structures. Instead, creating cards should be intuitive and work like a breeze. 
+prevent one from creating invalid schemes and structures. Instead, creating cards should be intuitive and work like a breeze.
 
 For a comprehensive introduction into the main ideas and patterns of adaptive cards, have a look on the [**official documentation**](https://docs.microsoft.com/en-us/adaptive-cards). I also recommend using the [**schema explorer**](https://adaptivecards.io/explorer) page alongside the implementation, since the library's type system relies on these schemes.
 
@@ -50,7 +64,7 @@ To perform validation on a fully initialized card, one can make use of the `Sche
 
 ### A simple card
 
-A simple `TextBlock` lives in the `elements` module and can be used after it's import. 
+A simple `TextBlock` lives in the `elements` module and can be used after it's import.
 
 ```Python
 from adaptive_cards.elements import TextBlock
@@ -92,7 +106,7 @@ Find your final layout below.
 💡 **Please note**
 <br>After building the object is done, the `create(...)` method must be called in order to create the final object. In this case, the object will be of type `AdaptiveCard`.
 
-To directly export your result, make use of the 
+To directly export your result, make use of the
 `to_json()` method provided by every card.
 
 ```Python
@@ -103,7 +117,7 @@ with open("path/to/out/file.json", "w+") as f:
 
 ### Adding multiple elements at once
 
-Assuming you have a bunch of elements you want your card to enrich with. There is also a method for doing so. Let's re-use the example from before, but add another `Image` element here as well. 
+Assuming you have a bunch of elements you want your card to enrich with. There is also a method for doing so. Let's re-use the example from before, but add another `Image` element here as well.
 
 ```Python
 from adaptive_cards.elements import TextBlock, Image
@@ -140,10 +154,10 @@ This will result in a card like shown below.
 
 ![simple card 2](https://github.com/dennis6p/adaptive-cards-py/blob/main/examples/simple_card/simple_card_2.jpg?raw=true)
 
-### Finally, a more complex card
+### A more complex card
 
 You can have a look on the following example for getting an idea of what's actually possible
-with adaptive cards. 
+with adaptive cards.
 
 ![wrap up card](https://github.com/dennis6p/adaptive-cards-py/blob/main/examples/wrap_up_card/wrap_up_card.jpg?raw=true)
 
@@ -567,12 +581,9 @@ print(f"Validation was successful: {result == Result.SUCCESS}")
 }
 ```
 
-
 </details>
 
 But we are still scratching the surface. You can do even better!
-
-
 
 ### Validate schema
 
@@ -596,18 +607,41 @@ print(f"Validation was successful: {result == Result.SUCCESS}")
 
 ```
 
+### Send card to MS Teams
+
+Of course, you want to create those cards for a reason. So once you did that, you might want to send it to one of the compatible services like MS Teams. See the following example, how this can be done, assuming that all previously mentioned steps are done prior to that:
+
+```python
+
+...
+
+from adaptive_cards.clients import TeamsClient
+from requests import Response
+
+...
+
+# send card
+webhook_url: str = "YOUR-URL"
+client: TeamsClient = TeamsClient(webhook_url)
+response: Response = client.send(card)
+
+new_webhook_url: str = "YOUR-URL-OF-SECOND-CHANNEL"
+client.set_webhook_url(new_webhook_url)
+response: Response = client.send(card)
+
+...
+
+```
+
+So far, there is only a MS Teams client available. If further services should be supported, give me some feedback by opening an Issue for instance.
+
+Find further information about sending cards or creating Webhooks to/in MS Teams [__here__](https://support.microsoft.com/en-us/office/create-incoming-webhooks-with-workflows-for-microsoft-teams-8ae491c7-0394-4861-ba59-055e33f75498).
+
 ## Examples
 
-If you are interested in more comprehensive examples or the actual source code, have a look into the `examples` folder. 
+If you are interested in more comprehensive examples or the actual source code, have a look into the `examples` folder.
 
 ## Contribution
 
 Feel free to create issues, fork the repository or even come up with a pull request. I am happy about any kind of contribution and would love
-to hear your feedback! 
-
-## Roadmap
-
-- [x] 📕 Comprehensive documentation on code level
-- [x] 🐍 Ready to use Python package
-- [ ] 🚀 More and better examples
-- [ ] 🔎 Comprehensive validation
+to hear your feedback!

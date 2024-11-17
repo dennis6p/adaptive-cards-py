@@ -1,8 +1,4 @@
 cards
 .vscode
-<<<<<<< HEAD
 __pycache__
-=======
-__pycache__
-
->>>>>>> ef5a658... Initial commit
+.venv

@@ -1,7 +1,7 @@
 """Implementation of the adaptive card type"""
 
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Optional, Sequence
 from dataclasses_json import dataclass_json, LetterCase
 from adaptive_cards.actions import SelectAction, ActionTypes
 from adaptive_cards.containers import ContainerTypes
@@ -213,7 +213,9 @@ class AdaptiveCardBuilder:
         self.__card.schema = schema
         return self
 
-    def add_item(self, item: Element | ContainerTypes | InputTypes) -> "AdaptiveCardBuilder":
+    def add_item(
+        self, item: Element | ContainerTypes | InputTypes
+    ) -> "AdaptiveCardBuilder":
         """
         Add single element, container or input to card
 
@@ -229,7 +231,7 @@ class AdaptiveCardBuilder:
         return self
 
     def add_items(
-        self, items: list[Element | ContainerTypes | InputTypes]
+        self, items: Sequence[Element | ContainerTypes | InputTypes]
     ) -> "AdaptiveCardBuilder":
         """
         Add multiple elements, containers or inputs to card
