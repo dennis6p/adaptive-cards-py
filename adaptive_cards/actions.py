@@ -30,18 +30,20 @@ class Action:
         icon_url: An optional string representing the URL of the icon associated with the action.
         id: An optional string representing the ID of the action.
         style: An optional ActionStyle enum value representing the style of the action.
-        fallback: An optional fallback ActionTypes object representing the fallback action to be 
+        fallback: An optional fallback ActionTypes object representing the fallback action to be
         performed.
         tooltip: An optional string representing the tooltip text for the action.
         is_enabled: An optional boolean indicating whether the action is enabled or disabled.
         mode: An optional ActionMode enum value representing the mode of the action.
-        requires: An optional dictionary mapping string keys to string values representing the 
+        requires: An optional dictionary mapping string keys to string values representing the
         requirements for the action.
     """
 
     title: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
     icon_url: Optional[str] = field(default=None, metadata=utils.get_metadata("1.1"))
-    id: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0")) # pylint: disable=C0103
+    id: Optional[str] = field(
+        default=None, metadata=utils.get_metadata("1.0")
+    )  # pylint: disable=C0103
     style: Optional[ct.ActionStyle] = field(
         default=None, metadata=utils.get_metadata("1.2")
     )
@@ -158,9 +160,9 @@ class ActionExecute(Action):
     Attributes:
         type: The type of the action, set to "Action.ShowCard".
         verb: An optional string representing the verb of the action.
-        data: An optional string or Any type representing additional data associated 
+        data: An optional string or Any type representing additional data associated
         with the action.
-        associated_inputs: An optional AssociatedInputs object representing associated 
+        associated_inputs: An optional AssociatedInputs object representing associated
         inputs for the action.
     """
 
