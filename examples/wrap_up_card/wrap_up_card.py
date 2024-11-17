@@ -1,4 +1,5 @@
 """Example: wrap-up card"""
+
 # pylint: disable=C0413
 
 import sys
@@ -10,6 +11,7 @@ from adaptive_cards.validation import SchemaValidator, Result
 from adaptive_cards.card import AdaptiveCard
 from adaptive_cards.elements import TextBlock, Image
 from adaptive_cards.containers import Container, ContainerTypes, ColumnSet, Column
+from adaptive_cards.clients import TeamsClient
 
 containers: list[ContainerTypes] = []
 
@@ -155,9 +157,16 @@ containers.append(
     )
 )
 
+# Build card
 card = AdaptiveCard.new().version("1.5").add_items(containers).create()
 
+# Validate card
 validator: SchemaValidator = SchemaValidator()
 result: Result = validator.validate(card)
 
 print(f"Validation was successful: {result == Result.SUCCESS}")
+
+# send card
+url: str = "YOUR-URL"
+client: TeamsClient = TeamsClient(url)
+client.send(card)
