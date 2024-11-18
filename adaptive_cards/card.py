@@ -1,7 +1,7 @@
 """Implementation of the adaptive card type"""
 
 from dataclasses import dataclass, field
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Any
 from dataclasses_json import dataclass_json, LetterCase
 from adaptive_cards.actions import SelectAction, ActionTypes
 from adaptive_cards.containers import ContainerTypes
@@ -375,3 +375,12 @@ class AdaptiveCard:
             str: Adaptive card schema as JSON string.
         """
         return self.to_json()
+
+    def to_dict(self) -> dict[str, Any]:
+        """
+        Converts the full adaptive card schema into a dictionary.
+
+        Returns:
+            str: Adaptive card schema as dictionary.
+        """
+        return self.to_dict()

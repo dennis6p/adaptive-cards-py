@@ -1,10 +1,12 @@
 """Example: simple card"""
 
+from requests import Response
 from adaptive_cards.elements import TextBlock
 import adaptive_cards.card_types as types
 from adaptive_cards.card import AdaptiveCard
 from adaptive_cards.validation import SchemaValidator, Result
 from adaptive_cards.client import TeamsClient
+
 
 text_block: TextBlock = TextBlock(
     text="It's your second card",
@@ -26,4 +28,4 @@ print(f"Validation was successful: {result == Result.SUCCESS}")
 # send card
 webhook_url: str = "YOUR-URL"
 client: TeamsClient = TeamsClient(webhook_url)
-client.send(card)
+response: Response = client.send(card)

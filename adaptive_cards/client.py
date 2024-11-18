@@ -33,7 +33,7 @@ class TeamsClient:
         Returns:
             dict: A dictionary representing the attachment.
         """
-        content: dict[str, Any] = asdict(card)
+        content: dict[str, Any] = card.to_dict()
         return {
             "contentType": "application/vnd.microsoft.card.adaptive",
             "contentUrl": None,
