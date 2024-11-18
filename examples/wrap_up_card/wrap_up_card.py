@@ -11,7 +11,7 @@ from adaptive_cards.validation import SchemaValidator, Result
 from adaptive_cards.card import AdaptiveCard
 from adaptive_cards.elements import TextBlock, Image
 from adaptive_cards.containers import Container, ContainerTypes, ColumnSet, Column
-from adaptive_cards.clients import TeamsClient
+from adaptive_cards.client import TeamsClient
 
 containers: list[ContainerTypes] = []
 
@@ -167,6 +167,6 @@ result: Result = validator.validate(card)
 print(f"Validation was successful: {result == Result.SUCCESS}")
 
 # send card
-url: str = "YOUR-URL"
-client: TeamsClient = TeamsClient(url)
+webhook_url: str = "YOUR-URL"
+client: TeamsClient = TeamsClient(webhook_url)
 client.send(card)
