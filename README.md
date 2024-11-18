@@ -26,7 +26,7 @@ If you are interested in the general concepts of adaptive cards and want to dig 
 ## About
 
 This library is intended to provide a clear and simple interface for creating adaptive cards with only a few lines of code in a more robust way. The heavy usage of Python's typing library should
-prevent one from creating invalid schemes and structures. Instead, creating cards should be intuitive and work like a breeze.
+prevent one from creating invalid schemes and structures. Instead, creating cards and sending cards should be intuitive and work like a breeze.
 
 For a comprehensive introduction into the main ideas and patterns of adaptive cards, have a look on the [**official documentation**](https://docs.microsoft.com/en-us/adaptive-cards). I also recommend using the [**schema explorer**](https://adaptivecards.io/explorer) page alongside the implementation, since the library's type system relies on these schemes.
 
@@ -39,12 +39,14 @@ For a comprehensive introduction into the main ideas and patterns of adaptive ca
 + Schema validation for version compatibility
 + Simple `JSON` export
 + Compliant with the official structures and ideas
++ Send cards to MS Teams via `TeamsClient`
 
 ## Dependencies
 
 * Python 3.10+
 * `dataclasses-json`
 * `StrEnum`
+* `requests`
 
 ## Installation
 
