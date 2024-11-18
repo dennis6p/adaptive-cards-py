@@ -3,6 +3,7 @@
 # pylint: disable=C0413
 
 import sys
+from requests import Response
 
 sys.path.append("../../")
 import adaptive_cards.card_types as types
@@ -169,4 +170,4 @@ print(f"Validation was successful: {result == Result.SUCCESS}")
 # send card
 webhook_url: str = "YOUR-URL"
 client: TeamsClient = TeamsClient(webhook_url)
-client.send(card)
+response: Response = client.send(card)
