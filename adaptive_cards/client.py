@@ -7,7 +7,6 @@
 """  # pylint: disable=line-too-long
 
 from typing import Any
-from dataclasses import asdict
 from http import HTTPStatus
 import requests
 
