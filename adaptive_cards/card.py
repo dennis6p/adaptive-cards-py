@@ -322,7 +322,7 @@ class AdaptiveCard:
     type: str = field(default=TYPE, metadata=utils.get_metadata("1.0"))
     version: str = field(default=VERSION, metadata=utils.get_metadata("1.0"))
     schema: str = field(
-        default=SCHEMA, metadata=utils.get_metadata("1.0") | {"field_name": "$schema"}
+        default=SCHEMA, metadata=utils.get_metadata("1.0", field_name="$schema")
     )
     refresh: Optional[ct.Refresh] = field(
         default=None, metadata=utils.get_metadata("1.4")

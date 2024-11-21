@@ -8,7 +8,7 @@ from dataclasses_json import config
 is_none: Any = lambda f: f is None
 
 
-def get_metadata(min_version: str) -> dict[str, Any]:
+def get_metadata(min_version: str, field_name: str | None = None) -> dict[str, Any]:
     """
     Get default metadata information for dataclass field
 
@@ -19,4 +19,4 @@ def get_metadata(min_version: str) -> dict[str, Any]:
     Returns:
         dict[str, Any]: Metadata information
     """
-    return config(exclude=is_none) | {"min_version": min_version}
+    return config(exclude=is_none, field_name=field_name) | {"min_version": min_version}
