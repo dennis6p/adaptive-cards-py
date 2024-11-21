@@ -101,11 +101,9 @@ class SchemaValidator:
 
                 if isinstance(value, list):
                     iterables.append(value)
-                    # self.__validate_elements(value)
 
                 elif dataclasses.is_dataclass(value):
                     custom_types.append(value)
-                    # self.__validate_elements(value)
 
                 else:
                     self.__validate_field_version(
