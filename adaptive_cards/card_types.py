@@ -435,3 +435,19 @@ class Metadata:
     """
 
     web_url: Optional[str] = field(default=None, metadata=utils.get_metadata("1.6"))
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass(kw_only=True)
+class MSTeams:
+    """
+    Represents specific properties for MS Teams as the target framework.
+
+    Attributes:
+        width: The total horizontal space an adaptive cards is allowed to occupy
+               when posted to MS Teams. Defaults to "None".
+    """
+
+    width: Optional[MSTeamsCardWidth] = field(
+        default=MSTeamsCardWidth.DEFAULT, metadata=utils.get_metadata("1.0")
+    )

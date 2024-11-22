@@ -3,12 +3,14 @@
 from dataclasses import dataclass, field
 from typing import Optional, Sequence, Any
 from dataclasses_json import dataclass_json, LetterCase
-from adaptive_cards.actions import SelectAction, ActionTypes
-from adaptive_cards.containers import ContainerTypes
-from adaptive_cards.elements import Element
-from adaptive_cards.inputs import InputTypes
-from adaptive_cards.teams import MSTeams
-from adaptive_cards import utils, MSTeamsCardWidth
+from adaptive_cards import (
+    SelectAction,
+    ActionTypes,
+    ContainerTypes,
+    Element,
+    InputTypes,
+    MSTeams,
+)
 import adaptive_cards.card_types as ct
 
 
@@ -214,7 +216,7 @@ class AdaptiveCardBuilder:
         self.__card.schema = schema
         return self
 
-    def width(self, width: MSTeamsCardWidth) -> "AdaptiveCardBuilder":
+    def width(self, width: ct.MSTeamsCardWidth) -> "AdaptiveCardBuilder":
         """
         Set card width for target framework. Please note, changing this property
         will only take affect in MS Teams. Other frameworks will simply ignore this
