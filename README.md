@@ -12,6 +12,7 @@
   - [Validate schema](#validate-schema)
   - [Send card to MS Teams](#send-card-to-ms-teams)
 - [Examples](#examples)
+- [Feature Roadmap](#feature-roadmap)
 - [Contribution](#contribution)
 
 [![PyPI version](https://badge.fury.io/py/adaptive-cards-py.svg)](https://pypi.org/project/adaptive-cards-py/)
@@ -21,7 +22,7 @@ A thin Python wrapper for creating [**Adaptive Cards**](https://adaptivecards.io
 If you are interested in the general concepts of adaptive cards and want to dig a bit deeper, have a look into the [**official documentation**](https://learn.microsoft.com/en-us/adaptive-cards/) or start a jump start and get used to the [**schema**](https://adaptivecards.io/explorer/).
 
 💡 **Please note**
-<br>This library is still in progress and is lacking some features. However, missing fractions are planned to be added soon.
+<br>This library is work in progress and is lacking some features which might come in handy. Missing parts are planned to be added from time to time.
 
 ## About
 
@@ -30,10 +31,18 @@ prevent one from creating invalid schemes and structures. Instead, creating card
 
 For a comprehensive introduction into the main ideas and patterns of adaptive cards, have a look on the [**official documentation**](https://docs.microsoft.com/en-us/adaptive-cards). I also recommend using the [**schema explorer**](https://adaptivecards.io/explorer) page alongside the implementation, since the library's type system relies on these schemes.
 
+Further resources can be found here:
+
+* [__Format cards in Teams__](https://learn.microsoft.com/en-us/microsoftteams/platform/task-modules-and-cards/cards/cards-format?tabs=adaptive-md%2Cdesktop%2Cdesktop1%2Cdesktop2%2Cconnector-html)
+* [__Official repository__](https://github.com/microsoft/AdaptiveCards)
+
 💡 **Please note**
-<br>It's highly recommended to turn on the **type check** capabilities for Python in your editor. This will serve you with direct feedback about the structures you create. If you are trying to assign values of incompatible types, your editor will mark it as such and yell at you right in the moment you are about to do so.
+<br> There are size limitations related to the traget framework a card is supposed to be used with. As of now, the maximum card size can be __28KB__ when used with Webhooks in Teams ([__Format cards in Teams__](https://learn.microsoft.com/en-us/microsoftteams/platform/task-modules-and-cards/cards/cards-format?tabs=adaptive-md%2Cdesktop%2Cdesktop1%2Cdesktop2%2Cconnector-html)). For bot frameworks the upper limit is set to __40KB__ ([__Format your bot messages__](https://learn.microsoft.com/en-us/microsoftteams/platform/bots/how-to/format-your-bot-messages)). An corresponding check is planned to be added soon to the [`SchemaValidator`](#validate-schema).
 
 ## Features
+
+💡 **Please note**
+<br>It's highly recommended to turn on the **type check** capabilities for Python in your editor. This will serve you with direct feedback about the structures you create. If you are trying to assign values of incompatible types, your editor will mark it as such and yell at you right in the moment you are about to do so.
 
 + Type annotated components based on Python's **dataclasses**
 + Schema validation for version compatibility
@@ -642,6 +651,12 @@ Find further information about sending cards or creating Webhooks to/in MS Teams
 ## Examples
 
 If you are interested in more comprehensive examples or the actual source code, have a look into the `examples` folder.
+
+## Feature Roadmap
+
+* [ ] Add size check to schema validation
+* [ ] Provide more examples
+* [ ] Allow reading of json-like schemas
 
 ## Contribution
 
