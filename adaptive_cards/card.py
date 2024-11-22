@@ -213,6 +213,26 @@ class AdaptiveCardBuilder:
         self.__card.schema = schema
         return self
 
+    def width(self, width: ct.MSTeamsCardWidth) -> "AdaptiveCardBuilder":
+        """
+        Set card width for target framework. Please note, changing this property
+        will only take affect in MS Teams. Other frameworks will simply ignore this
+        field.
+
+
+        Args:
+            width (MSTeamsCardWidth): Width property for card
+
+        Returns:
+            AdaptiveCardBuilder: Builder object
+        """
+        if width == ct.MSTeamsCardWidth.FULL:
+            self.__card.msteams = ct.MSTeams(width=width)
+            return self
+
+        self.__card.msteams = None
+        return self
+
     def add_item(
         self, item: Element | ContainerTypes | InputTypes
     ) -> "AdaptiveCardBuilder":
@@ -317,6 +337,7 @@ class AdaptiveCard:
         speak: The speak text for the card.
         lang: The language for the card.
         vertical_content_align: The vertical alignment of the card's content.
+        msteams: Set specific properties for MS Teams as the target framework
     """
 
     type: str = field(default=TYPE, metadata=utils.get_metadata("1.0"))
@@ -354,6 +375,9 @@ class AdaptiveCard:
     lang: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
     vertical_content_align: Optional[ct.VerticalAlignment] = field(
         default=None, metadata=utils.get_metadata("1.1")
+    )
+    msteams: Optional[ct.MSTeams] = field(
+        default=None, metadata=utils.get_metadata("1.0")
     )
 
     @staticmethod
