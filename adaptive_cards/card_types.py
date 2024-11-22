@@ -2,10 +2,24 @@
 
 from dataclasses import dataclass, field
 from typing import Optional
-from enum import auto
+from enum import auto, Enum
 from dataclasses_json import dataclass_json, LetterCase
 from strenum import LowercaseStrEnum
 from adaptive_cards import utils
+
+
+class MSTeamsCardWidth(str, Enum):
+    """
+    Enumerates the different fill modes for an image.
+
+    Attributes:
+        FULL: The cards' width will be set to full. Occupies all of the
+              available horizontal space.
+        NONE: The cards' width will be set to None. Default width.
+    """
+
+    FULL = "Full"
+    DEFAULT = None
 
 
 class ImageFillMode(LowercaseStrEnum):
@@ -359,7 +373,9 @@ class TokenExchangeResource:
         provider_id: The provider ID associated with the resource.
     """
 
-    id: str = field(default="", metadata=utils.get_metadata("1.4")) # pylint: disable=C0103
+    id: str = field(
+        default="", metadata=utils.get_metadata("1.4")
+    )  # pylint: disable=C0103
     uri: str = field(default="", metadata=utils.get_metadata("1.4"))
     provider_id: str = field(default="", metadata=utils.get_metadata("1.4"))
 
