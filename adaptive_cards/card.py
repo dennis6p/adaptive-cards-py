@@ -226,8 +226,8 @@ class AdaptiveCardBuilder:
         Returns:
             AdaptiveCardBuilder: Builder object
         """
-        if width == MSTeamsCardWidth.FULL:
-            self.__card.msteams = MSTeams(width=width)
+        if width == ct.MSTeamsCardWidth.FULL:
+            self.__card.msteams = ct.MSTeams(width=width)
             return self
 
         self.__card.msteams = None
