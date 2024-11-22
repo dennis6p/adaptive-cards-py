@@ -3,14 +3,11 @@
 from dataclasses import dataclass, field
 from typing import Optional, Sequence, Any
 from dataclasses_json import dataclass_json, LetterCase
-from adaptive_cards import (
-    SelectAction,
-    ActionTypes,
-    ContainerTypes,
-    Element,
-    InputTypes,
-    MSTeams,
-)
+from adaptive_cards.actions import SelectAction, ActionTypes
+from adaptive_cards.containers import ContainerTypes
+from adaptive_cards.elements import Element
+from adaptive_cards.inputs import InputTypes
+from adaptive_cards import utils
 import adaptive_cards.card_types as ct
 
 
@@ -379,7 +376,9 @@ class AdaptiveCard:
     vertical_content_align: Optional[ct.VerticalAlignment] = field(
         default=None, metadata=utils.get_metadata("1.1")
     )
-    msteams: Optional[MSTeams] = field(default=None, metadata=utils.get_metadata("1.0"))
+    msteams: Optional[ct.MSTeams] = field(
+        default=None, metadata=utils.get_metadata("1.0")
+    )
 
     @staticmethod
     def new() -> AdaptiveCardBuilder:
