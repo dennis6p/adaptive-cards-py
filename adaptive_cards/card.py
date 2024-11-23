@@ -407,4 +407,5 @@ class AdaptiveCard:
         Returns:
             str: Adaptive card schema as dictionary.
         """
+
         return self.to_dict()
