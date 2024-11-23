@@ -1,0 +1,268 @@
+{
+    "type": "AdaptiveCard",
+    "version": "1.5",
+    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+    "body": [
+        {
+            "items": [
+                {
+                    "type": "ColumnSet",
+                    "columns": [
+                        {
+                            "type": "Column",
+                            "items": [
+                                {
+                                    "text": "Your Daily Wrap-Up",
+                                    "type": "TextBlock",
+                                    "size": "ExtraLarge"
+                                }
+                            ],
+                            "width": "stretch"
+                        },
+                        {
+                            "type": "Column",
+                            "items": [
+                                {
+                                    "url": "https://img.icons8.com/3d-fluency/94/launched-rocket.png",
+                                    "type": "Image",
+                                    "width": "40px"
+                                }
+                            ],
+                            "rtl": true,
+                            "width": "auto"
+                        }
+                    ]
+                }
+            ],
+            "type": "Container",
+            "style": "emphasis",
+            "bleed": true
+        },
+        {
+            "spacing": "Medium",
+            "items": [
+                {
+                    "text": "**Some numbers for you**",
+                    "type": "TextBlock",
+                    "size": "Medium"
+                },
+                {
+                    "separator": true,
+                    "type": "ColumnSet",
+                    "columns": [
+                        {
+                            "type": "Column",
+                            "items": [
+                                {
+                                    "text": "_Total_",
+                                    "type": "TextBlock"
+                                },
+                                {
+                                    "text": "_Done by you_",
+                                    "type": "TextBlock"
+                                },
+                                {
+                                    "text": "_Done by other teams_",
+                                    "type": "TextBlock"
+                                },
+                                {
+                                    "text": "_Still open_",
+                                    "type": "TextBlock"
+                                },
+                                {
+                                    "text": "_Closed_",
+                                    "type": "TextBlock"
+                                }
+                            ],
+                            "width": "stretch"
+                        },
+                        {
+                            "spacing": "Medium",
+                            "type": "Column",
+                            "items": [
+                                {
+                                    "text": "5",
+                                    "type": "TextBlock"
+                                },
+                                {
+                                    "text": "4",
+                                    "type": "TextBlock"
+                                },
+                                {
+                                    "text": "3",
+                                    "type": "TextBlock"
+                                },
+                                {
+                                    "text": "6",
+                                    "type": "TextBlock"
+                                },
+                                {
+                                    "text": "1",
+                                    "type": "TextBlock"
+                                }
+                            ],
+                            "rtl": true,
+                            "width": "stretch"
+                        }
+                    ]
+                }
+            ],
+            "type": "Container"
+        },
+        {
+            "separator": true,
+            "spacing": "ExtraLarge",
+            "items": [
+                {
+                    "text": "**Detailed Results**",
+                    "type": "TextBlock",
+                    "size": "Medium"
+                }
+            ],
+            "type": "Container"
+        },
+        {
+            "items": [
+                {
+                    "items": [
+                        {
+                            "id": "headline",
+                            "type": "ColumnSet",
+                            "columns": [
+                                {
+                                    "type": "Column",
+                                    "items": [
+                                        {
+                                            "text": "**Number**",
+                                            "type": "TextBlock"
+                                        }
+                                    ],
+                                    "width": "stretch"
+                                },
+                                {
+                                    "type": "Column",
+                                    "items": [
+                                        {
+                                            "text": "**Status**",
+                                            "type": "TextBlock"
+                                        }
+                                    ],
+                                    "width": "stretch"
+                                },
+                                {
+                                    "type": "Column",
+                                    "items": [
+                                        {
+                                            "text": "**Topic**",
+                                            "type": "TextBlock"
+                                        }
+                                    ],
+                                    "width": "stretch"
+                                },
+                                {
+                                    "type": "Column",
+                                    "items": [
+                                        {
+                                            "text": "",
+                                            "type": "TextBlock"
+                                        }
+                                    ],
+                                    "width": "stretch"
+                                }
+                            ]
+                        }
+                    ],
+                    "type": "Container",
+                    "style": "emphasis",
+                    "bleed": true
+                },
+                {
+                    "items": [
+                        {
+                            "type": "ColumnSet",
+                            "columns": [
+                                {
+                                    "type": "Column",
+                                    "items": [
+                                        {
+                                            "text": "12312",
+                                            "type": "TextBlock"
+                                        }
+                                    ],
+                                    "width": "stretch"
+                                },
+                                {
+                                    "type": "Column",
+                                    "items": [
+                                        {
+                                            "text": "done",
+                                            "type": "TextBlock",
+                                            "color": "Good"
+                                        }
+                                    ],
+                                    "width": "stretch"
+                                },
+                                {
+                                    "type": "Column",
+                                    "items": [
+                                        {
+                                            "text": "abc",
+                                            "type": "TextBlock"
+                                        }
+                                    ],
+                                    "width": "stretch"
+                                },
+                                {
+                                    "type": "Column",
+                                    "items": [
+                                        {
+                                            "url": "https://adaptivecards.io/content/down.png",
+                                            "type": "Image",
+                                            "horizontalAlignment": "Right",
+                                            "width": "20px"
+                                        }
+                                    ],
+                                    "selectAction": {
+                                        "title": "More",
+                                        "targetElements": [
+                                            "toggle-me"
+                                        ],
+                                        "type": "Action.ToggleVisibility"
+                                    },
+                                    "width": "stretch"
+                                }
+                            ]
+                        }
+                    ],
+                    "type": "Container"
+                },
+                {
+                    "items": [
+                        {
+                            "id": "toggle-me",
+                            "isVisible": false,
+                            "text": "_Here you gonna find more information about the whole topic_",
+                            "type": "TextBlock",
+                            "isSubtle": true,
+                            "wrap": true
+                        }
+                    ],
+                    "type": "Container"
+                }
+            ],
+            "type": "Container"
+        },
+        {
+            "items": [
+                {
+                    "text": "Icon used from: https://icons8.com/icon/vNXFqyQtOSbb/launch",
+                    "type": "TextBlock",
+                    "horizontalAlignment": "Center",
+                    "isSubtle": true,
+                    "size": "Small"
+                }
+            ],
+            "type": "Container"
+        }
+    ]
+}
