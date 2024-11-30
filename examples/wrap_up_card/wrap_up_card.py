@@ -3,16 +3,17 @@
 # pylint: disable=C0413
 
 import sys
+
 from requests import Response
 
 sys.path.append("../../")
 import adaptive_cards.card_types as types
 from adaptive_cards.actions import ActionToggleVisibility, TargetElement
-from adaptive_cards.validation import CardValidator, CardValidatorFactory, Result
 from adaptive_cards.card import AdaptiveCard
-from adaptive_cards.elements import TextBlock, Image
-from adaptive_cards.containers import Container, ContainerTypes, ColumnSet, Column
 from adaptive_cards.client import TeamsClient
+from adaptive_cards.containers import Column, ColumnSet, Container, ContainerTypes
+from adaptive_cards.elements import Image, TextBlock
+from adaptive_cards.validation import CardValidator, CardValidatorFactory, Result
 
 containers: list[ContainerTypes] = []
 
