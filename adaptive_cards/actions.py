@@ -53,7 +53,7 @@ class Action:
     tooltip: Optional[str] = field(default=None, metadata=utils.get_metadata("1.5"))
     is_enabled: Optional[bool] = field(default=None, metadata=utils.get_metadata("1.5"))
     mode: Optional[ct.ActionMode] = field(
-        default=None, metadata=utils.get_metadata("1.5")
+        default=ct.ActionMode.PRIMARY, metadata=utils.get_metadata("1.5")
     )
     requires: Optional[dict[str, str]] = field(
         default=None, metadata=utils.get_metadata("1.2")
