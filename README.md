@@ -598,10 +598,15 @@ But we are still scratching the surface. You can do even better!
 
 ### Validate schema
 
-New components and fields are getting introduced every now and then. This means, if you are using an early version for a card and add fields, which are not compliant with it, you will have an invalid schema. To prevent you from exporting fields not yet supported by the card and target framework, a schema validation can be performed. It's as simple as that:
+New components and fields are getting introduced every now and then. This means, if you are using an early version for a card and add fields, which are not compliant with it, you will have an invalid schema. To prevent you from exporting fields not yet supported by the card and target framework, a card validation can be performed for the expected [__target framework__](https://learn.microsoft.com/en-us/adaptive-cards/resources/partners#live). For MS Teams as the target framework, it would like like this:
 
-```Python
-from adaptive_cards.validator import SchemaValidator, Result
+```python
+from adaptive_cards.validator import (
+    CardValidatorFactory, 
+    CardValidator, 
+    Result, 
+    Finding
+)
 
 ...
 
@@ -611,10 +616,24 @@ card: AdaptiveCard = AdaptiveCard.new() \
                                  .add_items([text_block, image]) \
                                  .create()
 
-validator: SchemaValidator = SchemaValidator()
+# generate a validator object for your required target framework
+validator: CardValidator = CardValidatorFactory.create_validator_ms_teams()
 result: Result = validator.validate(card)
 
 print(f"Validation was successful: {result == Result.SUCCESS}")
+
+# As it might come in handy in some situations, there is a separate class method
+# which can be utilized to calculate the card size without running the full
+# validation procedure
+card_size: float = validator.card_size(card)
+print(card_size)
+
+# in case the validation failed, you can check the validation details by using the according method, 
+# to get a full list of all findings occurred during validation.
+details: list[Finding] = validator.details()
+
+# please note, that the validation details are stored within the validator and will be overwritten,
+# once a new validator.validation(card) execution is done with the same validator object. 
 
 ```
 
@@ -654,7 +673,9 @@ If you are interested in more comprehensive examples or the actual source code, 
 
 ## Feature Roadmap
 
-* [ ] Add size check to schema validation
+* [x] Add size check to schema validation
+* [x] Add proper schema validation
+* [ ] Add further target framework validators
 * [ ] Provide more examples
 * [ ] Allow reading of json-like schemas
 
