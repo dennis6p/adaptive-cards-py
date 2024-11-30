@@ -21,7 +21,9 @@ from adaptive_cards.validation import (
 class TestAdaptiveCard(unittest.TestCase):
     def test_card_validator_ms_teams_validate_success(self) -> None:
         """Run test for simple card"""
-        validator: CardValidator = CardValidatorFactory.create_validator_ms_teams()
+        validator: CardValidator = (
+            CardValidatorFactory.create_validator_microsoft_teams()
+        )
         card: AdaptiveCard = (
             AdaptiveCard.new().add_item(TextBlock(text="Test Card")).create()
         )
@@ -29,14 +31,18 @@ class TestAdaptiveCard(unittest.TestCase):
         self.assertEqual(len(validator.details()), 0)
 
     def test_validate_failure_empty_body(self) -> None:
-        validator: CardValidator = CardValidatorFactory.create_validator_ms_teams()
+        validator: CardValidator = (
+            CardValidatorFactory.create_validator_microsoft_teams()
+        )
         card: AdaptiveCard = AdaptiveCard.new().create()
         self.assertEqual(validator.validate(card), Result.FAILURE)
         self.assertEqual(len(validator.details()), 1)
         self.assertEqual(validator.details()[0].failure, ValidationFailure.EMPTY_CARD)
 
     def test_validate_failure_invalid_field_version(self) -> None:
-        validator: CardValidator = CardValidatorFactory.create_validator_ms_teams()
+        validator: CardValidator = (
+            CardValidatorFactory.create_validator_microsoft_teams()
+        )
         card: AdaptiveCard = (
             AdaptiveCard.new()
             .version("1.0")
@@ -50,7 +56,9 @@ class TestAdaptiveCard(unittest.TestCase):
         )
 
     def test_validate_failure_invalid_schema(self) -> None:
-        validator: CardValidator = CardValidatorFactory.create_validator_ms_teams()
+        validator: CardValidator = (
+            CardValidatorFactory.create_validator_microsoft_teams()
+        )
 
         @dataclass_json
         @dataclass
@@ -69,7 +77,9 @@ class TestAdaptiveCard(unittest.TestCase):
         )
 
     def test_validate_failure_size_limit_exceeded(self) -> None:
-        validator: CardValidator = CardValidatorFactory.create_validator_ms_teams()
+        validator: CardValidator = (
+            CardValidatorFactory.create_validator_microsoft_teams()
+        )
 
         card: AdaptiveCard = (
             AdaptiveCard.new()

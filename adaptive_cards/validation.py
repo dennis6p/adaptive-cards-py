@@ -2,14 +2,15 @@
 
 import dataclasses
 import json
-from dataclasses import dataclass, fields
-from enum import Flag
-from typing import Any, Literal
 from abc import ABC, abstractmethod
+from dataclasses import dataclass, fields
+from enum import Enum, Flag
 from pathlib import Path
-from enum import Enum
-from jsonschema.validators import Draft6Validator
+from typing import Any, Literal
+
 from jsonschema.exceptions import ValidationError
+from jsonschema.validators import Draft6Validator
+
 from adaptive_cards.card import AdaptiveCard
 
 MINIMUM_VERSION_KEY: str = "min_version"
@@ -30,7 +31,6 @@ class Result(Flag):
 
 
 class ValidationFailure(str, Enum):
-
     EMPTY_CARD = "card body is empty"
     """card doesn't contain any elements"""
 
@@ -49,10 +49,12 @@ class AbstractTargetFramework(ABC):
     Abstract interface representing the AbstractTargetFramework cards can be send to
     """
 
-    def __init__(self, name: str, max_card_size_kb: float, schema_version: str) -> None:
+    def __init__(
+        self, name: str, max_card_size_kb: float, schema_version: SchemaVersion
+    ) -> None:
         self.__name: str = name
         self.__max_card_size_kb: float = max_card_size_kb
-        self.__schema_version: str = schema_version
+        self.__schema_version: SchemaVersion = schema_version
 
     def name(self) -> str:
         """
@@ -72,7 +74,7 @@ class AbstractTargetFramework(ABC):
         """
         return self.__max_card_size_kb
 
-    def schema_version(self) -> str:
+    def schema_version(self) -> SchemaVersion:
         """
         Schema version the card is validated against
 
@@ -82,25 +84,91 @@ class AbstractTargetFramework(ABC):
         return self.__schema_version
 
 
-class MSTeamsFramework(AbstractTargetFramework):
-    """MSTeams target framework"""
+class BotWebChat(AbstractTargetFramework):
+    """Bot WebChat target framework"""
 
     def __init__(self):
         """"""
-        name: str = "MS Teams"
-        max_card_size_kb: float = 28
-        schema_version: str = "1.5"
+        name: str = "BotWebChat"
+        max_card_size_kb: float = 40
+        schema_version: SchemaVersion = "1.5"
         super().__init__(name, max_card_size_kb, schema_version)
 
 
-class BotFramework(AbstractTargetFramework):
-    """Bot target framework"""
+class Outlook(AbstractTargetFramework):
+    """Outlook target framework"""
 
     def __init__(self):
         """"""
-        name: str = "Bot"
+        name: str = "Outlook"
+        max_card_size_kb: float = 40
+        schema_version: SchemaVersion = "1.0"
+        super().__init__(name, max_card_size_kb, schema_version)
+
+
+class MicrosoftTeams(AbstractTargetFramework):
+    """MicrosoftTeams target framework"""
+
+    def __init__(self):
+        """"""
+        name: str = "Microsoft Teams"
         max_card_size_kb: float = 28
-        schema_version: str = "1.5"
+        schema_version: SchemaVersion = "1.5"
+        super().__init__(name, max_card_size_kb, schema_version)
+
+
+class CortanaSkills(AbstractTargetFramework):
+    """Cortana Skills target framework"""
+
+    def __init__(self):
+        """"""
+        name: str = "Cortana Skills"
+        max_card_size_kb: float = 40
+        schema_version: SchemaVersion = "1.0"
+        super().__init__(name, max_card_size_kb, schema_version)
+
+
+class WindowsTimeline(AbstractTargetFramework):
+    """Windows Timeline target framework"""
+
+    def __init__(self):
+        """"""
+        name: str = "Windows Timeline"
+        max_card_size_kb: float = 40
+        schema_version: SchemaVersion = "1.0"
+        super().__init__(name, max_card_size_kb, schema_version)
+
+
+class CiscoWebExTeams(AbstractTargetFramework):
+    """Cisco WebEx Teams target framework"""
+
+    def __init__(self):
+        """"""
+        name: str = "Cisco WebEx Teams"
+        max_card_size_kb: float = 40
+        schema_version: SchemaVersion = "1.2"
+        super().__init__(name, max_card_size_kb, schema_version)
+
+
+class VivaConnections(AbstractTargetFramework):
+    """Viva Connections target framework"""
+
+    def __init__(self):
+        """"""
+        name: str = "Viva Connections"
+        max_card_size_kb: float = 40
+        schema_version: SchemaVersion = "1.2"
+        super().__init__(name, max_card_size_kb, schema_version)
+
+
+class WindowsWidgets(AbstractTargetFramework):
+    """Windows Widgets target framework"""
+
+    def __init__(self):
+        """"""
+        name: str = "WindowsWidgets"
+        max_card_size_kb: float = 40
+        schema_version: SchemaVersion = "1.6"
         super().__init__(name, max_card_size_kb, schema_version)
 
 
@@ -112,7 +180,27 @@ class CardValidatorAbstractFactory(ABC):
 
     @classmethod
     @abstractmethod
-    def create_validator_ms_teams(cls) -> "AbstractCardValidator":
+    def create_validator_bot(cls) -> "AbstractCardValidator":
+        """
+        Create card validator for Bot WebChat
+
+        Returns:
+            AbstractCardValidator: Card validator for Bot WebChat
+        """
+
+    @classmethod
+    @abstractmethod
+    def create_validator_outlook(cls) -> "AbstractCardValidator":
+        """
+        Create card validator for outlook
+
+        Returns:
+            AbstractCardValidator: Card validator for outlook
+        """
+
+    @classmethod
+    @abstractmethod
+    def create_validator_microsoft_teams(cls) -> "AbstractCardValidator":
         """
         Create card validator for target framework MS Teams
 
@@ -122,12 +210,52 @@ class CardValidatorAbstractFactory(ABC):
 
     @classmethod
     @abstractmethod
-    def create_validator_bot(cls) -> "AbstractCardValidator":
+    def create_validator_cortana_skills(cls) -> "AbstractCardValidator":
         """
-        Create card validator for Bot framework
+        Create card validator for Cortana Skills
 
         Returns:
-            AbstractCardValidator: Card validator for Bot framework
+            AbstractCardValidator: Card validator for Cortana Skills
+        """
+
+    @classmethod
+    @abstractmethod
+    def create_validator_windows_timeline(cls) -> "AbstractCardValidator":
+        """
+        Create card validator for Windows Timeline
+
+        Returns:
+            AbstractCardValidator: Card validator for Windows Timeline
+        """
+
+    @classmethod
+    @abstractmethod
+    def create_validator_cisco_webex_teams(cls) -> "AbstractCardValidator":
+        """
+        Create card validator for Cisco WebEx Teams
+
+        Returns:
+            AbstractCardValidator: Card validator for Cisco WebEx Teams
+        """
+
+    @classmethod
+    @abstractmethod
+    def create_validator_viva_connections(cls) -> "AbstractCardValidator":
+        """
+        Create card validator for Viva Connections
+
+        Returns:
+            AbstractCardValidator: Card validator for Viva Connections
+        """
+
+    @classmethod
+    @abstractmethod
+    def create_validator_windows_widgets(cls) -> "AbstractCardValidator":
+        """
+        Create card validator for Windows Widgets
+
+        Returns:
+            AbstractCardValidator: Card validator for Windows Widgets
         """
 
 
@@ -138,12 +266,36 @@ class CardValidatorFactory(CardValidatorAbstractFactory):
         pass
 
     @classmethod
-    def create_validator_ms_teams(cls) -> "CardValidator":
-        return CardValidator(MSTeamsFramework(), "1.5")
+    def create_validator_bot(cls) -> "CardValidator":
+        return CardValidator(BotWebChat())
 
     @classmethod
-    def create_validator_bot(cls) -> "CardValidator":
-        return CardValidator(BotFramework(), "1.5")
+    def create_validator_outlook(cls) -> "CardValidator":
+        return CardValidator(Outlook())
+
+    @classmethod
+    def create_validator_microsoft_teams(cls) -> "CardValidator":
+        return CardValidator(MicrosoftTeams())
+
+    @classmethod
+    def create_validator_cortana_skills(cls) -> "CardValidator":
+        return CardValidator(CortanaSkills())
+
+    @classmethod
+    def create_validator_windows_timeline(cls) -> "CardValidator":
+        return CardValidator(WindowsTimeline())
+
+    @classmethod
+    def create_validator_cisco_webex_teams(cls) -> "CardValidator":
+        return CardValidator(CiscoWebExTeams())
+
+    @classmethod
+    def create_validator_viva_connections(cls) -> "CardValidator":
+        return CardValidator(VivaConnections())
+
+    @classmethod
+    def create_validator_windows_widgets(cls) -> "CardValidator":
+        return CardValidator(WindowsWidgets())
 
 
 @dataclass
@@ -212,13 +364,9 @@ class CardValidator(AbstractCardValidator):
     card size and the overall card structure against the expected schema.
     """
 
-    def __init__(
-        self,
-        target_framework: AbstractTargetFramework,
-        schema_version: SchemaVersion,
-    ) -> None:
+    def __init__(self, target_framework: AbstractTargetFramework) -> None:
         self.__target_framework: AbstractTargetFramework = target_framework
-        self.__schema_version: SchemaVersion = schema_version
+        self.__schema_version: SchemaVersion = target_framework.schema_version()
 
         self.__card: AdaptiveCard
         self.__item: Any

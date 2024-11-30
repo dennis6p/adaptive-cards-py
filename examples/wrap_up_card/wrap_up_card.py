@@ -164,7 +164,7 @@ card = AdaptiveCard.new().version("1.5").add_items(containers).create()
 
 
 # Validate card
-card_validator: CardValidator = CardValidatorFactory.create_validator_ms_teams()
+card_validator: CardValidator = CardValidatorFactory.create_validator_microsoft_teams()
 result: Result = card_validator.validate(card)
 
 print(f"Validation was successful: {result == Result.SUCCESS}")
