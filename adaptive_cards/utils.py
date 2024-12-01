@@ -3,9 +3,21 @@ Utility functions for library
 """
 
 from typing import Any
+
 from dataclasses_json import config
 
-is_none: Any = lambda f: f is None
+
+def is_none(item: Any) -> bool:
+    """
+    Check whether a given item is initialized or None
+
+    Args:
+        item (Any): Item to be checked
+
+    Returns:
+        bool: true if item is None
+    """
+    return item is None
 
 
 def get_metadata(min_version: str, field_name: str | None = None) -> dict[str, Any]:
