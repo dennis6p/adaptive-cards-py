@@ -617,7 +617,7 @@ card: AdaptiveCard = AdaptiveCard.new() \
                                  .create()
 
 # generate a validator object for your required target framework
-validator: CardValidator = CardValidatorFactory.create_validator_ms_teams()
+validator: CardValidator = CardValidatorFactory.create_validator_microsoft_teams()
 result: Result = validator.validate(card)
 
 print(f"Validation was successful: {result == Result.SUCCESS}")
