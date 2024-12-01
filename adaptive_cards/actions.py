@@ -1,10 +1,12 @@
 """Implementations for all adaptive card action types"""
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Union
-from dataclasses_json import dataclass_json, LetterCase
-from adaptive_cards import utils
+from typing import Any, Optional, Union
+
+from dataclasses_json import LetterCase, dataclass_json
+
 import adaptive_cards.card_types as ct
+from adaptive_cards import utils
 
 ActionTypes = Union[
     "ActionOpenUrl",
@@ -41,9 +43,7 @@ class Action:
 
     title: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
     icon_url: Optional[str] = field(default=None, metadata=utils.get_metadata("1.1"))
-    id: Optional[str] = field(
-        default=None, metadata=utils.get_metadata("1.0")
-    )  # pylint: disable=C0103
+    id: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))  # pylint: disable=C0103
     style: Optional[ct.ActionStyle] = field(
         default=None, metadata=utils.get_metadata("1.2")
     )

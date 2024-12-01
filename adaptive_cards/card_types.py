@@ -1,9 +1,11 @@
 """Implementations for all general card-related types and enums"""
 
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import Optional
-from enum import auto, Enum
-from dataclasses_json import dataclass_json, LetterCase
+
+from dataclasses_json import LetterCase, dataclass_json
+
 from adaptive_cards import utils
 
 
@@ -373,9 +375,7 @@ class TokenExchangeResource:
         provider_id: The provider ID associated with the resource.
     """
 
-    id: str = field(
-        default="", metadata=utils.get_metadata("1.4")
-    )  # pylint: disable=C0103
+    id: str = field(default="", metadata=utils.get_metadata("1.4"))  # pylint: disable=C0103
     uri: str = field(default="", metadata=utils.get_metadata("1.4"))
     provider_id: str = field(default="", metadata=utils.get_metadata("1.4"))
 

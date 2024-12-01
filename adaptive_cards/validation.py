@@ -31,6 +31,8 @@ class Result(Flag):
 
 
 class ValidationFailure(str, Enum):
+    """Validation failure types"""
+
     EMPTY_CARD = "card body is empty"
     """card doesn't contain any elements"""
 
@@ -488,7 +490,8 @@ class CardValidator(AbstractCardValidator):
                 Finding(
                     ValidationFailure.SIZE_LIMIT_EXCEEDED,
                     ValidationFailure.SIZE_LIMIT_EXCEEDED.value,
-                    f"{self.__target_framework.name()} | {self.__target_framework.max_card_size()} KB",
+                    f"{self.__target_framework.name()} | "
+                    f"{self.__target_framework.max_card_size()} KB",
                 )
             )
 
@@ -512,7 +515,7 @@ class CardValidator(AbstractCardValidator):
             .joinpath(f"schema-{self.__schema_version}.json"),
             "+r",
             encoding="utf-8",
-        ) as f:
+        ) as f:  # pylint: disable=C0103
             return json.load(f)
 
     def __validate_schema(self) -> None:
