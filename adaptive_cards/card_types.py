@@ -1,10 +1,11 @@
 """Implementations for all general card-related types and enums"""
 
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import Optional
-from enum import auto, Enum
-from dataclasses_json import dataclass_json, LetterCase
-from strenum import LowercaseStrEnum
+
+from dataclasses_json import LetterCase, dataclass_json
+
 from adaptive_cards import utils
 
 
@@ -22,7 +23,7 @@ class MSTeamsCardWidth(str, Enum):
     DEFAULT = None
 
 
-class ImageFillMode(LowercaseStrEnum):
+class ImageFillMode(str, Enum):
     """
     Enumerates the different fill modes for an image.
 
@@ -34,13 +35,13 @@ class ImageFillMode(LowercaseStrEnum):
         REPEAT: The image will be repeated both horizontally and vertically to fill the area.
     """
 
-    COVER = auto()
+    COVER = "cover"
     REPEAT_HORIZONTALLY = "repeatHorizontally"
     REPEAT_VERTICALLY = "repeatVertically"
-    REPEAT = auto()
+    REPEAT = "repeat"
 
 
-class HorizontalAlignment(LowercaseStrEnum):
+class HorizontalAlignment(str, Enum):
     """
     Enumerates the horizontal alignment options.
 
@@ -50,12 +51,12 @@ class HorizontalAlignment(LowercaseStrEnum):
         RIGHT: Aligns the content to the right.
     """
 
-    LEFT = auto()
-    CENTER = auto()
-    RIGHT = auto()
+    LEFT = "left"
+    CENTER = "center"
+    RIGHT = "right"
 
 
-class VerticalAlignment(LowercaseStrEnum):
+class VerticalAlignment(str, Enum):
     """
     Enumerates the vertical alignment options.
 
@@ -65,12 +66,12 @@ class VerticalAlignment(LowercaseStrEnum):
         BOTTOM: Aligns the content to the bottom.
     """
 
-    TOP = auto()
-    CENTER = auto()
-    BOTTOM = auto()
+    TOP = "top"
+    CENTER = "center"
+    BOTTOM = "bottom"
 
 
-class Colors(LowercaseStrEnum):
+class Colors(str, Enum):
     """
     Enumerates the color options.
 
@@ -84,16 +85,17 @@ class Colors(LowercaseStrEnum):
         ATTENTION: A color indicating an attention or critical state.
     """
 
-    DEFAULT = auto()
-    DARK = auto()
-    LIGHT = auto()
-    ACCENT = auto()
-    GOOD = auto()
-    WARNING = auto()
-    ATTENTION = auto()
+    DEFAULT = "default"
+    DARK = "dark"
+    LIGHT = "light"
+    ACCENT = "accent"
+    GOOD = "good"
+    WARNING = "warning"
+    ATTENTION = "attention"
 
 
-class FontType(LowercaseStrEnum):
+# class FontType(str, Enum):
+class FontType(str, Enum):
     """
     Enumerates the font type options.
 
@@ -102,11 +104,11 @@ class FontType(LowercaseStrEnum):
         MONOSPACE: A monospace font type.
     """
 
-    DEFAULT = auto()
-    MONOSPACE = auto()
+    DEFAULT = "default"
+    MONOSPACE = "monospace"
 
 
-class FontSize(LowercaseStrEnum):
+class FontSize(str, Enum):
     """
     Enumerates the font size options.
 
@@ -118,14 +120,14 @@ class FontSize(LowercaseStrEnum):
         EXTRA_LARGE: An extra large font size.
     """
 
-    DEFAULT = auto()
-    SMALL = auto()
-    MEDIUM = auto()
-    LARGE = auto()
+    DEFAULT = "default"
+    SMALL = "small"
+    MEDIUM = "medium"
+    LARGE = "large"
     EXTRA_LARGE = "extraLarge"
 
 
-class FontWeight(LowercaseStrEnum):
+class FontWeight(str, Enum):
     """
     Enumerates the font weight options.
 
@@ -135,12 +137,12 @@ class FontWeight(LowercaseStrEnum):
         BOLDER: A bolder font weight.
     """
 
-    DEFAULT = auto()
-    LIGHTER = auto()
-    BOLDER = auto()
+    DEFAULT = "default"
+    LIGHTER = "lighter"
+    BOLDER = "bolder"
 
 
-class TextBlockStyle(LowercaseStrEnum):
+class TextBlockStyle(str, Enum):
     """
     Enumerates the text block style options.
 
@@ -149,11 +151,11 @@ class TextBlockStyle(LowercaseStrEnum):
         HEADING: A heading style for the text block.
     """
 
-    DEFAULT = auto()
-    HEADING = auto()
+    DEFAULT = "default"
+    HEADING = "heading"
 
 
-class BlockElementHeight(LowercaseStrEnum):
+class BlockElementHeight(str, Enum):
     """
     Enumerates the block element height options.
 
@@ -162,11 +164,11 @@ class BlockElementHeight(LowercaseStrEnum):
         STRETCH: Stretches the height to fill available space.
     """
 
-    AUTO = auto()
-    STRETCH = auto()
+    AUTO = "auto"
+    STRETCH = "stretch"
 
 
-class ImageSize(LowercaseStrEnum):
+class ImageSize(str, Enum):
     """
     Enumerates the image size options.
 
@@ -178,14 +180,14 @@ class ImageSize(LowercaseStrEnum):
         LARGE: A large image size.
     """
 
-    AUTO = auto()
-    STRETCH = auto()
-    SMALL = auto()
-    MEDIUM = auto()
-    LARGE = auto()
+    AUTO = "auto"
+    STRETCH = "stretch"
+    SMALL = "small"
+    MEDIUM = "medium"
+    LARGE = "large"
 
 
-class ImageStyle(LowercaseStrEnum):
+class ImageStyle(str, Enum):
     """
     Enumerates the image style options.
 
@@ -194,11 +196,11 @@ class ImageStyle(LowercaseStrEnum):
         PERSON: An image style for representing a person.
     """
 
-    DEFAULT = auto()
-    PERSON = auto()
+    DEFAULT = "default"
+    PERSON = "person"
 
 
-class ContainerStyle(LowercaseStrEnum):
+class ContainerStyle(str, Enum):
     """
     Enumerates the container styles.
 
@@ -211,15 +213,15 @@ class ContainerStyle(LowercaseStrEnum):
         ACCENT: A container style for accentuated content.
     """
 
-    DEFAULT = auto()
-    EMPHASIS = auto()
-    GOOD = auto()
-    ATTENTION = auto()
-    WARNING = auto()
-    ACCENT = auto()
+    DEFAULT = "default"
+    EMPHASIS = "emphasis"
+    GOOD = "good"
+    ATTENTION = "attention"
+    WARNING = "warning"
+    ACCENT = "accent"
 
 
-class Spacing(LowercaseStrEnum):
+class Spacing(str, Enum):
     """
     Enumerates the spacing options.
 
@@ -233,16 +235,16 @@ class Spacing(LowercaseStrEnum):
         PADDING: Padding spacing.
     """
 
-    DEFAULT = auto()
-    NONE = auto()
-    SMALL = auto()
-    MEDIUM = auto()
-    LARGE = auto()
+    DEFAULT = "default"
+    NONE = "none"
+    SMALL = "small"
+    MEDIUM = "medium"
+    LARGE = "large"
     EXTRA_LARGE = "extraLarge"
-    PADDING = auto()
+    PADDING = "padding"
 
 
-class AssociatedInputs(LowercaseStrEnum):
+class AssociatedInputs(str, Enum):
     """
     Enumerates the associated inputs options.
 
@@ -251,11 +253,11 @@ class AssociatedInputs(LowercaseStrEnum):
         NONE: Do not associate inputs.
     """
 
-    AUTO = auto()
-    NONE = auto()
+    AUTO = "auto"
+    NONE = "none"
 
 
-class ActionStyle(LowercaseStrEnum):
+class ActionStyle(str, Enum):
     """
     Enumerates the action styles.
 
@@ -265,12 +267,12 @@ class ActionStyle(LowercaseStrEnum):
         DESTRUCTIVE: A destructive or negative action style.
     """
 
-    DEFAULT = auto()
-    POSITIVE = auto()
-    DESTRUCTIVE = auto()
+    DEFAULT = "default"
+    POSITIVE = "positive"
+    DESTRUCTIVE = "destructive"
 
 
-class ActionMode(LowercaseStrEnum):
+class ActionMode(str, Enum):
     """
     Enumerates the action modes.
 
@@ -279,11 +281,11 @@ class ActionMode(LowercaseStrEnum):
         SECONDARY: The secondary action mode.
     """
 
-    PRIMARY = auto()
-    SECONDARY = auto()
+    PRIMARY = "primary"
+    SECONDARY = "secondary"
 
 
-class TextInputStyle(LowercaseStrEnum):
+class TextInputStyle(str, Enum):
     """
     Enumerates the text input styles.
 
@@ -295,14 +297,14 @@ class TextInputStyle(LowercaseStrEnum):
         PASSWORD: The password input style.
     """
 
-    TEXT = auto()
-    TEL = auto()
-    URL = auto()
-    EMAIL = auto()
-    PASSWORD = auto()
+    TEXT = "text"
+    TEL = "tel"
+    URL = "url"
+    EMAIL = "email"
+    PASSWORD = "password"
 
 
-class ChoiceInputStyle(LowercaseStrEnum):
+class ChoiceInputStyle(str, Enum):
     """
     Enumerates the choice input styles.
 
@@ -312,9 +314,9 @@ class ChoiceInputStyle(LowercaseStrEnum):
         FILTERED: A filtered choice input style.
     """
 
-    COMPACT = auto()
-    EXPANDED = auto()
-    FILTERED = auto()
+    COMPACT = "compact"
+    EXPANDED = "expanded"
+    FILTERED = "filtered"
 
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
@@ -373,9 +375,7 @@ class TokenExchangeResource:
         provider_id: The provider ID associated with the resource.
     """
 
-    id: str = field(
-        default="", metadata=utils.get_metadata("1.4")
-    )  # pylint: disable=C0103
+    id: str = field(default="", metadata=utils.get_metadata("1.4"))  # pylint: disable=C0103
     uri: str = field(default="", metadata=utils.get_metadata("1.4"))
     provider_id: str = field(default="", metadata=utils.get_metadata("1.4"))
 

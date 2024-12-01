@@ -16,8 +16,11 @@ classifiers = [
 readme = "README.md"
 license = { file = "LICENSE" }
 keywords = ["bot", "ui", "adaptivecards", "cards", "adaptivecardsio", "python"]
-dependencies = ["dataclasses-json", "StrEnum", "requests"]
+dependencies = ["dataclasses-json", "StrEnum", "requests", "jsonschema"]
 requires-python = ">=3.10"
 
 [project.urls]
 Homepage = "https://github.com/dennis6p/adaptive-cards-py"
+
+[tool.setuptools.package-data]
+adaptive_cards = ["schemas/*.json"]

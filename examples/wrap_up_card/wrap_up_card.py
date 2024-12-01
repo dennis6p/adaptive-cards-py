@@ -3,16 +3,17 @@
 # pylint: disable=C0413
 
 import sys
+
 from requests import Response
 
 sys.path.append("../../")
 import adaptive_cards.card_types as types
 from adaptive_cards.actions import ActionToggleVisibility, TargetElement
-from adaptive_cards.validation import SchemaValidator, Result
 from adaptive_cards.card import AdaptiveCard
-from adaptive_cards.elements import TextBlock, Image
-from adaptive_cards.containers import Container, ContainerTypes, ColumnSet, Column
 from adaptive_cards.client import TeamsClient
+from adaptive_cards.containers import Column, ColumnSet, Container, ContainerTypes
+from adaptive_cards.elements import Image, TextBlock
+from adaptive_cards.validation import CardValidator, CardValidatorFactory, Result
 
 containers: list[ContainerTypes] = []
 
@@ -161,9 +162,10 @@ containers.append(
 # Build card
 card = AdaptiveCard.new().version("1.5").add_items(containers).create()
 
+
 # Validate card
-validator: SchemaValidator = SchemaValidator()
-result: Result = validator.validate(card)
+card_validator: CardValidator = CardValidatorFactory.create_validator_microsoft_teams()
+result: Result = card_validator.validate(card)
 
 print(f"Validation was successful: {result == Result.SUCCESS}")
 
