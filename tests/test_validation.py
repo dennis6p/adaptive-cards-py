@@ -1,14 +1,15 @@
-# test_math_operations.py
+"""Tests for validation module"""
+
 import unittest
 from dataclasses import dataclass, field
 
 from dataclasses_json import dataclass_json
 
 import adaptive_cards.card_types as types
-import adaptive_cards.utils as utils
 from adaptive_cards import (
     AdaptiveCard,
     TextBlock,
+    utils,
 )
 from adaptive_cards.validation import (
     CardValidator,
@@ -18,9 +19,11 @@ from adaptive_cards.validation import (
 )
 
 
-class TestAdaptiveCard(unittest.TestCase):
+class TestAdaptiveCardValidation(unittest.TestCase):
+    """Test class for Adaptive Card validaiton"""
+
     def test_card_validator_ms_teams_validate_success(self) -> None:
-        """Run test for simple card"""
+        """Test validation for ms teams"""
         validator: CardValidator = (
             CardValidatorFactory.create_validator_microsoft_teams()
         )
@@ -31,6 +34,7 @@ class TestAdaptiveCard(unittest.TestCase):
         self.assertEqual(len(validator.details()), 0)
 
     def test_validate_failure_empty_body(self) -> None:
+        """Test validation for ms teams"""
         validator: CardValidator = (
             CardValidatorFactory.create_validator_microsoft_teams()
         )
@@ -40,6 +44,7 @@ class TestAdaptiveCard(unittest.TestCase):
         self.assertEqual(validator.details()[0].failure, ValidationFailure.EMPTY_CARD)
 
     def test_validate_failure_invalid_field_version(self) -> None:
+        """Test validation for ms teams"""
         validator: CardValidator = (
             CardValidatorFactory.create_validator_microsoft_teams()
         )
@@ -56,6 +61,7 @@ class TestAdaptiveCard(unittest.TestCase):
         )
 
     def test_validate_failure_invalid_schema(self) -> None:
+        """Test validation for ms teams"""
         validator: CardValidator = (
             CardValidatorFactory.create_validator_microsoft_teams()
         )
@@ -63,6 +69,8 @@ class TestAdaptiveCard(unittest.TestCase):
         @dataclass_json
         @dataclass
         class InvalidClass:
+            """Invalid class"""
+
             some_field: int | None = field(
                 default=None, metadata=utils.get_metadata("1.0")
             )
@@ -77,6 +85,7 @@ class TestAdaptiveCard(unittest.TestCase):
         )
 
     def test_validate_failure_size_limit_exceeded(self) -> None:
+        """Test validation for ms teams"""
         validator: CardValidator = (
             CardValidatorFactory.create_validator_microsoft_teams()
         )
