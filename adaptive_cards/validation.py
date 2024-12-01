@@ -418,13 +418,34 @@ class CardValidator(AbstractCardValidator):
                 )
             )
 
-    def __validate_version_for_elements(self, items: Any):
+    @staticmethod
+    def __to_list(items: Any | list[Any]) -> list[Any]:
+        """
+        Put single item into list or keep data as is, if already of type list
+
+        Args:
+            items (Any | list[Any]): One or multiple items
+
+        Returns:
+            list[Any]: One or multiple items stored as a list
+        """
+        if not isinstance(items, list):
+            items = [items]
+
+        return items
+
+    def __validate_version_for_elements(self, items: Any | list[Any]):
+        """
+        Recursively check all elements against the overall card version
+
+        Args:
+            items (Any): Items to be checked
+        """
         # return if no items at all
         if not items:
             return
 
-        if not isinstance(items, list):
-            items = [items]
+        items = CardValidator.__to_list(items)
 
         custom_types: list[Any] = []
         iterables: list[Any] = []
@@ -439,14 +460,15 @@ class CardValidator(AbstractCardValidator):
 
                 if isinstance(value, list):
                     iterables.append(value)
+                    continue
 
-                elif dataclasses.is_dataclass(value):
+                if dataclasses.is_dataclass(value):
                     custom_types.append(value)
+                    continue
 
-                else:
-                    self.__validate_field_version(
-                        field.name, field.metadata.get(MINIMUM_VERSION_KEY)
-                    )
+                self.__validate_field_version(
+                    field.name, field.metadata.get(MINIMUM_VERSION_KEY)
+                )
 
         for iterable in iterables:
             self.__validate_version_for_elements(iterable)
@@ -483,7 +505,7 @@ class CardValidator(AbstractCardValidator):
                 )
             )
 
-    def __read_schema(self) -> dict[str, Any]:
+    def __read_schema_file(self) -> dict[str, Any]:
         with open(
             Path(__file__)
             .parent.joinpath("schemas")
@@ -494,7 +516,7 @@ class CardValidator(AbstractCardValidator):
             return json.load(f)
 
     def __validate_schema(self) -> None:
-        schema: dict[str, Any] = self.__read_schema()
+        schema: dict[str, Any] = self.__read_schema_file()
         try:
             Draft6Validator(schema).validate(json.loads(self.__card.to_json()))
 
