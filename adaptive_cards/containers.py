@@ -2,13 +2,12 @@
 
 from dataclasses import dataclass, field
 from typing import Optional, Union
+
 from dataclasses_json import LetterCase, dataclass_json
 
-from adaptive_cards import elements
-from adaptive_cards import inputs
-from adaptive_cards import utils
 import adaptive_cards.actions as action
 import adaptive_cards.card_types as ct
+from adaptive_cards import elements, inputs, utils
 
 ContainerTypes = Union[
     "ActionSet", "Container", "ColumnSet", "FactSet", "ImageSet", "Table"
@@ -33,9 +32,9 @@ class ContainerBase:
         height: The height style to be applied to the container.
     """
 
-    fallback: Optional[
-        elements.Element | action.ActionTypes | inputs.InputTypes
-    ] = field(default=None, metadata=utils.get_metadata("1.2"))
+    fallback: Optional[elements.Element | action.ActionTypes | inputs.InputTypes] = (
+        field(default=None, metadata=utils.get_metadata("1.2"))
+    )
     separator: Optional[bool] = field(default=None, metadata=utils.get_metadata("1.2"))
     spacing: Optional[ct.Spacing] = field(
         default=None, metadata=utils.get_metadata("1.2")
@@ -166,7 +165,7 @@ class Column(ContainerBase):
     """
 
     type: str = field(default="Column", metadata=utils.get_metadata("1.0"))
-    items: Optional[list[elements.Element]] = field(
+    items: Optional[list[elements.Element | ContainerTypes | inputs.Input]] = field(
         default=None, metadata=utils.get_metadata("1.0")
     )
     background_image: Optional[ct.BackgroundImage | str] = field(
