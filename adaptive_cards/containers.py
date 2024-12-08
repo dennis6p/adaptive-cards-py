@@ -165,7 +165,7 @@ class Column(ContainerBase):
     """
 
     type: str = field(default="Column", metadata=utils.get_metadata("1.0"))
-    items: Optional[list[elements.Element | ContainerTypes]] = field(
+    items: Optional[list[elements.Element | ContainerTypes | inputs.Input]] = field(
         default=None, metadata=utils.get_metadata("1.0")
     )
     background_image: Optional[ct.BackgroundImage | str] = field(
