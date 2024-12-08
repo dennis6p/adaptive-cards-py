@@ -6,11 +6,12 @@
 - [Creating incoming web hooks with workflows](https://support.microsoft.com/en-us/office/create-incoming-webhooks-with-workflows-for-microsoft-teams-8ae491c7-0394-4861-ba59-055e33f75498)
 """  # pylint: disable=line-too-long
 
-from typing import Any
 from http import HTTPStatus
-import requests
+from typing import Any
 
+import requests
 from requests import Response
+
 from adaptive_cards.card import AdaptiveCard
 
 
@@ -79,7 +80,7 @@ class TeamsClient:
 
         headers = {"Content-Type": "application/json"}
         attachments = [self._create_attachment(card) for card in cards]
-        payload = {"attachments": attachments}
+        payload = {"type": "message", "attachments": attachments}
         response = requests.post(
             self._webhook_url, headers=headers, json=payload, timeout=timeout
         )
