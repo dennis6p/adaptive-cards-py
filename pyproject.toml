@@ -16,7 +16,7 @@ classifiers = [
 readme = "README.md"
 license = { file = "LICENSE" }
 keywords = ["bot", "ui", "adaptivecards", "cards", "adaptivecardsio", "python"]
-dependencies = ["dataclasses-json", "StrEnum", "requests", "jsonschema"]
+dependencies = ["dataclasses-json", "requests", "jsonschema"]
 requires-python = ">=3.10"
 
 [project.urls]

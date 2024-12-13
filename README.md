@@ -17,19 +17,18 @@
 
 [![PyPI version](https://badge.fury.io/py/adaptive-cards-py.svg)](https://pypi.org/project/adaptive-cards-py/)
 
-A thin Python wrapper for creating [**Adaptive Cards**](https://adaptivecards.io/) easily on code level. The deep integration of Python's `typing` package prevents you from creating invalid schemes and guides you while creating visual apealing cards.
+A thin Python wrapper for creating [**Adaptive Cards**](https://adaptivecards.io/) easily on code level. The deep integration of Python's `typing` package prevents you from creating invalid schemas and guides you while setting up the code for generating visual appealing cards.
 
-If you are interested in the general concepts of adaptive cards and want to dig a bit deeper, have a look into the [**official documentation**](https://learn.microsoft.com/en-us/adaptive-cards/) or start a jump start and get used to the [**schema**](https://adaptivecards.io/explorer/).
+If you are interested in the general concepts of adaptive cards and want to dig a bit deeper, have a look into the [**official documentation**](https://learn.microsoft.com/en-us/adaptive-cards/) or get used to the [**schema**](https://adaptivecards.io/explorer/) first.
 
 💡 **Please note**
-<br>This library is work in progress and is lacking some features which might come in handy. Missing parts are planned to be added from time to time.
+<br>This library is work in progress. Missing parts are planned to be added from time to time.
 
 ## About
 
-This library is intended to provide a clear and simple interface for creating adaptive cards with only a few lines of code in a more robust way. The heavy usage of Python's typing library should
-prevent one from creating invalid schemes and structures. Instead, creating cards and sending cards should be intuitive and work like a breeze.
+This library is intended to provide a clear and simple interface for creating adaptive cards with only a few lines of code in a more robust way. The heavy usage of Python's `typing` library should prevent one from creating invalid schemes and structures. Instead, creating and sending cards should be intuitive and be supported by the typing system.
 
-For a comprehensive introduction into the main ideas and patterns of adaptive cards, have a look on the [**official documentation**](https://docs.microsoft.com/en-us/adaptive-cards). I also recommend using the [**schema explorer**](https://adaptivecards.io/explorer) page alongside the implementation, since the library's type system relies on these schemes.
+For a comprehensive introduction into the main ideas and patterns of adaptive cards, head over to the [**official documentation**](https://docs.microsoft.com/en-us/adaptive-cards). I also recommend using the [**schema explorer**](https://adaptivecards.io/explorer) page alongside the implementation, since the library's type system relies on these schemas.
 
 Further resources can be found here:
 
@@ -37,12 +36,13 @@ Further resources can be found here:
 * [__Official repository__](https://github.com/microsoft/AdaptiveCards)
 
 💡 **Please note**
-<br> There are size limitations related to the traget framework a card is supposed to be used with. As of now, the maximum card size can be __28KB__ when used with Webhooks in Teams ([__Format cards in Teams__](https://learn.microsoft.com/en-us/microsoftteams/platform/task-modules-and-cards/cards/cards-format?tabs=adaptive-md%2Cdesktop%2Cdesktop1%2Cdesktop2%2Cconnector-html)). For bot frameworks the upper limit is set to __40KB__ ([__Format your bot messages__](https://learn.microsoft.com/en-us/microsoftteams/platform/bots/how-to/format-your-bot-messages)). An corresponding check is planned to be added soon to the [`SchemaValidator`](#validate-schema).
+<br> There are size limitations related to the [__target framework__](https://learn.microsoft.com/en-us/adaptive-cards/resources/partners#live) (or "__Host__") a card is supposed to be used with. As of now, the maximum card size can be __28KB__ when used with Webhooks in Teams ([__Format cards in Teams__](https://learn.microsoft.com/en-us/microsoftteams/platform/task-modules-and-cards/cards/cards-format?tabs=adaptive-md%2Cdesktop%2Cdesktop1%2Cdesktop2%2Cconnector-html)). For bot frameworks the upper limit is set to __40KB__ ([__Format your bot messages__](https://learn.microsoft.com/en-us/microsoftteams/platform/bots/how-to/format-your-bot-messages)). An corresponding check is planned to be added soon to the [`SchemaValidator`](#validate-schema).
 
 ## Features
 
 💡 **Please note**
-<br>It's highly recommended to turn on the **type check** capabilities for Python in your editor. This will serve you with direct feedback about the structures you create. If you are trying to assign values of incompatible types, your editor will mark it as such and yell at you right in the moment you are about to do so.
+<br>It's highly recommended to turn on the **type check** capabilities for Python in your editor. This will serve you with direct feedback about the structures you create. If you are trying to assign values of incompatible types, your editor will mark it as such and yell at you right in the moment you are about to do so. Otherwise, invalid schemas can be detected by making use of the card validation, 
+once the card has been successfully created.
 
 + Type annotated components based on Python's **dataclasses**
 + Schema validation for version compatibility
@@ -54,7 +54,6 @@ Further resources can be found here:
 
 * Python 3.10+
 * `dataclasses-json`
-* `StrEnum`
 * `requests`
 
 ## Installation
@@ -65,11 +64,17 @@ pip install adaptive-cards-py
 
 ## Library structure
 
-**Adaptive cards** can consist of different kind of components. The four main categories beside the actual cards are **Elements**, **Containers**, **Actions** and **Inputs**. You can find all available components for each category within the corresponding file. The `AdaptiveCard` is defined in `cards.py`.
+**Adaptive cards** can consist of different kinds of components. The four main categories beside the actual cards are **Elements**, **Containers**, **Actions** and **Inputs**. You can find all available components for each category within the corresponding module. The `AdaptiveCard` is defined in the `cards` module.
 
-In addition to that, some fields of certain components are of custom types. These types are living inside the `card_types.py` file. For instance, if you are about to assign a color to a `TextBlock`, the field `color` will only accept a value of type `Colors`, which is implemented in the aforementioned Python file.
+In addition to that, some fields of certain components are of custom types. These types are living inside the `card_types` mpdule. For instance, if you are about to assign a color to a `TextBlock`, the field `color` will only accept a value of type `Colors`, which is implemented in the aforementioned Python file.
 
-To perform validation on a fully initialized card, one can make use of the `SchemaValidator` class. Similar to the whole library, this class provides a simple interface with only on method. The validation currently checks whether all used fields are compliant with the overall card version
+To perform validation on a fully initialized card, one can make use of the `CardValidator` class (`validation` module). Similar to the whole library, this class provides a simple interface. For creating a validator, a Factory (`CardValidatorFactory`) can be used, in order to account for the desired target framework. Validation will check the following points:
+
+
+* Are any components used, which are not yet available for the card version?
+* Is the card size within the limitation defined by the target framework?
+* Does the schema correspond to the official card schema?
+* Are there any components in the card body at all?
 
 ## Usage
 
@@ -167,8 +172,7 @@ This will result in a card like shown below.
 
 ### A more complex card
 
-You can have a look on the following example for getting an idea of what's actually possible
-with adaptive cards.
+You can have a look on the following example for getting an idea of what's actually possible with adaptive cards.
 
 ![wrap up card](https://github.com/dennis6p/adaptive-cards-py/blob/main/examples/wrap_up_card/wrap_up_card.jpg?raw=true)
 
@@ -594,11 +598,9 @@ print(f"Validation was successful: {result == Result.SUCCESS}")
 
 </details>
 
-But we are still scratching the surface. You can do even better!
-
 ### Validate schema
 
-New components and fields are getting introduced every now and then. This means, if you are using an early version for a card and add fields, which are not compliant with it, you will have an invalid schema. To prevent you from exporting fields not yet supported by the card and target framework, a card validation can be performed for the expected [__target framework__](https://learn.microsoft.com/en-us/adaptive-cards/resources/partners#live). For MS Teams as the target framework, it would like like this:
+New components and fields are getting introduced every now and then. This means, if you are using an early version for a card and add fields, which are not compliant with it, you will have an invalid schema. To prevent you from exporting fields not yet supported by the card and target framework, a card validation can be performed for the expected [__target framework__](https://learn.microsoft.com/en-us/adaptive-cards/resources/partners#live) (see [__Library structure__](#library-structure) for more info). For MS Teams as the target framework, it would like like this:
 
 ```python
 from adaptive_cards.validator import (
@@ -675,7 +677,7 @@ If you are interested in more comprehensive examples or the actual source code, 
 
 * [x] Add size check to schema validation
 * [x] Add proper schema validation
-* [ ] Add further target framework validators
+* [x] Add further target framework validators
 * [ ] Provide more examples
 * [ ] Allow reading of json-like schemas
 
