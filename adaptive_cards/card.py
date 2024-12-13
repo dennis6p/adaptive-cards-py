@@ -1,21 +1,21 @@
 """Implementation of the adaptive card type"""
 
 from dataclasses import dataclass, field
-from typing import Optional, Sequence, Any, Literal
-from dataclasses_json import dataclass_json, LetterCase
-from adaptive_cards.actions import SelectAction, ActionTypes
+from typing import Any, Literal, Optional, Sequence
+
+from dataclasses_json import LetterCase, dataclass_json
+
+import adaptive_cards.card_types as ct
+from adaptive_cards import utils
+from adaptive_cards.actions import ActionTypes, SelectAction
 from adaptive_cards.containers import ContainerTypes
 from adaptive_cards.elements import Element
 from adaptive_cards.inputs import InputTypes
-from adaptive_cards import utils
-import adaptive_cards.card_types as ct
-
 
 SCHEMA: str = "http://adaptivecards.io/schemas/adaptive-card.json"
 TYPE: str = "AdaptiveCard"
-VERSION: str = "1.0"
-
 CardVersion = Literal["1.0", "1.1", "1.2", "1.3", "1.4", "1.5", "1.6"]
+VERSION: CardVersion = "1.0"
 
 
 class AdaptiveCardBuilder:
