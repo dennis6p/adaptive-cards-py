@@ -513,7 +513,7 @@ class CardValidator(AbstractCardValidator):
             Path(__file__)
             .parent.joinpath("schemas")
             .joinpath(f"schema-{self.__schema_version}.json"),
-            "+r",
+            "r",
             encoding="utf-8",
         ) as f:  # pylint: disable=C0103
             return json.load(f)
