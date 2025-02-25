@@ -273,8 +273,8 @@ class TableRow:
     """
 
     type: str = field(default="TableRow", metadata=utils.get_metadata("1.5"))
-    cells: Optional["TableCell"] = field(
-        default=None, metadata=utils.get_metadata("1.5")
+    cells: list["TableCell"] = field(
+        default_factory=list, metadata=utils.get_metadata("1.5")
     )
     horizontal_cell_content_alignment: Optional[ct.HorizontalAlignment] = field(
         default=None, metadata=utils.get_metadata("1.5")
