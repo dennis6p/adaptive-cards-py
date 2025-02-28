@@ -61,6 +61,10 @@ once the card has been successfully created.
 ```bash
 pip install adaptive-cards-py
 ```
+or 
+```bash
+uv add adaptive-cards-py
+```
 
 ## Library structure
 
