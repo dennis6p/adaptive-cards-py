@@ -1,9 +1,9 @@
 """Implementation of the adaptive card type"""
 
-from dataclasses import dataclass, field
-from typing import Any, Literal, Optional, Sequence
-
-from dataclasses_json import LetterCase, dataclass_json
+from __future__ import annotations
+from typing import Any, List, Literal, Optional, Sequence
+from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
+from pydantic.alias_generators import to_camel
 
 import adaptive_cards.card_types as ct
 from adaptive_cards import utils
@@ -11,6 +11,7 @@ from adaptive_cards.actions import ActionTypes, SelectAction
 from adaptive_cards.containers import ContainerTypes
 from adaptive_cards.elements import Element
 from adaptive_cards.inputs import InputTypes
+from result import Ok, Err, Result
 
 SCHEMA: str = "http://adaptivecards.io/schemas/adaptive-card.json"
 TYPE: str = "AdaptiveCard"
@@ -24,8 +25,19 @@ class AdaptiveCardBuilder:
     def __init__(self) -> None:
         self.__reset()
 
+    @staticmethod
+    def __get_id(
+        element: Element | ContainerTypes | InputTypes | ActionTypes,
+    ) -> str | None:
+        if not hasattr(element, "id"):
+            return
+
+        return element.id  # type: ignore -> safe as attribute is checked before
+
     def __reset(self) -> None:
         self.__card = AdaptiveCard()
+        self.__items: dict[str, Element | ContainerTypes | InputTypes] = {}
+        self.__actions: dict[str, ActionTypes] = {}
 
     def type(self, _type: str) -> "AdaptiveCardBuilder":
         """
@@ -66,9 +78,7 @@ class AdaptiveCardBuilder:
         self.__card.refresh = refresh
         return self
 
-    def authentication(
-        self, authentication: ct.Authentication
-    ) -> "AdaptiveCardBuilder":
+    def authentication(self, authentication: ct.Authentication) -> "AdaptiveCardBuilder":
         """
         Set authentication mode
 
@@ -107,9 +117,7 @@ class AdaptiveCardBuilder:
         self.__card.fallback_text = fallback_text
         return self
 
-    def background_image(
-        self, background_image: ct.BackgroundImage
-    ) -> "AdaptiveCardBuilder":
+    def background_image(self, background_image: ct.BackgroundImage) -> "AdaptiveCardBuilder":
         """
         Set background image for card
 
@@ -187,9 +195,7 @@ class AdaptiveCardBuilder:
         self.__card.lang = lang
         return self
 
-    def vertical_content_alignment(
-        self, vertical_content_align: ct.VerticalAlignment
-    ) -> "AdaptiveCardBuilder":
+    def vertical_content_alignment(self, vertical_content_align: ct.VerticalAlignment) -> "AdaptiveCardBuilder":
         """
         Set vertical alignment for card
 
@@ -212,7 +218,7 @@ class AdaptiveCardBuilder:
         Returns:
             AdaptiveCardBuilder: Builder object
         """
-        self.__card.schema = schema
+        self.__card.schema_ = schema
         return self
 
     def width(self, width: ct.MSTeamsCardWidth) -> "AdaptiveCardBuilder":
@@ -235,9 +241,7 @@ class AdaptiveCardBuilder:
         self.__card.msteams = None
         return self
 
-    def add_item(
-        self, item: Element | ContainerTypes | InputTypes
-    ) -> "AdaptiveCardBuilder":
+    def add_item(self, item: Element | ContainerTypes | InputTypes) -> "AdaptiveCardBuilder":
         """
         Add single element, container or input to card
 
@@ -250,11 +254,14 @@ class AdaptiveCardBuilder:
         if self.__card.body is None:
             self.__card.body = []
         self.__card.body.append(item)
+
+        # add if id field is set
+        if id := self.__get_id(item):
+            self.__items[id] = item
+
         return self
 
-    def add_items(
-        self, items: Sequence[Element | ContainerTypes | InputTypes]
-    ) -> "AdaptiveCardBuilder":
+    def add_items(self, items: Sequence[Element | ContainerTypes | InputTypes]) -> "AdaptiveCardBuilder":
         """
         Add multiple elements, containers or inputs to card
 
@@ -284,6 +291,10 @@ class AdaptiveCardBuilder:
         if self.__card.actions is None:
             self.__card.actions = []
         self.__card.actions.append(action)
+
+        # add if id field is set
+        if id := self.__get_id(action):
+            self.__actions[id] = action
         return self
 
     def add_actions(self, actions: list[ActionTypes]) -> "AdaptiveCardBuilder":
@@ -312,13 +323,17 @@ class AdaptiveCardBuilder:
         Returns:
             AdaptiveCard: Fully defined apdative card object
         """
+        card: AdaptiveCard = self.__card
+        card._items = self.__items
+        card._actions = self.__actions
+
         return self.__card
 
 
 # pylint: disable=too-many-instance-attributes
-@dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass
-class AdaptiveCard:
+
+
+class AdaptiveCard(BaseModel):
     """
     Represents an Adaptive Card.
 
@@ -342,45 +357,37 @@ class AdaptiveCard:
         msteams: Set specific properties for MS Teams as the target framework
     """
 
-    type: str = field(default=TYPE, metadata=utils.get_metadata("1.0"))
-    version: str = field(default=VERSION, metadata=utils.get_metadata("1.0"))
-    schema: str = field(
-        default=SCHEMA, metadata=utils.get_metadata("1.0", field_name="$schema")
+    model_config = ConfigDict(alias_generator=to_camel)
+    _items: dict[str, Element | ContainerTypes | InputTypes] = PrivateAttr({})
+    _actions: dict[str, ActionTypes] = PrivateAttr({})
+
+    type: str = Field(default=TYPE, json_schema_extra=utils.get_metadata("1.0"))
+    version: str = Field(default=VERSION, json_schema_extra=utils.get_metadata("1.0"))
+    schema_: str = Field(
+        default=SCHEMA,
+        alias="$schema",
+        json_schema_extra=utils.get_metadata("1.0", field_name="$schema"),
     )
-    refresh: Optional[ct.Refresh] = field(
-        default=None, metadata=utils.get_metadata("1.4")
+    refresh: Optional[ct.Refresh] = Field(default=None, json_schema_extra=utils.get_metadata("1.4"))
+    authentication: Optional[ct.Authentication] = Field(default=None, json_schema_extra=utils.get_metadata("1.4"))
+    body: Optional[list[Element | ContainerTypes | InputTypes]] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    authentication: Optional[ct.Authentication] = field(
-        default=None, metadata=utils.get_metadata("1.4")
+    actions: Optional[list[ActionTypes]] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    select_action: Optional[SelectAction] = Field(default=None, json_schema_extra=utils.get_metadata("1.1"))
+    fallback_text: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    background_image: Optional[ct.BackgroundImage | str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    body: Optional[list[Element | ContainerTypes | InputTypes]] = field(
-        default=None, metadata=utils.get_metadata("1.0")
+    metadata: Optional[ct.Metadata] = Field(default=None, json_schema_extra=utils.get_metadata("1.6"))
+    min_height: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.2"))
+    rtl: Optional[bool] = Field(default=None, json_schema_extra=utils.get_metadata("1.5"))
+    speak: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    lang: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    vertical_content_align: Optional[ct.VerticalAlignment] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.1")
     )
-    actions: Optional[list[ActionTypes]] = field(
-        default=None, metadata=utils.get_metadata("1.0")
-    )
-    select_action: Optional[SelectAction] = field(
-        default=None, metadata=utils.get_metadata("1.1")
-    )
-    fallback_text: Optional[str] = field(
-        default=None, metadata=utils.get_metadata("1.0")
-    )
-    background_image: Optional[ct.BackgroundImage | str] = field(
-        default=None, metadata=utils.get_metadata("1.0")
-    )
-    metadata: Optional[ct.Metadata] = field(
-        default=None, metadata=utils.get_metadata("1.6")
-    )
-    min_height: Optional[str] = field(default=None, metadata=utils.get_metadata("1.2"))
-    rtl: Optional[bool] = field(default=None, metadata=utils.get_metadata("1.5"))
-    speak: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
-    lang: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
-    vertical_content_align: Optional[ct.VerticalAlignment] = field(
-        default=None, metadata=utils.get_metadata("1.1")
-    )
-    msteams: Optional[ct.MSTeams] = field(
-        default=None, metadata=utils.get_metadata("1.0")
-    )
+    msteams: Optional[ct.MSTeams] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
 
     @staticmethod
     def new() -> AdaptiveCardBuilder:
@@ -393,6 +400,42 @@ class AdaptiveCard:
         """
         return AdaptiveCardBuilder()
 
+    def update(self, id: str, **kwargs) -> Result[None, str]:
+        """Update the current card with another card.
+
+        Note:
+            The update procedure can only succeed if the following criteria is fulfilled:
+            - ID of an element has been set when the card was created initially
+            - The property about to be updated must be part of the actual data model of the parent element
+            - The property's type must match the defined type in the parent data model
+
+        Examples:
+            `card.update(id="element-id", text="new text")`
+
+        Args:
+            id (str): id of element to be updated
+
+        Returns:
+            Result[None, ValidationFailure]: _description_
+        """
+        for field, value in kwargs.items():
+            # if attribute is not present update method will fail immediately
+
+            if not self._items.get(id):
+                return Err("Element not found for given ID")
+
+            if not hasattr(self._items[id], field):
+                return Err("Field not found in element")
+
+            # if new value's type doesn't match the expected update will fail immediately
+            field_current = getattr(self._items[id], field)
+            if not isinstance(value, type(field_current)):
+                return Err("Value type does not match expected field type")
+
+            setattr(self._items[id], field, value)
+
+        return Ok(None)
+
     def to_json(self) -> str:
         """
         Converts the full adaptive card schema into a json string.
@@ -400,7 +443,7 @@ class AdaptiveCard:
         Returns:
             str: Adaptive card schema as JSON string.
         """
-        return self.to_json()
+        return self.model_dump_json(exclude_none=True, by_alias=True)
 
     def to_dict(self) -> dict[str, Any]:
         """
@@ -410,4 +453,7 @@ class AdaptiveCard:
             str: Adaptive card schema as dictionary.
         """
 
-        return self.to_dict()
+        return self.model_dump(exclude_none=True, by_alias=True)
+
+
+AdaptiveCard.model_rebuild()
