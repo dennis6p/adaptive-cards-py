@@ -182,10 +182,11 @@ You can have a look on the following example for getting an idea of what's actua
 ```python
 import adaptive_cards.card_types as types
 from adaptive_cards.actions import ActionToggleVisibility, TargetElement
-from adaptive_cards.validation import SchemaValidator, Result
+from adaptive_cards.validation import SchemaValidator
 from adaptive_cards.card import AdaptiveCard
 from adaptive_cards.elements import TextBlock, Image
 from adaptive_cards.containers import Container, ContainerTypes, ColumnSet, Column
+from result import Result, Ok, Err, is_ok
 
 containers: list[ContainerTypes] = []
 
@@ -334,9 +335,9 @@ containers.append(
 card = AdaptiveCard.new().version("1.5").add_items(containers).create()
 
 validator: SchemaValidator = SchemaValidator()
-result: Result = validator.validate(card)
+result: Result[None, str] = validator.validate(card)
 
-print(f"Validation was successful: {result == Result.SUCCESS}")
+print(f"Validation was successful: {is_ok(result)}")
 
 ```
 
@@ -605,10 +606,10 @@ New components and fields are getting introduced every now and then. This means,
 ```python
 from adaptive_cards.validator import (
     CardValidatorFactory, 
-    CardValidator, 
-    Result, 
+    CardValidator,
     Finding
 )
+from result import Result, Err, Ok, is_ok
 
 ...
 
@@ -620,9 +621,9 @@ card: AdaptiveCard = AdaptiveCard.new() \
 
 # generate a validator object for your required target framework
 validator: CardValidator = CardValidatorFactory.create_validator_microsoft_teams()
-result: Result = validator.validate(card)
+result: Result[None, str] = validator.validate(card)
 
-print(f"Validation was successful: {result == Result.SUCCESS}")
+print(f"Validation was successful: {is_ok(result)}")
 
 # As it might come in handy in some situations, there is a separate class method
 # which can be utilized to calculate the card size without running the full

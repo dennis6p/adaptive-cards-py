@@ -1,33 +1,21 @@
 """Validation class for evaluating a cards schema"""
 
-import dataclasses
 import json
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, fields
 from enum import Enum, Flag
 from pathlib import Path
 from typing import Any, Literal
+from pydantic import BaseModel, ValidationError
 
 from jsonschema.exceptions import ValidationError
 from jsonschema.validators import Draft6Validator
 
 from adaptive_cards.card import AdaptiveCard
+from result import Result, Err, Ok
 
 MINIMUM_VERSION_KEY: str = "min_version"
 
 SchemaVersion = Literal["1.0", "1.1", "1.2", "1.3", "1.4", "1.5", "1.6"]
-
-
-class Result(Flag):
-    """
-    Represents the overall validation result value as a combination of flags.
-    """
-
-    SUCCESS = 0
-    """validation successful"""
-
-    FAILURE = 1
-    """validation failed"""
 
 
 class ValidationFailure(str, Enum):
@@ -45,15 +33,19 @@ class ValidationFailure(str, Enum):
     SIZE_LIMIT_EXCEEDED = "card exceeds the allowed card size for framework"
     """size of card exceeds the defined limit for the target framework"""
 
+    ID_NOT_FOUND = "ID not found - requested element is not part of the card in scope"
+    """ID was not found for any element in card"""
+
+    INVALID_VALUE_TYPE = "Value type does not match the field type meant to be updated"
+    """Value type does not match what is expected for the field as per definition in the pydantic model"""
+
 
 class AbstractTargetFramework(ABC):
     """
     Abstract interface representing the AbstractTargetFramework cards can be send to
     """
 
-    def __init__(
-        self, name: str, max_card_size_kb: float, schema_version: SchemaVersion
-    ) -> None:
+    def __init__(self, name: str, max_card_size_kb: float, schema_version: SchemaVersion) -> None:
         self.__name: str = name
         self.__max_card_size_kb: float = max_card_size_kb
         self.__schema_version: SchemaVersion = schema_version
@@ -300,8 +292,7 @@ class CardValidatorFactory(CardValidatorAbstractFactory):
         return CardValidator(WindowsWidgets())
 
 
-@dataclass
-class Finding:
+class Finding(BaseModel):
     """
     Class for storing an individual finding during schema validation
     """
@@ -315,6 +306,18 @@ class Finding:
     message_additional: str = ""
     """Addition information"""
 
+    def __init__(
+        self,
+        failure: ValidationFailure,
+        message: str,
+        message_additional: str = "",
+    ) -> None:
+        super(Finding, self).__init__(
+            failure=failure,
+            message=message,
+            message_additional=message_additional,
+        )
+
 
 class AbstractCardValidator(ABC):
     """
@@ -325,7 +328,7 @@ class AbstractCardValidator(ABC):
         pass
 
     @abstractmethod
-    def validate(self, card: AdaptiveCard, debug: bool = True) -> Result:
+    def validate(self, card: AdaptiveCard, debug: bool = True) -> Result[None, Err]:
         """
         Run validation on card.
 
@@ -333,7 +336,7 @@ class AbstractCardValidator(ABC):
             card (AdaptiveCard): Card to be validated
 
         Returns:
-            Result: Validation result
+            Result[None, Err]: Result of validation
         """
 
     @classmethod
@@ -375,7 +378,7 @@ class CardValidator(AbstractCardValidator):
         self.__findings: list[Finding]
         self.__card_size: float
 
-    def validate(self, card: AdaptiveCard, debug: bool = True) -> Result:
+    def validate(self, card: AdaptiveCard, debug: bool = True) -> Result[None, str]:
         self.__card = card
         self.__reset()
         self.__validate_card()
@@ -383,7 +386,7 @@ class CardValidator(AbstractCardValidator):
         if debug:
             self.__debug()
 
-        return Result.SUCCESS if len(self.__findings) == 0 else Result.FAILURE
+        return Ok(None) if len(self.__findings) == 0 else Err("Validation failed")
 
     @classmethod
     def card_size(cls, card: AdaptiveCard) -> float:
@@ -454,8 +457,11 @@ class CardValidator(AbstractCardValidator):
 
         for item in items:
             self.__item = item
-            for field in fields(item):
-                value: Any = getattr(item, field.name)
+
+            for field in item.model_fields_set:
+                field_name: str = field.__str__()
+
+                value: Any = getattr(item, field_name)
 
                 if value is None:
                     continue
@@ -464,13 +470,12 @@ class CardValidator(AbstractCardValidator):
                     iterables.append(value)
                     continue
 
-                if dataclasses.is_dataclass(value):
+                if isinstance(value, BaseModel):
                     custom_types.append(value)
                     continue
 
-                self.__validate_field_version(
-                    field.name, field.metadata.get(MINIMUM_VERSION_KEY)
-                )
+                metadata = item.model_fields[field_name].json_schema_extra
+                self.__validate_field_version(field_name, metadata.get(MINIMUM_VERSION_KEY))
 
         for iterable in iterables:
             self.__validate_version_for_elements(iterable)
@@ -490,8 +495,7 @@ class CardValidator(AbstractCardValidator):
                 Finding(
                     ValidationFailure.SIZE_LIMIT_EXCEEDED,
                     ValidationFailure.SIZE_LIMIT_EXCEEDED.value,
-                    f"{self.__target_framework.name()} | "
-                    f"{self.__target_framework.max_card_size()} KB",
+                    f"{self.__target_framework.name()} | {self.__target_framework.max_card_size()} KB",
                 )
             )
 
@@ -510,9 +514,7 @@ class CardValidator(AbstractCardValidator):
 
     def __read_schema_file(self) -> dict[str, Any]:
         with open(
-            Path(__file__)
-            .parent.joinpath("schemas")
-            .joinpath(f"schema-{self.__schema_version}.json"),
+            Path(__file__).parent.joinpath("schemas").joinpath(f"schema-{self.__schema_version}.json"),
             "r",
             encoding="utf-8",
         ) as f:  # pylint: disable=C0103
@@ -521,7 +523,7 @@ class CardValidator(AbstractCardValidator):
     def __validate_schema(self) -> None:
         schema: dict[str, Any] = self.__read_schema_file()
         try:
-            Draft6Validator(schema).validate(json.loads(self.__card.to_json()))
+            Draft6Validator(schema).validate(instance=self.__card.to_dict())
 
         except ValidationError as ex:
             self.__findings.append(
