@@ -28,33 +28,15 @@ class Input(BaseModel):
 
     model_config = ConfigDict(alias_generator=to_camel)
 
-    error_message: Optional[str] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.3")
-    )
-    is_required: Optional[bool] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.3")
-    )
-    label: Optional[str] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.3")
-    )
-    fallback: Optional[InputTypes] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.2")
-    )
-    height: Optional[ct.BlockElementHeight] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.1")
-    )
-    separator: Optional[bool] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
-    spacing: Optional[ct.Spacing] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
-    is_visible: Optional[bool] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.2")
-    )
-    requires: Optional[dict[str, str]] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.2")
-    )
+    error_message: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.3"))
+    is_required: Optional[bool] = Field(default=None, json_schema_extra=utils.get_metadata("1.3"))
+    label: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.3"))
+    fallback: Optional[InputTypes] = Field(default=None, json_schema_extra=utils.get_metadata("1.2"))
+    height: Optional[ct.BlockElementHeight] = Field(default=None, json_schema_extra=utils.get_metadata("1.1"))
+    separator: Optional[bool] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    spacing: Optional[ct.Spacing] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    is_visible: Optional[bool] = Field(default=None, json_schema_extra=utils.get_metadata("1.2"))
+    requires: Optional[dict[str, str]] = Field(default=None, json_schema_extra=utils.get_metadata("1.2"))
 
 
 class InputText(Input):
@@ -80,27 +62,13 @@ class InputText(Input):
 
     id: str = Field(json_schema_extra=utils.get_metadata("1.0"))  # pylint: disable=C0103
     type: str = Field(default="Input.Text", json_schema_extra=utils.get_metadata("1.0"))
-    is_multiline: Optional[bool] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
-    max_length: Optional[int] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
-    placeholder: Optional[str] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
-    regex: Optional[str] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.3")
-    )
-    style: Optional[ct.TextInputStyle] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
-    inline_action: Optional[actions.SelectAction] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.2")
-    )
-    value: Optional[str] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
+    is_multiline: Optional[bool] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    max_length: Optional[int] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    placeholder: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    regex: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.3"))
+    style: Optional[ct.TextInputStyle] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    inline_action: Optional[actions.SelectAction] = Field(default=None, json_schema_extra=utils.get_metadata("1.2"))
+    value: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
 
 
 class InputNumber(Input):
@@ -121,21 +89,11 @@ class InputNumber(Input):
     model_config = ConfigDict(alias_generator=to_camel)
 
     id: str = Field(json_schema_extra=utils.get_metadata("1.0"))  # pylint: disable=C0103
-    type: str = Field(
-        default="Input.Number", json_schema_extra=utils.get_metadata("1.0")
-    )
-    max: Optional[int] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
-    max: Optional[int] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
-    placeholder: Optional[str] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
-    value: Optional[int] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
+    type: str = Field(default="Input.Number", json_schema_extra=utils.get_metadata("1.0"))
+    max: Optional[int] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    min: Optional[int] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    placeholder: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    value: Optional[int] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
 
 
 class InputDate(Input):
@@ -156,15 +114,9 @@ class InputDate(Input):
 
     id: str = Field(json_schema_extra=utils.get_metadata("1.0"))  # pylint: disable=C0103
     type: str = Field(default="Input.Date", json_schema_extra=utils.get_metadata("1.0"))
-    max: Optional[str] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
-    placeholder: Optional[str] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
-    value: Optional[str] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
+    max: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    placeholder: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    value: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
 
 
 class InputTime(Input):
@@ -177,6 +129,7 @@ class InputTime(Input):
         id: The ID of the input.
         type: The type of the input, which is "Input.Time".
         max: The maximum time allowed for the input. Optional.
+        min: The minimum time allowed for the input. Optional.
         placeholder: The placeholder text for the input. Optional.
         value: The initial value of the input. Optional.
     """
@@ -185,18 +138,10 @@ class InputTime(Input):
 
     id: str = Field(json_schema_extra=utils.get_metadata("1.0"))  # pylint: disable=C0103
     type: str = Field(default="Input.Time", json_schema_extra=utils.get_metadata("1.0"))
-    max: Optional[str] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
-    max: Optional[str] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
-    placeholder: Optional[str] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
-    value: Optional[str] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
+    max: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    min: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    placeholder: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    value: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
 
 
 class InputToggle(Input):
@@ -219,21 +164,11 @@ class InputToggle(Input):
 
     id: str = Field(json_schema_extra=utils.get_metadata("1.0"))  # pylint: disable=C0103
     title: str = Field(json_schema_extra=utils.get_metadata("1.0"))
-    type: str = Field(
-        default="Input.Toggle", json_schema_extra=utils.get_metadata("1.0")
-    )
-    value: Optional[str] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
-    value_off: Optional[str] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
-    value_on: Optional[str] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
-    wrap: Optional[bool] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.2")
-    )
+    type: str = Field(default="Input.Toggle", json_schema_extra=utils.get_metadata("1.0"))
+    value: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    value_off: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    value_on: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    wrap: Optional[bool] = Field(default=None, json_schema_extra=utils.get_metadata("1.2"))
 
 
 class InputChoiceSet(Input):
@@ -257,27 +192,13 @@ class InputChoiceSet(Input):
     model_config = ConfigDict(alias_generator=to_camel)
 
     id: str = Field(json_schema_extra=utils.get_metadata("1.0"))  # pylint: disable=C0103
-    type: str = Field(
-        default="Input.ChoiceSet", json_schema_extra=utils.get_metadata("1.0")
-    )
-    choices: Optional[list["InputChoice"]] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
-    is_multi_select: Optional[bool] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
-    style: Optional[ct.ChoiceInputStyle] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
-    value: Optional[str] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
-    placeholder: Optional[str] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
-    wrap: Optional[bool] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.2")
-    )
+    type: str = Field(default="Input.ChoiceSet", json_schema_extra=utils.get_metadata("1.0"))
+    choices: Optional[list["InputChoice"]] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    is_multi_select: Optional[bool] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    style: Optional[ct.ChoiceInputStyle] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    value: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    placeholder: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    wrap: Optional[bool] = Field(default=None, json_schema_extra=utils.get_metadata("1.2"))
 
 
 class InputChoice(BaseModel):
