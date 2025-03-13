@@ -42,7 +42,7 @@ class Input:
     is_required: Optional[bool] = field(
         default=None, metadata=utils.get_metadata("1.3")
     )
-    label: Optional[bool] = field(default=None, metadata=utils.get_metadata("1.3"))
+    label: Optional[str] = field(default=None, metadata=utils.get_metadata("1.3"))
     fallback: Optional[InputTypes] = field(
         default=None, metadata=utils.get_metadata("1.2")
     )
@@ -117,7 +117,7 @@ class InputNumber(Input):
     id: str = field(metadata=utils.get_metadata("1.0"))  # pylint: disable=C0103
     type: str = field(default="Input.Number", metadata=utils.get_metadata("1.0"))
     max: Optional[int] = field(default=None, metadata=utils.get_metadata("1.0"))
-    max: Optional[int] = field(default=None, metadata=utils.get_metadata("1.0"))
+    min: Optional[int] = field(default=None, metadata=utils.get_metadata("1.0"))
     placeholder: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
     value: Optional[int] = field(default=None, metadata=utils.get_metadata("1.0"))
 
@@ -134,6 +134,7 @@ class InputDate(Input):
         id: The ID of the input.
         type: The type of the input, which is "Input.Date".
         max: The maximum date allowed for the input. Optional.
+        min: The minimum date allowed for the input. Optional.
         placeholder: The placeholder text for the input. Optional.
         value: The initial value of the input. Optional.
     """
@@ -141,6 +142,7 @@ class InputDate(Input):
     id: str = field(metadata=utils.get_metadata("1.0"))  # pylint: disable=C0103
     type: str = field(default="Input.Date", metadata=utils.get_metadata("1.0"))
     max: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
+    min: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
     placeholder: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
     value: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
 
@@ -157,6 +159,7 @@ class InputTime(Input):
         id: The ID of the input.
         type: The type of the input, which is "Input.Time".
         max: The maximum time allowed for the input. Optional.
+        min: The minimum time allowed for the input. Optional.
         placeholder: The placeholder text for the input. Optional.
         value: The initial value of the input. Optional.
     """
@@ -164,7 +167,7 @@ class InputTime(Input):
     id: str = field(metadata=utils.get_metadata("1.0"))  # pylint: disable=C0103
     type: str = field(default="Input.Time", metadata=utils.get_metadata("1.0"))
     max: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
-    max: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
+    min: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
     placeholder: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
     value: Optional[str] = field(default=None, metadata=utils.get_metadata("1.0"))
 
