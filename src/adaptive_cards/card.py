@@ -1,7 +1,7 @@
 """Implementation of the adaptive card type"""
 
 from __future__ import annotations
-from typing import Any, List, Literal, Optional, Sequence
+from typing import Any, Literal, Optional, Sequence
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
 from pydantic.alias_generators import to_camel
 
@@ -78,7 +78,9 @@ class AdaptiveCardBuilder:
         self.__card.refresh = refresh
         return self
 
-    def authentication(self, authentication: ct.Authentication) -> "AdaptiveCardBuilder":
+    def authentication(
+        self, authentication: ct.Authentication
+    ) -> "AdaptiveCardBuilder":
         """
         Set authentication mode
 
@@ -117,7 +119,9 @@ class AdaptiveCardBuilder:
         self.__card.fallback_text = fallback_text
         return self
 
-    def background_image(self, background_image: ct.BackgroundImage) -> "AdaptiveCardBuilder":
+    def background_image(
+        self, background_image: ct.BackgroundImage
+    ) -> "AdaptiveCardBuilder":
         """
         Set background image for card
 
@@ -195,7 +199,9 @@ class AdaptiveCardBuilder:
         self.__card.lang = lang
         return self
 
-    def vertical_content_alignment(self, vertical_content_align: ct.VerticalAlignment) -> "AdaptiveCardBuilder":
+    def vertical_content_alignment(
+        self, vertical_content_align: ct.VerticalAlignment
+    ) -> "AdaptiveCardBuilder":
         """
         Set vertical alignment for card
 
@@ -241,7 +247,9 @@ class AdaptiveCardBuilder:
         self.__card.msteams = None
         return self
 
-    def add_item(self, item: Element | ContainerTypes | InputTypes) -> "AdaptiveCardBuilder":
+    def add_item(
+        self, item: Element | ContainerTypes | InputTypes
+    ) -> "AdaptiveCardBuilder":
         """
         Add single element, container or input to card
 
@@ -261,7 +269,9 @@ class AdaptiveCardBuilder:
 
         return self
 
-    def add_items(self, items: Sequence[Element | ContainerTypes | InputTypes]) -> "AdaptiveCardBuilder":
+    def add_items(
+        self, items: Sequence[Element | ContainerTypes | InputTypes]
+    ) -> "AdaptiveCardBuilder":
         """
         Add multiple elements, containers or inputs to card
 
@@ -368,26 +378,48 @@ class AdaptiveCard(BaseModel):
         alias="$schema",
         json_schema_extra=utils.get_metadata("1.0", field_name="$schema"),
     )
-    refresh: Optional[ct.Refresh] = Field(default=None, json_schema_extra=utils.get_metadata("1.4"))
-    authentication: Optional[ct.Authentication] = Field(default=None, json_schema_extra=utils.get_metadata("1.4"))
+    refresh: Optional[ct.Refresh] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.4")
+    )
+    authentication: Optional[ct.Authentication] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.4")
+    )
     body: Optional[list[Element | ContainerTypes | InputTypes]] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    actions: Optional[list[ActionTypes]] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
-    select_action: Optional[SelectAction] = Field(default=None, json_schema_extra=utils.get_metadata("1.1"))
-    fallback_text: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    actions: Optional[list[ActionTypes]] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    select_action: Optional[SelectAction] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.1")
+    )
+    fallback_text: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
     background_image: Optional[ct.BackgroundImage | str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    metadata: Optional[ct.Metadata] = Field(default=None, json_schema_extra=utils.get_metadata("1.6"))
-    min_height: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.2"))
-    rtl: Optional[bool] = Field(default=None, json_schema_extra=utils.get_metadata("1.5"))
-    speak: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
-    lang: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    metadata: Optional[ct.Metadata] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.6")
+    )
+    min_height: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    rtl: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.5")
+    )
+    speak: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    lang: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
     vertical_content_align: Optional[ct.VerticalAlignment] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.1")
     )
-    msteams: Optional[ct.MSTeams] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    msteams: Optional[ct.MSTeams] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
 
     @staticmethod
     def new() -> AdaptiveCardBuilder:

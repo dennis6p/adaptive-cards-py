@@ -24,13 +24,19 @@ icon_url: str = "https://img.icons8.com/3d-fluency/94/launched-rocket.png"
 header_column_set: ColumnSet = ColumnSet(
     columns=[
         Column(
-            items=[TextBlock(text="Your Daily Wrap-Up", size=types.FontSize.EXTRA_LARGE)],
+            items=[
+                TextBlock(text="Your Daily Wrap-Up", size=types.FontSize.EXTRA_LARGE)
+            ],
             width="stretch",
         ),
         Column(items=[Image(url=icon_url, width="40px")], rtl=True, width="auto"),
     ]
 )
-containers.append(Container(items=[header_column_set], style=types.ContainerStyle.EMPHASIS, bleed=True))
+containers.append(
+    Container(
+        items=[header_column_set], style=types.ContainerStyle.EMPHASIS, bleed=True
+    )
+)
 
 containers.append(
     Container(

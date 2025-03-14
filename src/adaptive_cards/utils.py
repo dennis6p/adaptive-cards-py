@@ -29,4 +29,4 @@ def get_metadata(min_version: str, field_name: str | None = None) -> dict[str, A
     Returns:
         dict[str, Any]: Metadata information
     """
-    return dict(exclude=is_none, field_name=field_name) | {"min_version": min_version}
+    return {"exclude": is_none, "field_name": field_name} | {"min_version": min_version}
