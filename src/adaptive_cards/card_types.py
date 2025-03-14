@@ -1,10 +1,11 @@
 """Implementations for all general card-related types and enums"""
 
-from dataclasses import dataclass, field
+from __future__ import annotations
 from enum import Enum
 from typing import Optional
+from pydantic import BaseModel, ConfigDict, Field
+from pydantic.alias_generators import to_camel
 
-from dataclasses_json import LetterCase, dataclass_json
 
 from adaptive_cards import utils
 
@@ -319,9 +320,7 @@ class ChoiceInputStyle(str, Enum):
     FILTERED = "filtered"
 
 
-@dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass(kw_only=True)
-class BackgroundImage:
+class BackgroundImage(BaseModel):
     """
     Represents the background image properties.
 
@@ -332,21 +331,21 @@ class BackgroundImage:
         vertical_alignment: The vertical alignment of the image.
     """
 
-    uri: str = field(metadata=utils.get_metadata("1.0"))
-    fill_mode: Optional[ImageFillMode] = field(
-        default=None, metadata=utils.get_metadata("1.2")
+    model_config = ConfigDict(alias_generator=to_camel)
+
+    uri: str = Field(json_schema_extra=utils.get_metadata("1.0"))
+    fill_mode: Optional[ImageFillMode] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
     )
-    horizontal_alignment: Optional[HorizontalAlignment] = field(
-        default=None, metadata=utils.get_metadata("1.2")
+    horizontal_alignment: Optional[HorizontalAlignment] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
     )
-    vertical_alignment: Optional[VerticalAlignment] = field(
-        default=None, metadata=utils.get_metadata("1.2")
+    vertical_alignment: Optional[VerticalAlignment] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
     )
 
 
-@dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass(kw_only=True)
-class Refresh:
+class Refresh(BaseModel):
     """
     Represents the refresh properties.
 
@@ -356,16 +355,20 @@ class Refresh:
         user_ids: The list of user IDs associated with the refresh.
     """
 
-    action: Optional[str] = field(default=None, metadata=utils.get_metadata("1.4"))
-    expires: Optional[str] = field(default=None, metadata=utils.get_metadata("1.6"))
-    user_ids: Optional[list[str]] = field(
-        default=None, metadata=utils.get_metadata("1.4")
+    model_config = ConfigDict(alias_generator=to_camel)
+
+    action: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.4")
+    )
+    expires: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.6")
+    )
+    user_ids: Optional[list[str]] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.4")
     )
 
 
-@dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass(kw_only=True)
-class TokenExchangeResource:
+class TokenExchangeResource(BaseModel):
     """
     Represents a token exchange resource.
 
@@ -375,14 +378,14 @@ class TokenExchangeResource:
         provider_id: The provider ID associated with the resource.
     """
 
-    id: str = field(default="", metadata=utils.get_metadata("1.4"))  # pylint: disable=C0103
-    uri: str = field(default="", metadata=utils.get_metadata("1.4"))
-    provider_id: str = field(default="", metadata=utils.get_metadata("1.4"))
+    model_config = ConfigDict(alias_generator=to_camel)
+
+    id: str = Field(default="", json_schema_extra=utils.get_metadata("1.4"))  # pylint: disable=C0103
+    uri: str = Field(default="", json_schema_extra=utils.get_metadata("1.4"))
+    provider_id: str = Field(default="", json_schema_extra=utils.get_metadata("1.4"))
 
 
-@dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass(kw_only=True)
-class AuthCardButtons:
+class AuthCardButtons(BaseModel):
     """
     Represents buttons used in an authentication card.
 
@@ -393,15 +396,19 @@ class AuthCardButtons:
         image: The image URL of the button.
     """
 
-    type: str = field(default="", metadata=utils.get_metadata("1.4"))
-    value: str = field(default="", metadata=utils.get_metadata("1.4"))
-    title: Optional[str] = field(default=None, metadata=utils.get_metadata("1.4"))
-    image: Optional[str] = field(default=None, metadata=utils.get_metadata("1.4"))
+    model_config = ConfigDict(alias_generator=to_camel)
+
+    type: str = Field(default="", json_schema_extra=utils.get_metadata("1.4"))
+    value: str = Field(default="", json_schema_extra=utils.get_metadata("1.4"))
+    title: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.4")
+    )
+    image: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.4")
+    )
 
 
-@dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass(kw_only=True)
-class Authentication:
+class Authentication(BaseModel):
     """
     Represents authentication properties.
 
@@ -412,21 +419,23 @@ class Authentication:
         buttons: The authentication buttons.
     """
 
-    text: Optional[str] = field(default=None, metadata=utils.get_metadata("1.4"))
-    connection_name: Optional[str] = field(
-        default=None, metadata=utils.get_metadata("1.4")
+    model_config = ConfigDict(alias_generator=to_camel)
+
+    text: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.4")
     )
-    token_exchange_resource: Optional[TokenExchangeResource] = field(
-        default=None, metadata=utils.get_metadata("1.4")
+    connection_name: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.4")
     )
-    buttons: Optional[AuthCardButtons] = field(
-        default=None, metadata=utils.get_metadata("1.4")
+    token_exchange_resource: Optional[TokenExchangeResource] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.4")
+    )
+    buttons: Optional[AuthCardButtons] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.4")
     )
 
 
-@dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass(kw_only=True)
-class Metadata:
+class Metadata(BaseModel):
     """
     Represents metadata properties.
 
@@ -434,12 +443,14 @@ class Metadata:
         web_url: The web URL.
     """
 
-    web_url: Optional[str] = field(default=None, metadata=utils.get_metadata("1.6"))
+    model_config = ConfigDict(alias_generator=to_camel)
+
+    web_url: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.6")
+    )
 
 
-@dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass(kw_only=True)
-class MSTeams:
+class MSTeams(BaseModel):
     """
     Represents specific properties for MS Teams as the target framework.
 
@@ -448,6 +459,8 @@ class MSTeams:
                when posted to MS Teams. Defaults to "None".
     """
 
-    width: Optional[MSTeamsCardWidth] = field(
-        default=MSTeamsCardWidth.DEFAULT, metadata=utils.get_metadata("1.0")
+    model_config = ConfigDict(alias_generator=to_camel)
+
+    width: Optional[MSTeamsCardWidth] = Field(
+        default=MSTeamsCardWidth.DEFAULT, json_schema_extra=utils.get_metadata("1.0")
     )

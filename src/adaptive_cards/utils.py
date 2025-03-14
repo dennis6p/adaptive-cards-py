@@ -4,8 +4,6 @@ Utility functions for library
 
 from typing import Any
 
-from dataclasses_json import config
-
 
 def is_none(item: Any) -> bool:
     """
@@ -31,4 +29,4 @@ def get_metadata(min_version: str, field_name: str | None = None) -> dict[str, A
     Returns:
         dict[str, Any]: Metadata information
     """
-    return config(exclude=is_none, field_name=field_name) | {"min_version": min_version}
+    return {"exclude": is_none, "field_name": field_name} | {"min_version": min_version}
