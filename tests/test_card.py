@@ -1,6 +1,4 @@
-from cProfile import label
-import pytest
-from adaptive_cards.card import AdaptiveCard, AdaptiveCardBuilder
+from adaptive_cards.card import AdaptiveCard
 from adaptive_cards.inputs import InputText
 from result import is_ok
 
@@ -22,7 +20,9 @@ class TestAdaptiveCard:
         card = AdaptiveCard.new().add_item(input_text).version("1.3").create()
 
         input_text_updated: InputText = InputText(id="id", label="updated")
-        card_updated = AdaptiveCard.new().add_item(input_text_updated).version("1.3").create()
+        card_updated = (
+            AdaptiveCard.new().add_item(input_text_updated).version("1.3").create()
+        )
 
         result = card.update("id", label="updated")
 
@@ -34,7 +34,9 @@ class TestAdaptiveCard:
         card = AdaptiveCard.new().add_item(input_text).version("1.3").create()
 
         input_text_updated: InputText = InputText(id="id", label="updated")
-        card_updated = AdaptiveCard.new().add_item(input_text_updated).version("1.3").create()
+        card_updated = (
+            AdaptiveCard.new().add_item(input_text_updated).version("1.3").create()
+        )
 
         result = card.update("wrong-id", label="updated")
 
@@ -46,7 +48,9 @@ class TestAdaptiveCard:
         card = AdaptiveCard.new().add_item(input_text).version("1.3").create()
 
         input_text_updated: InputText = InputText(id="id", label="updated")
-        card_updated = AdaptiveCard.new().add_item(input_text_updated).version("1.3").create()
+        card_updated = (
+            AdaptiveCard.new().add_item(input_text_updated).version("1.3").create()
+        )
 
         result = card.update("wrong-id", wrong_field="updated")
 
@@ -58,7 +62,9 @@ class TestAdaptiveCard:
         card = AdaptiveCard.new().add_item(input_text).version("1.3").create()
 
         input_text_updated: InputText = InputText(id="id", label="updated")
-        card_updated = AdaptiveCard.new().add_item(input_text_updated).version("1.3").create()
+        card_updated = (
+            AdaptiveCard.new().add_item(input_text_updated).version("1.3").create()
+        )
 
         result = card.update("wrong-id", wrong_field=1)
 

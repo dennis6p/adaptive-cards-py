@@ -2,12 +2,12 @@
 
 import json
 from abc import ABC, abstractmethod
-from enum import Enum, Flag
+from enum import Enum
 from pathlib import Path
 from typing import Any, Literal
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
-from jsonschema.exceptions import ValidationError
+from jsonschema.exceptions import ValidationError as SchemaValidationError
 from jsonschema.validators import Draft6Validator
 
 from adaptive_cards.card import AdaptiveCard
@@ -37,7 +37,8 @@ class ValidationFailure(str, Enum):
     """ID was not found for any element in card"""
 
     INVALID_VALUE_TYPE = "Value type does not match the field type meant to be updated"
-    """Value type does not match what is expected for the field as per definition in the pydantic model"""
+    """Value type does not match what is expected for the field as per definition in the
+    pydantic model"""
 
 
 class AbstractTargetFramework(ABC):
@@ -45,7 +46,9 @@ class AbstractTargetFramework(ABC):
     Abstract interface representing the AbstractTargetFramework cards can be send to
     """
 
-    def __init__(self, name: str, max_card_size_kb: float, schema_version: SchemaVersion) -> None:
+    def __init__(
+        self, name: str, max_card_size_kb: float, schema_version: SchemaVersion
+    ) -> None:
         self.__name: str = name
         self.__max_card_size_kb: float = max_card_size_kb
         self.__schema_version: SchemaVersion = schema_version
@@ -168,9 +171,6 @@ class WindowsWidgets(AbstractTargetFramework):
 
 class CardValidatorAbstractFactory(ABC):
     """Abstract card validator factory"""
-
-    def __init__(self):
-        pass
 
     @classmethod
     @abstractmethod
@@ -324,9 +324,6 @@ class AbstractCardValidator(ABC):
     Abstract interface for card validators
     """
 
-    def __init__(self):
-        pass
-
     @abstractmethod
     def validate(self, card: AdaptiveCard, debug: bool = True) -> Result[None, Err]:
         """
@@ -475,7 +472,9 @@ class CardValidator(AbstractCardValidator):
                     continue
 
                 metadata = item.model_fields[field_name].json_schema_extra
-                self.__validate_field_version(field_name, metadata.get(MINIMUM_VERSION_KEY))
+                self.__validate_field_version(
+                    field_name, metadata.get(MINIMUM_VERSION_KEY)
+                )
 
         for iterable in iterables:
             self.__validate_version_for_elements(iterable)
@@ -514,7 +513,9 @@ class CardValidator(AbstractCardValidator):
 
     def __read_schema_file(self) -> dict[str, Any]:
         with open(
-            Path(__file__).parent.joinpath("schemas").joinpath(f"schema-{self.__schema_version}.json"),
+            Path(__file__)
+            .parent.joinpath("schemas")
+            .joinpath(f"schema-{self.__schema_version}.json"),
             "r",
             encoding="utf-8",
         ) as f:  # pylint: disable=C0103
@@ -525,7 +526,7 @@ class CardValidator(AbstractCardValidator):
         try:
             Draft6Validator(schema).validate(instance=self.__card.to_dict())
 
-        except ValidationError as ex:
+        except SchemaValidationError as ex:
             self.__findings.append(
                 Finding(
                     ValidationFailure.INVALID_SCHEMA,
