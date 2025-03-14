@@ -27,7 +27,7 @@ class CardElement(BaseModel):
 
     model_config = ConfigDict(alias_generator=to_camel)
 
-    element: Optional[Any | "Element"] = Field(
+    element: Optional[Any | Element] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
     )
     separator: Optional[bool] = Field(
