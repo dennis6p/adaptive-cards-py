@@ -43,7 +43,7 @@ jobs:
         run: uv build
 
       - name: Publish package
-        run: uv publish --publish-url https://upload.pypi.org/legacy/ --username __token__ --password ${{ secrets.PYPI_TEST_API_TOKEN }}
+        run: uv publish --publish-url https://test.pypi.org/legacy/ --username __token__ --password ${{ secrets.PYPI_TEST_API_TOKEN }}
         if: github.event_name == 'pull_request'
 
       - name: Publish package
