@@ -34,7 +34,6 @@ jobs:
           cache-dependency-glob: uv.lock
 
       - name: Update version in pyproject.toml
-        id: update_version
         run: |
           echo "Updating version in pyproject.toml"
           LAST_RELEASE=$(pip index \
@@ -46,7 +45,6 @@ jobs:
         if: github.event_name == 'pull_request'
 
       - name: Update version in pyproject.toml
-        id: update_version
         run: |
           echo "Updating version in pyproject.toml"
           TAG_NAME=${GITHUB_REF##*/}  # Get the tag name from GITHUB_REF
