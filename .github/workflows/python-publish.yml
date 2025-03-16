@@ -37,6 +37,7 @@ jobs:
           TAG_NAME=${GITHUB_REF##*/}  # Get the tag name from GITHUB_REF
           # Optionally, you may want to sanitize TAG_NAME (remove 'v' prefix, etc.)
           sed -i "s/version = \".*\"/version = \"${TAG_NAME}\"/" pyproject.toml
+          cat pyproject.toml
 
       - name: Build package
         run: uv build
