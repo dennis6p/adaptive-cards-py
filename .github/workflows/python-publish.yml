@@ -48,10 +48,9 @@ jobs:
       - name: Publish package
         run:
           ls -l dist && uv publish --publish-url https://test.pypi.org/legacy/ \
-          --check-url https://test.pypi.org/simple/ \
           --username __token__ \
           --password ${{ secrets.PYPI_TEST_API_TOKEN }} \
-          dist/*
+          --trusted-publishing always
         if: github.event_name == 'pull_request'
 
       - name: Publish package
