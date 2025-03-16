@@ -46,7 +46,8 @@ jobs:
         run: uv build
 
       - name: Publish package
-        run: ls -l && uv publish --publish-url https://test.pypi.org/legacy/ \
+        run:
+          ls -l dist && uv publish --publish-url https://test.pypi.org/legacy/ \
           --check-url https://test.pypi.org/simple/ \
           --username __token__ \
           --password ${{ secrets.PYPI_TEST_API_TOKEN }}
