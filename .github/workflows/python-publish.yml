@@ -37,6 +37,18 @@ jobs:
         id: update_version
         run: |
           echo "Updating version in pyproject.toml"
+          LAST_RELEASE=$(pip index \
+            -i https://test.pypi.org/simple/ \
+            versions adaptive-cards-py 2>/dev/null \
+            | egrep -o '([0-9]+\.){2}[0-9]+' | head -n 1)
+          NEW_RELEASE=$(echo "$LAST_RELEASE" | awk -F. -v OFS=. '{$NF += 1; print}')
+          sed -i "s/version = \".*\"/version = \"${NEW_RELEASE}\"/" pyproject.toml
+        if: github.event_name == 'pull_request'
+
+      - name: Update version in pyproject.toml
+        id: update_version
+        run: |
+          echo "Updating version in pyproject.toml"
           TAG_NAME=${GITHUB_REF##*/}  # Get the tag name from GITHUB_REF
           # Optionally, you may want to sanitize TAG_NAME (remove 'v' prefix, etc.)
           sed -i "s/version = \".*\"/version = \"${TAG_NAME}\"/" pyproject.toml
