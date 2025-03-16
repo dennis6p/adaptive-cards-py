@@ -36,7 +36,3 @@ jobs:
       - name: Test with pytest
         run: |
           uv run tests/*.py
-
-      - name: Build package
-        run: |
-          uv build

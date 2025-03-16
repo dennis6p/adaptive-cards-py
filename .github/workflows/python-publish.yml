@@ -11,6 +11,7 @@ name: Upload Python Package
 on:
   release:
     types: [published]
+  pull_request:
 
 permissions:
   contents: read
@@ -41,10 +42,9 @@ jobs:
         run: uv build
 
       - name: Publish package
-        run: uv publish
+        run: uv publish --publish-url https://upload.pypi.org/legacy/ --username __token__ --password ${{ secrets.PYPI_TEST_API_TOKEN }}
+        if: github.event_name == 'pull_request'
 
       - name: Publish package
-        uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+        run: uv publish --username __token__ --password ${{ secrets.PYPI_API_TOKEN }}
+        if: github.event_name == 'release'
