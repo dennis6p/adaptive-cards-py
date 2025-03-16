@@ -52,6 +52,7 @@ jobs:
 
   deploy-test:
     if: github.event_name == 'pull_request'
+    needs: build
     runs-on: ubuntu-latest
     environment: test
     steps:
@@ -82,6 +83,7 @@ jobs:
 
   deploy-release:
     if: github.event_name == 'release'
+    needs: build
     runs-on: ubuntu-latest
     environment: release
     steps:
