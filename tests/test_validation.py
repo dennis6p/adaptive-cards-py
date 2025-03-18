@@ -11,20 +11,17 @@ from adaptive_cards.card_types import FontType
 from adaptive_cards import utils
 from result import is_ok, is_err
 from pydantic import BaseModel, Field
-import pytest
 
 
 class TestCardValidation:
-    @pytest.fixture
-    def default_card() -> AdaptiveCard:
-        return AdaptiveCard.new().add_item(TextBlock(text="Test Card")).create()
-
-    def test_card_validator_ms_teams_validate_success(self, default_card):
+    def test_card_validator_ms_teams_validate_success(self):
         """Test validation for ms teams"""
         validator: CardValidator = (
             CardValidatorFactory.create_validator_microsoft_teams()
         )
-        card: AdaptiveCard = default_card
+        card: AdaptiveCard = (
+            AdaptiveCard.new().add_item(TextBlock(text="Test Card")).create()
+        )
         assert is_ok(validator.validate(card))
         assert len(validator.details()) == 0
 
