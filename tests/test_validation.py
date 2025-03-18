@@ -1,104 +1,104 @@
 """Tests for validation module"""
 
-import unittest
+from adaptive_cards.card import AdaptiveCard
+from adaptive_cards.validation import (
+    CardValidator,
+    CardValidatorFactory,
+    ValidationFailure,
+)
+from adaptive_cards.elements import TextBlock
+from adaptive_cards.card_types import FontType
+from adaptive_cards import utils
+from result import is_ok, is_err
+from pydantic import BaseModel, Field
+import pytest
 
 
-class TestAdaptiveCardValidation(unittest.TestCase):
-    """Test class for Adaptive Card validaiton"""
+class TestCardValidation:
+    @pytest.fixture
+    def default_card() -> AdaptiveCard:
+        return AdaptiveCard.new().add_item(TextBlock(text="Test Card")).create()
 
-    # def test_card_validator_ms_teams_validate_success(self) -> None:
-    #     """Test validation for ms teams"""
-    #     validator: CardValidator = (
-    #         CardValidatorFactory.create_validator_microsoft_teams()
-    #     )
-    #     card: AdaptiveCard = (
-    #         AdaptiveCard.new().add_item(TextBlock(text="Test Card")).create()
-    #     )
-    #     self.assertEqual(validator.validate(card), Result.SUCCESS)
-    #     self.assertEqual(len(validator.details()), 0)
+    def test_card_validator_ms_teams_validate_success(self, default_card):
+        """Test validation for ms teams"""
+        validator: CardValidator = (
+            CardValidatorFactory.create_validator_microsoft_teams()
+        )
+        card: AdaptiveCard = default_card
+        assert is_ok(validator.validate(card))
+        assert len(validator.details()) == 0
 
-    # def test_validate_failure_empty_body(self) -> None:
-    #     """Test validation for ms teams"""
-    #     validator: CardValidator = (
-    #         CardValidatorFactory.create_validator_microsoft_teams()
-    #     )
-    #     card: AdaptiveCard = AdaptiveCard.new().create()
-    #     self.assertEqual(validator.validate(card), Result.FAILURE)
-    #     self.assertEqual(len(validator.details()), 1)
-    #     self.assertEqual(validator.details()[0].failure,
-    # ValidationFailure.EMPTY_CARD)
+    def test_validate_failure_empty_body(self):
+        """Test validation for ms teams"""
+        validator: CardValidator = (
+            CardValidatorFactory.create_validator_microsoft_teams()
+        )
+        card: AdaptiveCard = AdaptiveCard.new().create()
+        assert is_err(validator.validate(card))
+        assert len(validator.details()) == 1
+        assert validator.details()[0].failure == ValidationFailure.EMPTY_CARD
 
-    # def test_validate_failure_invalid_field_version(self) -> None:
-    #     """Test validation for ms teams"""
-    #     validator: CardValidator = (
-    #         CardValidatorFactory.create_validator_microsoft_teams()
-    #     )
-    #     card: AdaptiveCard = (
-    #         AdaptiveCard.new()
-    #         .version("1.0")
-    #         .add_item(TextBlock(text="Test Card",
-    # font_type=types.FontType.MONOSPACE))
-    #         .create()
-    #     )
-    #     self.assertEqual(validator.validate(card), Result.FAILURE)
-    #     self.assertEqual(len(validator.details()), 1)
-    #     self.assertEqual(
-    #         validator.details()[0].failure, ValidationFailure.INVALID_FIELD_VERSION
-    #     )
+    def test_validate_failure_invalid_field_version(self):
+        """Test validation for ms teams"""
+        validator: CardValidator = (
+            CardValidatorFactory.create_validator_microsoft_teams()
+        )
 
-    # def test_validate_failure_invalid_schema(self) -> None:
-    #     """Test validation for ms teams"""
-    #     validator: CardValidator = (
-    #         CardValidatorFactory.create_validator_microsoft_teams()
-    #     )
+        # should fail as font_type is available only card schemas > 1.2
+        text_block = TextBlock(text="Test Card", font_type=FontType.MONOSPACE)
+        card: AdaptiveCard = (
+            AdaptiveCard.new().version("1.0").add_item(text_block).create()
+        )
+        assert is_err(validator.validate(card, debug=True))
+        assert len(validator.details()) == 1
+        assert validator.details()[0].failure == ValidationFailure.INVALID_FIELD_VERSION
 
-    #     @dataclass_json
-    #     @dataclass
-    #     class InvalidClass:
-    #         """Invalid class"""
+    def test_validate_failure_invalid_schema(self):
+        """Test validation for ms teams"""
+        validator: CardValidator = (
+            CardValidatorFactory.create_validator_microsoft_teams()
+        )
 
-    #         some_field: int | None = field(
-    #             default=None, metadata=utils.get_metadata("1.0")
-    #         )
+        class InvalidClass(BaseModel):
+            """Invalid class"""
 
-    #     card: AdaptiveCard = (
-    #         AdaptiveCard.new().version("1.0").add_item(InvalidClass(1)).create()  #
-    #     )
-    #     self.assertEqual(validator.validate(card), Result.FAILURE)
-    #     self.assertEqual(len(validator.details()), 1)
-    #     self.assertEqual(
-    #         validator.details()[0].failure, ValidationFailure.INVALID_SCHEMA
-    #     )
+            some_field: int | None = Field(
+                default=None, json_schema_extra=utils.get_metadata("1.0")
+            )
 
-    # def test_validate_failure_size_limit_exceeded(self) -> None:
-    #     """Test validation for ms teams"""
-    #     validator: CardValidator = (
-    #         CardValidatorFactory.create_validator_microsoft_teams()
-    #     )
+        card: AdaptiveCard = (
+            AdaptiveCard.new()
+            .version("1.0")
+            .add_item(InvalidClass(some_field=1))  # type: ignore
+            .create()
+        )
+        assert is_err(validator.validate(card))
+        assert len(validator.details()) == 1
+        assert validator.details()[0].failure == ValidationFailure.INVALID_SCHEMA
 
-    #     card: AdaptiveCard = (
-    #         AdaptiveCard.new()
-    #         .version("1.0")
-    #         .add_items([TextBlock(text="TestCard") for i in range(660)])
-    #         .create()  #
-    #     )
+    def test_validate_failure_size_limit_exceeded(self):
+        """Test validation for ms teams"""
+        validator: CardValidator = (
+            CardValidatorFactory.create_validator_microsoft_teams()
+        )
 
-    #     self.assertTrue(validator.card_size(card) < 28)
-    #     self.assertEqual(validator.validate(card), Result.SUCCESS)
+        card: AdaptiveCard = (
+            AdaptiveCard.new()
+            .version("1.0")
+            .add_items([TextBlock(text="TestCard") for i in range(730)])
+            .create()
+        )
 
-    #     card = (
-    #         AdaptiveCard.new()
-    #         .version("1.0")
-    #         .add_items([TextBlock(text="TestCard") for i in range(670)])
-    #         .create()  #
-    #     )
-    #     self.assertTrue(validator.card_size(card) > 28)
-    #     self.assertEqual(validator.validate(card), Result.FAILURE)
-    #     self.assertEqual(len(validator.details()), 1)
-    #     self.assertEqual(
-    #         validator.details()[0].failure, ValidationFailure.SIZE_LIMIT_EXCEEDED
-    #     )
+        assert validator.card_size(card) < 28
+        assert is_ok(validator.validate(card))
 
-
-if __name__ == "__main__":
-    unittest.main()
+        card = (
+            AdaptiveCard.new()
+            .version("1.0")
+            .add_items([TextBlock(text="TestCard") for i in range(740)])
+            .create()
+        )
+        assert validator.card_size(card) > 28
+        assert is_err(validator.validate(card))
+        assert len(validator.details()) == 1
+        assert validator.details()[0].failure == ValidationFailure.SIZE_LIMIT_EXCEEDED
