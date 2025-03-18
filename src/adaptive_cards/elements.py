@@ -25,7 +25,7 @@ class CardElement(BaseModel):
         height: The height of the element.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     element: Optional[Any | Element] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
@@ -69,15 +69,18 @@ class TextBlock(CardElement):
         style: The style of the text block.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     text: str = Field(json_schema_extra=utils.get_metadata("1.0"))
-    type: str = Field(default="TextBlock", json_schema_extra=utils.get_metadata("1.0"))
+    type: str = Field(
+        default="TextBlock", json_schema_extra=utils.get_metadata("1.0"), frozen=True
+    )
     color: Optional[ct.Colors] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
     font_type: Optional[ct.FontType] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.2")
+        default=None,
+        json_schema_extra=utils.get_metadata("1.2"),
     )
     horizontal_alignment: Optional[ct.HorizontalAlignment] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
@@ -121,10 +124,12 @@ class Image(CardElement):
         width: The width of the image.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     url: str = Field(json_schema_extra=utils.get_metadata("1.0"))
-    type: str = Field(default="Image", json_schema_extra=utils.get_metadata("1.0"))
+    type: str = Field(
+        default="Image", json_schema_extra=utils.get_metadata("1.0"), frozen=True
+    )
     alt_text: Optional[str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
@@ -162,9 +167,11 @@ class Media(CardElement):
         caption_sources: The list of caption sources.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
-    type: str = Field(default="Media", json_schema_extra=utils.get_metadata("1.1"))
+    type: str = Field(
+        default="Media", json_schema_extra=utils.get_metadata("1.1"), frozen=True
+    )
     sources: list["MediaSource"] = Field(json_schema_extra=utils.get_metadata("1.1"))
     poster: Optional[str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.1")
@@ -186,7 +193,7 @@ class MediaSource(BaseModel):
         mime_type: The MIME type of the media source.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     url: str = Field(json_schema_extra=utils.get_metadata("1.1"))
     mime_type: Optional[str] = Field(
@@ -204,7 +211,7 @@ class CaptionSource(BaseModel):
         label: The label of the caption source.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     mime_type: str = Field(json_schema_extra=utils.get_metadata("1.6"))
     url: str = Field(json_schema_extra=utils.get_metadata("1.6"))
@@ -224,13 +231,15 @@ class RichTextBlock(CardElement):
         horizontal_alignment: The horizontal alignment of the rich text block.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     inlines: list[Union[str, "TextRun"]] = Field(
         json_schema_extra=utils.get_metadata("1.2")
     )
     type: str = Field(
-        default="RichTextBlock", json_schema_extra=utils.get_metadata("1.2")
+        default="RichTextBlock",
+        json_schema_extra=utils.get_metadata("1.2"),
+        frozen=True,
     )
     horizontal_alignment: Optional[ct.HorizontalAlignment] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
@@ -257,10 +266,12 @@ class TextRun(BaseModel):
         weight: The font weight of the text run.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     text: str = Field(json_schema_extra=utils.get_metadata("1.2"))
-    type: str = Field(default="TextRun", json_schema_extra=utils.get_metadata("1.2"))
+    type: str = Field(
+        default="TextRun", json_schema_extra=utils.get_metadata("1.2"), frozen=True
+    )
     color: Optional[ct.Colors] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
     )

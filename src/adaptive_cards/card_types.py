@@ -331,7 +331,7 @@ class BackgroundImage(BaseModel):
         vertical_alignment: The vertical alignment of the image.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     uri: str = Field(json_schema_extra=utils.get_metadata("1.0"))
     fill_mode: Optional[ImageFillMode] = Field(
@@ -355,7 +355,7 @@ class Refresh(BaseModel):
         user_ids: The list of user IDs associated with the refresh.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     action: Optional[str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.4")
@@ -378,7 +378,7 @@ class TokenExchangeResource(BaseModel):
         provider_id: The provider ID associated with the resource.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     id: str = Field(default="", json_schema_extra=utils.get_metadata("1.4"))  # pylint: disable=C0103
     uri: str = Field(default="", json_schema_extra=utils.get_metadata("1.4"))
@@ -396,7 +396,7 @@ class AuthCardButtons(BaseModel):
         image: The image URL of the button.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     type: str = Field(default="", json_schema_extra=utils.get_metadata("1.4"))
     value: str = Field(default="", json_schema_extra=utils.get_metadata("1.4"))
@@ -419,7 +419,7 @@ class Authentication(BaseModel):
         buttons: The authentication buttons.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     text: Optional[str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.4")
@@ -443,7 +443,7 @@ class Metadata(BaseModel):
         web_url: The web URL.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     web_url: Optional[str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.6")
@@ -459,7 +459,7 @@ class MSTeams(BaseModel):
                when posted to MS Teams. Defaults to "None".
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     width: Optional[MSTeamsCardWidth] = Field(
         default=MSTeamsCardWidth.DEFAULT, json_schema_extra=utils.get_metadata("1.0")
