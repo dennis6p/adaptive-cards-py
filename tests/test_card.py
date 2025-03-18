@@ -5,7 +5,7 @@ from result import is_ok
 
 class TestAdaptiveCard:
     def test_create_card(self):
-        card = AdaptiveCard.new().type("AdaptiveCard").version("1.2").create()
+        card = AdaptiveCard.new().version("1.2").create()
         assert card.type == "AdaptiveCard"
         assert card.version == "1.2"
 
