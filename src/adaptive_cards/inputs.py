@@ -26,7 +26,7 @@ class Input(BaseModel):
         requires: The requirements for the input.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     error_message: Optional[str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.3")
@@ -76,10 +76,12 @@ class InputText(Input):
         value: The initial value of the input.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     id: str = Field(json_schema_extra=utils.get_metadata("1.0"))  # pylint: disable=C0103
-    type: str = Field(default="Input.Text", json_schema_extra=utils.get_metadata("1.0"))
+    type: str = Field(
+        default="Input.Text", json_schema_extra=utils.get_metadata("1.0"), frozen=True
+    )
     is_multiline: Optional[bool] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
@@ -118,11 +120,11 @@ class InputNumber(Input):
         value: The initial value of the input. Optional.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     id: str = Field(json_schema_extra=utils.get_metadata("1.0"))  # pylint: disable=C0103
     type: str = Field(
-        default="Input.Number", json_schema_extra=utils.get_metadata("1.0")
+        default="Input.Number", json_schema_extra=utils.get_metadata("1.0"), frozen=True
     )
     max: Optional[int] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
@@ -152,10 +154,12 @@ class InputDate(Input):
         value: The initial value of the input. Optional.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     id: str = Field(json_schema_extra=utils.get_metadata("1.0"))  # pylint: disable=C0103
-    type: str = Field(default="Input.Date", json_schema_extra=utils.get_metadata("1.0"))
+    type: str = Field(
+        default="Input.Date", json_schema_extra=utils.get_metadata("1.0"), frozen=True
+    )
     max: Optional[str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
@@ -182,10 +186,12 @@ class InputTime(Input):
         value: The initial value of the input. Optional.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     id: str = Field(json_schema_extra=utils.get_metadata("1.0"))  # pylint: disable=C0103
-    type: str = Field(default="Input.Time", json_schema_extra=utils.get_metadata("1.0"))
+    type: str = Field(
+        default="Input.Time", json_schema_extra=utils.get_metadata("1.0"), frozen=True
+    )
     max: Optional[str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
@@ -216,12 +222,12 @@ class InputToggle(Input):
         wrap: Indicates whether the input should wrap to the next line if needed. Optional.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     id: str = Field(json_schema_extra=utils.get_metadata("1.0"))  # pylint: disable=C0103
     title: str = Field(json_schema_extra=utils.get_metadata("1.0"))
     type: str = Field(
-        default="Input.Toggle", json_schema_extra=utils.get_metadata("1.0")
+        default="Input.Toggle", json_schema_extra=utils.get_metadata("1.0"), frozen=True
     )
     value: Optional[str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
@@ -255,11 +261,13 @@ class InputChoiceSet(Input):
         wrap: Indicates whether the input should wrap to the next line if needed. Optional.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     id: str = Field(json_schema_extra=utils.get_metadata("1.0"))  # pylint: disable=C0103
     type: str = Field(
-        default="Input.ChoiceSet", json_schema_extra=utils.get_metadata("1.0")
+        default="Input.ChoiceSet",
+        json_schema_extra=utils.get_metadata("1.0"),
+        frozen=True,
     )
     choices: Optional[list["InputChoice"]] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
@@ -290,7 +298,7 @@ class InputChoice(BaseModel):
         value: The value associated with the choice.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     title: str = Field(json_schema_extra=utils.get_metadata("1.0"))
     value: str = Field(json_schema_extra=utils.get_metadata("1.0"))

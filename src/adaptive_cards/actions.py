@@ -29,7 +29,7 @@ class Action(BaseModel):
         requirements for the action.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     title: Optional[str] = Field(
         default=None,
@@ -70,11 +70,13 @@ class ActionOpenUrl(Action):
         type: The type of the action. Default is "Action.OpenUrl".
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     url: str = Field(json_schema_extra=utils.get_metadata("1.0"))
     type: str = Field(
-        default="Action.OpenUrl", json_schema_extra=utils.get_metadata("1.0")
+        default="Action.OpenUrl",
+        json_schema_extra=utils.get_metadata("1.0"),
+        frozen=True,
     )
 
 
@@ -90,10 +92,12 @@ class ActionSubmit(Action):
         associated_inputs: Optional associated inputs for the action.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     type: str = Field(
-        default="Action.Submit", json_schema_extra=utils.get_metadata("1.0")
+        default="Action.Submit",
+        json_schema_extra=utils.get_metadata("1.0"),
+        frozen=True,
     )
     data: Optional[str | Any] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
@@ -114,10 +118,12 @@ class ActionShowCard(Action):
         card: Optional card to show.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     type: str = Field(
-        default="Action.ShowCard", json_schema_extra=utils.get_metadata("1.0")
+        default="Action.ShowCard",
+        json_schema_extra=utils.get_metadata("1.0"),
+        frozen=True,
     )
     card: Optional[Any] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
@@ -133,7 +139,7 @@ class TargetElement(BaseModel):
         is_visible: Optional flag indicating the visibility of the target element.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     element_id: str = Field(json_schema_extra=utils.get_metadata("1.0"))
     is_visible: Optional[bool] = Field(
@@ -152,13 +158,15 @@ class ActionToggleVisibility(Action):
         type: The type of the action, set to "Action.ToggleVisibility".
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     target_elements: list[TargetElement] = Field(
         json_schema_extra=utils.get_metadata("1.2")
     )
     type: str = Field(
-        default="Action.ToggleVisibility", json_schema_extra=utils.get_metadata("1.2")
+        default="Action.ToggleVisibility",
+        json_schema_extra=utils.get_metadata("1.2"),
+        frozen=True,
     )
 
 
@@ -177,10 +185,12 @@ class ActionExecute(Action):
         inputs for the action.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     type: str = Field(
-        default="Action.ShowCard", json_schema_extra=utils.get_metadata("1.4")
+        default="Action.ShowCard",
+        json_schema_extra=utils.get_metadata("1.4"),
+        frozen=True,
     )
     verb: Optional[str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.4")

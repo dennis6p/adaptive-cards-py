@@ -39,19 +39,6 @@ class AdaptiveCardBuilder:
         self.__items: dict[str, Element | ContainerTypes | InputTypes] = {}
         self.__actions: dict[str, ActionTypes] = {}
 
-    def type(self, _type: str) -> "AdaptiveCardBuilder":
-        """
-        Set type of card
-
-        Args:
-            type (str): Type of card
-
-        Returns:
-            AdaptiveCardBuilder: Builder object
-        """
-        self.__card.type = _type
-        return self
-
     def version(self, version: CardVersion) -> "AdaptiveCardBuilder":
         """
         Set card version
@@ -139,7 +126,7 @@ class AdaptiveCardBuilder:
         Set additional metadata for card
 
         Args:
-            metadata (ct.Metadata): Object with addtional metadata
+            metadata (ct.Metadata): Object with additional metadata
 
         Returns:
             AdaptiveCardBuilder: Builder object
@@ -331,7 +318,7 @@ class AdaptiveCardBuilder:
         Please note: This method must be called to get a actual card object from the card builder.
 
         Returns:
-            AdaptiveCard: Fully defined apdative card object
+            AdaptiveCard: Fully defined adaptive card object
         """
         card: AdaptiveCard = self.__card
         card._items = self.__items
@@ -367,11 +354,13 @@ class AdaptiveCard(BaseModel):
         msteams: Set specific properties for MS Teams as the target framework
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
     _items: dict[str, Element | ContainerTypes | InputTypes] = PrivateAttr({})
     _actions: dict[str, ActionTypes] = PrivateAttr({})
 
-    type: str = Field(default=TYPE, json_schema_extra=utils.get_metadata("1.0"))
+    type: str = Field(
+        default=TYPE, json_schema_extra=utils.get_metadata("1.0"), frozen=True
+    )
     version: str = Field(default=VERSION, json_schema_extra=utils.get_metadata("1.0"))
     schema_: str = Field(
         default=SCHEMA,
@@ -475,7 +464,7 @@ class AdaptiveCard(BaseModel):
         Returns:
             str: Adaptive card schema as JSON string.
         """
-        return self.model_dump_json(exclude_none=True, by_alias=True)
+        return self.model_dump_json(exclude_none=True, by_alias=True, warnings=False)
 
     def to_dict(self) -> dict[str, Any]:
         """
@@ -485,7 +474,7 @@ class AdaptiveCard(BaseModel):
             str: Adaptive card schema as dictionary.
         """
 
-        return self.model_dump(exclude_none=True, by_alias=True)
+        return self.model_dump(exclude_none=True, by_alias=True, warnings=False)
 
 
 AdaptiveCard.model_rebuild()

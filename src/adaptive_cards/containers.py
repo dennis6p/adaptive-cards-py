@@ -28,7 +28,7 @@ class ContainerBase(BaseModel):
         height: The height style to be applied to the container.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     fallback: Optional[elements.Element | action.ActionTypes | inputs.InputTypes] = (
         Field(default=None, json_schema_extra=utils.get_metadata("1.2"))
@@ -62,12 +62,14 @@ class ActionSet(ContainerBase):
         type: The type of the action set. Defaults to "ActionSet".
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     actions: list[action.ActionTypes] = Field(
         json_schema_extra=utils.get_metadata("1.2")
     )
-    type: str = Field(default="ActionSet", json_schema_extra=utils.get_metadata("1.2"))
+    type: str = Field(
+        default="ActionSet", json_schema_extra=utils.get_metadata("1.2"), frozen=True
+    )
 
 
 class Container(ContainerBase):
@@ -88,12 +90,14 @@ class Container(ContainerBase):
         rtl: Determines whether the container's content is displayed right-to-left.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     items: list[elements.Element | ContainerTypes | inputs.InputTypes] = Field(
         json_schema_extra=utils.get_metadata("1.0")
     )
-    type: str = Field(default="Container", json_schema_extra=utils.get_metadata("1.0"))
+    type: str = Field(
+        default="Container", json_schema_extra=utils.get_metadata("1.0"), frozen=True
+    )
     select_action: Optional[action.SelectAction] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.1")
     )
@@ -132,9 +136,11 @@ class ColumnSet(ContainerBase):
         horizontal_alignment: The horizontal alignment of the column set.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
-    type: str = Field(default="ColumnSet", json_schema_extra=utils.get_metadata("1.0"))
+    type: str = Field(
+        default="ColumnSet", json_schema_extra=utils.get_metadata("1.0"), frozen=True
+    )
     columns: Optional[list["Column"]] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
@@ -176,9 +182,11 @@ class Column(ContainerBase):
         width: The width of the column.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
-    type: str = Field(default="Column", json_schema_extra=utils.get_metadata("1.0"))
+    type: str = Field(
+        default="Column", json_schema_extra=utils.get_metadata("1.0"), frozen=True
+    )
     items: Optional[list[elements.Element | ContainerTypes | inputs.Input]] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
@@ -224,10 +232,12 @@ class FactSet(ContainerBase):
         type: The type of the fact set. Defaults to "FactSet".
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     facts: list["Fact"] = Field(json_schema_extra=utils.get_metadata("1.0"))
-    type: str = Field(default="FactSet", json_schema_extra=utils.get_metadata("1.0"))
+    type: str = Field(
+        default="FactSet", json_schema_extra=utils.get_metadata("1.0"), frozen=True
+    )
 
 
 class Fact(BaseModel):
@@ -238,7 +248,7 @@ class Fact(BaseModel):
         value: The value of the fact.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     title: str = Field(json_schema_extra=utils.get_metadata("1.0"))
     value: str = Field(json_schema_extra=utils.get_metadata("1.0"))
@@ -255,10 +265,12 @@ class ImageSet(ContainerBase):
         image_size: The size of the images within the image set.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     images: list[elements.Image] = Field(json_schema_extra=utils.get_metadata("1.0"))
-    type: str = Field(default="ImageSet", json_schema_extra=utils.get_metadata("1.2"))
+    type: str = Field(
+        default="ImageSet", json_schema_extra=utils.get_metadata("1.2"), frozen=True
+    )
     image_size: Optional[ct.ImageSize] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
@@ -273,7 +285,7 @@ class TableColumnDefinition(BaseModel):
         width: The width of the table column.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     horizontal_cell_content_alignment: Optional[ct.HorizontalAlignment] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.5")
@@ -296,9 +308,11 @@ class TableRow(BaseModel):
         style: The style of the table row.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
-    type: str = Field(default="TableRow", json_schema_extra=utils.get_metadata("1.5"))
+    type: str = Field(
+        default="TableRow", json_schema_extra=utils.get_metadata("1.5"), frozen=True
+    )
     cells: Optional[list["TableCell"]] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.5")
     )
@@ -330,7 +344,7 @@ class Table(ContainerBase):
         vertical_cell_content_alignment: The vertical alignment of cell content.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     type: str = Field(default="Table", json_schema_extra=utils.get_metadata("1.5"))
     columns: Optional[list[TableColumnDefinition]] = Field(
@@ -371,9 +385,11 @@ class TableCell(BaseModel):
         rtl: Whether the cell should be rendered in right-to-left direction.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel)
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
-    type: str = Field(default="TableCell", json_schema_extra=utils.get_metadata("1.5"))
+    type: str = Field(
+        default="TableCell", json_schema_extra=utils.get_metadata("1.5"), frozen=True
+    )
     items: list[elements.Element] = Field(json_schema_extra=utils.get_metadata("1.5"))
     select_action: Optional[action.SelectAction] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.1")
