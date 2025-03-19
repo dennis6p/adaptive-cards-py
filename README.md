@@ -745,5 +745,5 @@ to hear your feedback or ideas for enhancement!
 
 * **Item**: Any object of type *container*, *element* or *input*
 * **Action**: Any object of type *action* 
-* **Component**: Synonym for action AND components
+* **Component**: Synonym for both actions and items
 * **Property**: A specific attribute a component comes with. Defined via the [**official schema**](https://adaptivecards.io/explorer/). 
