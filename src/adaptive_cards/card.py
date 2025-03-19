@@ -1,7 +1,7 @@
 """Implementation of the adaptive card type"""
 
 from __future__ import annotations
-from typing import Any, Literal, Optional, Sequence
+from typing import Any, Literal, Optional, Sequence, get_origin, get_args
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
 from pydantic.alias_generators import to_camel
 
@@ -27,12 +27,12 @@ class AdaptiveCardBuilder:
 
     @staticmethod
     def __get_id(
-        element: Element | ContainerTypes | InputTypes | ActionTypes,
+        component: Element | ContainerTypes | InputTypes | ActionTypes,
     ) -> str | None:
-        if not hasattr(element, "id"):
+        if not hasattr(component, "id"):
             return
 
-        return element.id  # type: ignore -> safe as attribute is checked before
+        return component.id  # type: ignore -> safe as attribute is checked before
 
     def __reset(self) -> None:
         self.__card = AdaptiveCard()
@@ -82,10 +82,10 @@ class AdaptiveCardBuilder:
 
     def select_action(self, select_action: SelectAction) -> "AdaptiveCardBuilder":
         """
-        Set select_action element for card
+        Set select_action component for card
 
         Args:
-            select_action (SelectAction): Action element when selected
+            select_action (SelectAction): Action component when selected
 
         Returns:
             AdaptiveCardBuilder: Builder object
@@ -340,7 +340,7 @@ class AdaptiveCard(BaseModel):
         schema: The schema of the Adaptive Card.
         refresh: The refresh settings for the card.
         authentication: The authentication settings for the card.
-        body: The list of card elements.
+        body: The list of card items.
         actions: The list of card actions.
         select_action: The select action for the card.
         fallback_text: The fallback text for the card.
@@ -421,41 +421,94 @@ class AdaptiveCard(BaseModel):
         """
         return AdaptiveCardBuilder()
 
-    def update(self, id: str, **kwargs) -> Result[None, str]:
-        """Update the current card with another card.
+    @staticmethod
+    def __get_field_type_from_annotation(annotation: Any) -> Any:
+        """Determine a fields type from its annotation.
+
+        Args:
+            annotation (Any): Field annotation
+
+        Returns:
+            Any: Type of the field
+        """
+        if not get_origin(annotation):
+            return annotation
+        return get_args(annotation)[0]
+
+    @staticmethod
+    def __update(
+        components: dict[str, Element | ContainerTypes | InputTypes]
+        | dict[str, ActionTypes],
+        id: str,
+        **kwargs,
+    ) -> Result[None, str]:
+        """Update an item's or action's field value(s).
+
+        Args:
+            id (str): id of component to be updated
+
+        Returns:
+            Result[None, str]: Result of update procedure. None if successful, Error message otherwise.
+        """
+        # if id is not found -> exit
+        if not components.get(id):
+            return Err("No component found for given ID")
+
+        for field, value in kwargs.items():
+            # if attribute is not present -> exit
+            if not hasattr(components[id], field):
+                return Err("Field not found in component")
+
+            # if new value's type doesn't match the expected one -> exit
+            field_info = components[id].model_fields[field]
+            field_type: Any = AdaptiveCard.__get_field_type_from_annotation(
+                field_info.annotation
+            )
+            if not isinstance(value, field_type):
+                return Err("Value type does not match expected field type")
+
+            setattr(components[id], field, value)
+        return Ok(None)
+
+    def update_action(self, id: str, **kwargs) -> Result[None, str]:
+        """Update an action's field value
 
         Note:
             The update procedure can only succeed if the following criteria is fulfilled:
-            - ID of an element has been set when the card was created initially
-            - The property about to be updated must be part of the actual data model of the parent element
+            - ID of an component has been set when the card was created initially
+            - The property about to be updated must be part of the actual data model of the parent component
             - The property's type must match the defined type in the parent data model
 
         Examples:
-            `card.update(id="element-id", text="new text")`
+            `card.update_action(id="action-id", title="new title")`
 
         Args:
-            id (str): id of element to be updated
+            id (str): id of action component to be updated
 
         Returns:
-            Result[None, ValidationFailure]: _description_
+            Result[None, str]: Result of update procedure. None if successful, error string otherwise.
         """
-        for field, value in kwargs.items():
-            # if attribute is not present update method will fail immediately
+        return AdaptiveCard.__update(self._actions, id, **kwargs)
 
-            if not self._items.get(id):
-                return Err("Element not found for given ID")
+    def update_item(self, id: str, **kwargs) -> Result[None, str]:
+        """Update an item's field value
 
-            if not hasattr(self._items[id], field):
-                return Err("Field not found in element")
+        Note:
+            The update procedure can only succeed if the following criteria is fulfilled:
+            - ID of an component has been set when the card was created initially
+            - The property about to be updated must be part of the actual data model of the parent component
+            - The property's type must match the defined type in the parent data model
 
-            # if new value's type doesn't match the expected update will fail immediately
-            field_current = getattr(self._items[id], field)
-            if not isinstance(value, type(field_current)):
-                return Err("Value type does not match expected field type")
+        Examples:
+            `card.update_item(id="action-id", text="new text")`
 
-            setattr(self._items[id], field, value)
+        Args:
+            id (str): id of action component to be updated
 
-        return Ok(None)
+        Returns:
+            Result[None, str]: Result of update procedure. None if successful, error string otherwise.
+        """
+        return AdaptiveCard.__update(self._items, id, **kwargs)
 
     def to_json(self) -> str:
         """
