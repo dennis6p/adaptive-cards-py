@@ -35,4 +35,4 @@ jobs:
 
       - name: Test with pytest
         run: |
-          uv run tests/*.py
+          uv run pytest tests/*.py
