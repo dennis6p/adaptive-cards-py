@@ -15,7 +15,6 @@ keywords = ["bot", "ui", "adaptivecards", "cards", "adaptivecardsio", "python"]
 dependencies = [
     "requests",
     "jsonschema",
-    "pytest>=8.3.5",
     "pydantic>=2.10.6",
     "mypy>=1.15.0",
     "result>=0.17.0",
@@ -31,6 +30,11 @@ adaptive_cards = ["schemas/*.json"]
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/adaptive_cards"]
