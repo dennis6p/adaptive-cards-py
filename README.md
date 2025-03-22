@@ -658,7 +658,7 @@ New components and properties are getting introduced every now and then. This me
 
 ```python
 from adaptive_cards.card import AdaptiveCard
-from adaptive_cards.validator import (
+from adaptive_cards.validation import (
     CardValidatorFactory, 
     CardValidator,
     Finding
