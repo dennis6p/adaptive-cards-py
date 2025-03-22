@@ -13,7 +13,8 @@ from adaptive_cards.card import AdaptiveCard
 from adaptive_cards.client import TeamsClient
 from adaptive_cards.containers import Column, ColumnSet, Container, ContainerTypes
 from adaptive_cards.elements import Image, TextBlock
-from adaptive_cards.validation import CardValidator, CardValidatorFactory, Result
+from adaptive_cards.validation import CardValidator, CardValidatorFactory
+from result import Result, is_ok
 
 containers: list[ContainerTypes] = []
 
@@ -167,7 +168,7 @@ card = AdaptiveCard.new().version("1.5").add_items(containers).create()
 card_validator: CardValidator = CardValidatorFactory.create_validator_microsoft_teams()
 result: Result = card_validator.validate(card)
 
-print(f"Validation was successful: {result == Result.SUCCESS}")
+print(f"Validation was successful: {is_ok(result)}")
 
 # send card
 webhook_url: str = "YOUR-URL"
