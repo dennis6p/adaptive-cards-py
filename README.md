@@ -136,7 +136,7 @@ Find your final layout below.
 ![simple card](https://github.com/dennis6p/adaptive-cards-py/blob/main/examples/simple_card/simple_card.jpg?raw=true)
 
 💡 **Please note**
-<br>After building the object is done, the `create(...)` method must be called in order to create the final object. In this case, the object will be of type `AdaptiveCard`.
+<br>After building the object is done, the `create(...)` method must be called in order to construct the final object. In this case, the object will be of type `AdaptiveCard`.
 
 To directly export your result, make use of the
 `to_json()` method provided by every card.
