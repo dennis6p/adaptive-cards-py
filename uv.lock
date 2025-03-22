@@ -1,4 +1,5 @@
 version = 1
+revision = 1
 requires-python = ">=3.10"
 
 [[package]]
@@ -9,9 +10,13 @@ dependencies = [
     { name = "jsonschema" },
     { name = "mypy" },
     { name = "pydantic" },
-    { name = "pytest" },
     { name = "requests" },
     { name = "result" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
 ]
 
 [package.metadata]
@@ -19,10 +24,12 @@ requires-dist = [
     { name = "jsonschema" },
     { name = "mypy", specifier = ">=1.15.0" },
     { name = "pydantic", specifier = ">=2.10.6" },
-    { name = "pytest", specifier = ">=8.3.5" },
     { name = "requests" },
     { name = "result", specifier = ">=0.17.0" },
 ]
+
+[package.metadata.requires-dev]
+dev = [{ name = "pytest", specifier = ">=8.3.5" }]
 
 [[package]]
 name = "annotated-types"
