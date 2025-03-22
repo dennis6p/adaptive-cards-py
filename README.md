@@ -20,7 +20,7 @@
 
 [![PyPI version](https://badge.fury.io/py/adaptive-cards-py.svg)](https://pypi.org/project/adaptive-cards-py/)
 
-A thin Python wrapper for creating [**Adaptive Cards**](https://adaptivecards.io/) easily on code level. The deep integration of Python's `typing` package alongside the famous `pydantic` library prevents you from creating invalid schemas and guides you while setting up the code for generating visual appealing cards.
+A thin Python wrapper for creating [**Adaptive Cards**](https://adaptivecards.io/) easily on code level. The deep integration of Python's `typing` package alongside the famous `pydantic` library prevents you from creating invalid schemas and guides you while setting up the code for generating visually appealing cards.
 
 If you are interested in the general concepts of adaptive cards and want to dig a bit deeper, have a look into the [**official documentation**](https://learn.microsoft.com/en-us/adaptive-cards/) or get used to the [**schema**](https://adaptivecards.io/explorer/) first.
 
