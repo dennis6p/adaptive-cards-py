@@ -1,6 +1,6 @@
 from adaptive_cards.card import AdaptiveCard
 from adaptive_cards.validation import CardValidatorFactory, CardValidator, Finding
-from result import Result, Err, Ok, is_ok
+from result import Result, is_ok
 from adaptive_cards.elements import TextBlock
 import adaptive_cards.card_types as types
 
