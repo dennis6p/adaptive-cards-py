@@ -726,7 +726,7 @@ Find further information about sending cards or creating Webhooks to/in MS Teams
 
 ## Examples
 
-If you are interested in more comprehensive examples or the actual source code, have a look into the `examples` folder.
+If you are interested in more comprehensive examples or the actual source code, have a look into the [**`examples`**](examples) folder.
 
 ## Feature Roadmap
 
