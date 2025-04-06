@@ -304,12 +304,40 @@ class TextRun(BaseModel):
     )
 
 
+class CodeBlock(CardElement):
+    """
+    Represents a text block card element.
+
+    Inherits from CardElement.
+
+    Attributes:
+        type: The type of the card element.
+        codeSnippet: The text content of the text block.
+        language: The type of the card element.
+        startLineNumber: The color of the text block.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    type: str = Field(
+        default="CodeBlock", json_schema_extra=utils.get_metadata("1.5"), frozen=True
+    )
+    codeSnippet: str = Field(json_schema_extra=utils.get_metadata("1.5"))
+    language: ct.Language = Field(
+        default=ct.Language.PLAINTEXT, json_schema_extra=utils.get_metadata("1.5")
+    )
+    startLineNumber: Optional[int] = Field(
+        default=1, json_schema_extra=utils.get_metadata("1.5")
+    )
+
+
 Element = Union[
     Image,
     TextBlock,
     Media,
     CaptionSource,
     RichTextBlock,
+    CodeBlock,
 ]
 
 CardElement.model_rebuild()

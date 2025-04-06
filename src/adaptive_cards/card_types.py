@@ -320,6 +320,36 @@ class ChoiceInputStyle(str, Enum):
     FILTERED = "filtered"
 
 
+class Language(str, Enum):
+    """
+    Enumerates the choice of supported languages.
+    """
+
+    BASH = "Bash"
+    C = "C"
+    CPP = "Cpp"
+    CSHARP = "CSharp"
+    CSS = "Css"
+    DOS = "Dos"
+    GO = "Go"
+    GRAPHQL = "Graphql"
+    HTML = "Html"
+    JAVA = "Java"
+    JAVASCRIPT = "JavaScript"
+    JSON = "Json"
+    OBJECTIVEC = "ObjectiveC"
+    PERL = "Perl"
+    PHP = "Php"
+    PLAINTEXT = "PlainText"
+    POWERSHELL = "PowerShell"
+    PYTHON = "Python"
+    SQL = "Sql"
+    TYPESCRIPT = "TypeScript"
+    VBNET = "VbNet"
+    VERILOG = "Verilog"
+    VHDL = "Vhdl"
+    XML = "Xml"
+
 class BackgroundImage(BaseModel):
     """
     Represents the background image properties.
