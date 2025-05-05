@@ -4,18 +4,29 @@ import json
 from abc import ABC, abstractmethod
 from enum import Enum
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any
 from pydantic import BaseModel
+from typing import Union
 
 from jsonschema.exceptions import ValidationError as SchemaValidationError
 from jsonschema.validators import Draft6Validator
 
 from adaptive_cards.card import AdaptiveCard
+from adaptive_cards.target_frameworks import (
+    AbstractTargetFramework,
+    BotWebChat,
+    Outlook,
+    MicrosoftTeams,
+    CortanaSkills,
+    WindowsTimeline,
+    CiscoWebExTeams,
+    VivaConnections,
+    WindowsWidgets,
+    SchemaVersion,
+)
 from result import Result, Err, Ok
 
 MINIMUM_VERSION_KEY: str = "min_version"
-
-SchemaVersion = Literal["1.0", "1.1", "1.2", "1.3", "1.4", "1.5", "1.6"]
 
 
 class ValidationFailure(str, Enum):
@@ -40,133 +51,15 @@ class ValidationFailure(str, Enum):
     """Value type does not match what is expected for the field as per definition in the
     pydantic model"""
 
+    ELEMENT_NOT_SUPPORTED_BY_TARGET_FRAMEWORK = (
+        "Validated element is not supported by the target framework"
+    )
+    """validated element is currently not supported by the target framework"""
 
-class AbstractTargetFramework(ABC):
-    """
-    Abstract interface representing the AbstractTargetFramework cards can be send to
-    """
-
-    def __init__(
-        self, name: str, max_card_size_kb: float, schema_version: SchemaVersion
-    ) -> None:
-        self.__name: str = name
-        self.__max_card_size_kb: float = max_card_size_kb
-        self.__schema_version: SchemaVersion = schema_version
-
-    def name(self) -> str:
-        """
-        Return name of target framework
-
-        Returns:
-            str: Name of target framework
-        """
-        return self.__name
-
-    def max_card_size(self) -> float:
-        """
-        Calculate the maximum allowed card size for the target framework
-
-        Returns:
-            float: maximum card size
-        """
-        return self.__max_card_size_kb
-
-    def schema_version(self) -> SchemaVersion:
-        """
-        Schema version the card is validated against
-
-        Returns:
-            float: schema version
-        """
-        return self.__schema_version
-
-
-class BotWebChat(AbstractTargetFramework):
-    """Bot WebChat target framework"""
-
-    def __init__(self):
-        """"""
-        name: str = "BotWebChat"
-        max_card_size_kb: float = 40
-        schema_version: SchemaVersion = "1.5"
-        super().__init__(name, max_card_size_kb, schema_version)
-
-
-class Outlook(AbstractTargetFramework):
-    """Outlook target framework"""
-
-    def __init__(self):
-        """"""
-        name: str = "Outlook"
-        max_card_size_kb: float = 40
-        schema_version: SchemaVersion = "1.0"
-        super().__init__(name, max_card_size_kb, schema_version)
-
-
-class MicrosoftTeams(AbstractTargetFramework):
-    """MicrosoftTeams target framework"""
-
-    def __init__(self):
-        """"""
-        name: str = "Microsoft Teams"
-        max_card_size_kb: float = 28
-        schema_version: SchemaVersion = "1.5"
-        super().__init__(name, max_card_size_kb, schema_version)
-
-
-class CortanaSkills(AbstractTargetFramework):
-    """Cortana Skills target framework"""
-
-    def __init__(self):
-        """"""
-        name: str = "Cortana Skills"
-        max_card_size_kb: float = 40
-        schema_version: SchemaVersion = "1.0"
-        super().__init__(name, max_card_size_kb, schema_version)
-
-
-class WindowsTimeline(AbstractTargetFramework):
-    """Windows Timeline target framework"""
-
-    def __init__(self):
-        """"""
-        name: str = "Windows Timeline"
-        max_card_size_kb: float = 40
-        schema_version: SchemaVersion = "1.0"
-        super().__init__(name, max_card_size_kb, schema_version)
-
-
-class CiscoWebExTeams(AbstractTargetFramework):
-    """Cisco WebEx Teams target framework"""
-
-    def __init__(self):
-        """"""
-        name: str = "Cisco WebEx Teams"
-        max_card_size_kb: float = 40
-        schema_version: SchemaVersion = "1.2"
-        super().__init__(name, max_card_size_kb, schema_version)
-
-
-class VivaConnections(AbstractTargetFramework):
-    """Viva Connections target framework"""
-
-    def __init__(self):
-        """"""
-        name: str = "Viva Connections"
-        max_card_size_kb: float = 40
-        schema_version: SchemaVersion = "1.2"
-        super().__init__(name, max_card_size_kb, schema_version)
-
-
-class WindowsWidgets(AbstractTargetFramework):
-    """Windows Widgets target framework"""
-
-    def __init__(self):
-        """"""
-        name: str = "WindowsWidgets"
-        max_card_size_kb: float = 40
-        schema_version: SchemaVersion = "1.6"
-        super().__init__(name, max_card_size_kb, schema_version)
+    FIELD_NOT_SUPPORTED_BY_TARGET_FRAMEWORK = (
+        "Validated field is not supported by the target framework"
+    )
+    """validated field is currently not supported by the target framework"""
 
 
 class CardValidatorAbstractFactory(ABC):
@@ -404,7 +297,7 @@ class CardValidator(AbstractCardValidator):
         self.__validate_schema()
 
         # check whether the version requirements are fulfilled for all elements
-        self.__validate_version_for_elements(self.__card.body)
+        self.__validate_target_framework_compatibility(self.__card.body)
 
         # check whether the card size is within the expected range
         # sizes are derived from the original documentation
@@ -436,7 +329,7 @@ class CardValidator(AbstractCardValidator):
 
         return items
 
-    def __validate_version_for_elements(self, items: Any | list[Any]):
+    def __validate_target_framework_compatibility(self, items: Any | list[Any]):
         """
         Recursively check all elements against the overall card version
 
@@ -454,6 +347,7 @@ class CardValidator(AbstractCardValidator):
 
         for item in items:
             self.__item = item
+            self.__validate_target_framework_model()
 
             for field in item.model_fields_set:
                 field_name: str = field.__str__()
@@ -475,12 +369,13 @@ class CardValidator(AbstractCardValidator):
                 self.__validate_field_version(
                     field_name, metadata.get(MINIMUM_VERSION_KEY)
                 )
+                self.__validate_target_framework_field(field_name)
 
         for iterable in iterables:
-            self.__validate_version_for_elements(iterable)
+            self.__validate_target_framework_compatibility(iterable)
 
         for custom_type in custom_types:
-            self.__validate_version_for_elements(custom_type)
+            self.__validate_target_framework_compatibility(custom_type)
 
     @staticmethod
     def __calculate_card_size(card: AdaptiveCard) -> float:
@@ -497,6 +392,46 @@ class CardValidator(AbstractCardValidator):
                     f"{self.__target_framework.name()} | {self.__target_framework.max_card_size()} KB",
                 )
             )
+
+    def __validate_target_framework_model(self) -> None:
+        if not self.__item.model_json_schema().get("limited_to_target_platforms"):
+            return
+
+        if (
+            self.__target_framework.NAME
+            in self.__item.model_json_schema()["limited_to_target_platforms"]
+        ):
+            return
+
+        self.__findings.append(
+            Finding(
+                ValidationFailure.ELEMENT_NOT_SUPPORTED_BY_TARGET_FRAMEWORK,
+                ValidationFailure.ELEMENT_NOT_SUPPORTED_BY_TARGET_FRAMEWORK.value,
+                f"Element not supported by the target framework: {type(self.__item).__name__}",
+            )
+        )
+
+    def __validate_target_framework_field(self, field_name: str) -> None:
+        if not self.__item.model_json_schema()[field_name].get(
+            "limited_to_target_platforms"
+        ):
+            return
+
+        if (
+            self.__target_framework.NAME
+            in self.__item.model_json_schema()[field_name][
+                "limited_to_target_platforms"
+            ]
+        ):
+            return
+
+        self.__findings.append(
+            Finding(
+                ValidationFailure.FIELD_NOT_SUPPORTED_BY_TARGET_FRAMEWORK,
+                ValidationFailure.FIELD_NOT_SUPPORTED_BY_TARGET_FRAMEWORK.value,
+                f"Field not supported by the target framework: {type(self.__item).__name__}",
+            )
+        )
 
     def __validate_field_version(self, field_name: str, minimum_version: Any) -> None:
         assert minimum_version is not None
