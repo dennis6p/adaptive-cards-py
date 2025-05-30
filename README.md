@@ -702,7 +702,7 @@ Of course, you want to create those cards for a reason. So once you did that, yo
 
 ...
 
-from adaptive_cards.clients import TeamsClient
+from adaptive_cards.client import TeamsClient
 from requests import Response
 
 ...
