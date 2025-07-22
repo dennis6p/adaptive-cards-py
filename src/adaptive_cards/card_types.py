@@ -325,7 +325,7 @@ class BackgroundImage(BaseModel):
     Represents the background image properties.
 
     Attributes:
-        uri: The URI of the background image.
+        url: The URL of the background image.
         fill_mode: The fill mode of the image.
         horizontal_alignment: The horizontal alignment of the image.
         vertical_alignment: The vertical alignment of the image.
@@ -333,7 +333,7 @@ class BackgroundImage(BaseModel):
 
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
-    uri: str = Field(json_schema_extra=utils.get_metadata("1.0"))
+    url: str = Field(json_schema_extra=utils.get_metadata("1.2"))
     fill_mode: Optional[ImageFillMode] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
     )
