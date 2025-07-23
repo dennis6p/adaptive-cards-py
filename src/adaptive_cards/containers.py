@@ -64,12 +64,15 @@ class ActionSet(ContainerBase):
 
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
-    actions: list[action.ActionTypes] = Field(
-        json_schema_extra=utils.get_metadata("1.2")
-    )
     type: str = Field(
         default="ActionSet", json_schema_extra=utils.get_metadata("1.2"), frozen=True
     )
+    """Must be ActionSet."""
+
+    actions: list[action.ActionTypes] = Field(
+        json_schema_extra=utils.get_metadata("1.2")
+    )
+    """The actions in the set."""
 
 
 class Container(ContainerBase):

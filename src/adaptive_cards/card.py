@@ -12,6 +12,7 @@ from adaptive_cards.containers import ContainerTypes
 from adaptive_cards.elements import Element
 from adaptive_cards.inputs import InputTypes
 from result import Ok, Err, Result
+import adaptive_cards.target_frameworks as tf
 
 SCHEMA: str = "http://adaptivecards.io/schemas/adaptive-card.json"
 TYPE: str = "AdaptiveCard"
@@ -121,12 +122,12 @@ class AdaptiveCardBuilder:
         self.__card.background_image = background_image
         return self
 
-    def metadata(self, metadata: ct.Metadata) -> "AdaptiveCardBuilder":
+    def metadata(self, metadata: ct.CardMetadata) -> "AdaptiveCardBuilder":
         """
         Set additional metadata for card
 
         Args:
-            metadata (ct.Metadata): Object with additional metadata
+            metadata (ct.CardMetadata): Object with additional metadata
 
         Returns:
             AdaptiveCardBuilder: Builder object
@@ -228,10 +229,10 @@ class AdaptiveCardBuilder:
             AdaptiveCardBuilder: Builder object
         """
         if width == ct.MSTeamsCardWidth.FULL:
-            self.__card.msteams = ct.MSTeams(width=width)
+            self.__card.ms_teams = ct.MSTeams(width=width)
             return self
 
-        self.__card.msteams = None
+        self.__card.ms_teams = None
         return self
 
     def add_item(
@@ -333,25 +334,6 @@ class AdaptiveCardBuilder:
 class AdaptiveCard(BaseModel):
     """
     Represents an Adaptive Card.
-
-    Attributes:
-        type: The type of the Adaptive Card. Defaults to "AdaptiveCard".
-        version: The version of the Adaptive Card.
-        schema: The schema of the Adaptive Card.
-        refresh: The refresh settings for the card.
-        authentication: The authentication settings for the card.
-        body: The list of card items.
-        actions: The list of card actions.
-        select_action: The select action for the card.
-        fallback_text: The fallback text for the card.
-        background_image: The background image for the card.
-        metadata: The metadata for the card.
-        min_height: The minimum height of the card.
-        rtl: Whether the card should be displayed right-to-left.
-        speak: The speak text for the card.
-        lang: The language for the card.
-        vertical_content_align: The vertical alignment of the card's content.
-        msteams: Set specific properties for MS Teams as the target framework
     """
 
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
@@ -361,54 +343,145 @@ class AdaptiveCard(BaseModel):
     type: str = Field(
         default=TYPE, json_schema_extra=utils.get_metadata("1.0"), frozen=True
     )
-    version: str = Field(default=VERSION, json_schema_extra=utils.get_metadata("1.0"))
+    """Must be AdaptiveCard"""
+
     schema_: str = Field(
         default=SCHEMA,
         alias="$schema",
         json_schema_extra=utils.get_metadata("1.0", field_name="$schema"),
     )
-    refresh: Optional[ct.Refresh] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.4")
-    )
-    authentication: Optional[ct.Authentication] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.4")
-    )
-    body: Optional[list[Element | ContainerTypes | InputTypes]] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
+    """A URL to the Adaptive Card schema the card is authored against"""
+
     actions: Optional[list[ActionTypes]] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    select_action: Optional[SelectAction] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.1")
+    """The card level actions, which always appear at the bottom of the card."""
+
+    authentication: Optional[ct.Authentication] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.4")
     )
+    """Defines authentication information to enable on-behalf-of single-sign-on or just-in-time OAuth.
+    This information is used in conjunction with the refresh property and Action.Execute in general."""
+
+    body: Optional[list[Element | ContainerTypes | InputTypes]] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    """The body of the card, comprised of a list of elements displayed according to the layouts property.
+    If the layouts property is not specified, a Layout.Stack is used."""
+
     fallback_text: Optional[str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    background_image: Optional[ct.BackgroundImage | str] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
-    metadata: Optional[ct.Metadata] = Field(
+    """The text that should be displayed if the client is not able to render the card."""
+
+    metadata: Optional[ct.CardMetadata] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.6")
     )
-    min_height: Optional[str] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.2")
+    """Metadata associated with the card."""
+
+    ms_teams: Optional[ct.MSTeams] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    rtl: Optional[bool] = Field(
+    """Teams-specific metadata associated with the card."""
+
+    references: Optional[list[ct.AdaptiveCardReference | ct.DocumentReference]] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.5")
     )
+    """References that can be cited in TextBlock and RichTextBlock elements."""
+
+    refresh: Optional[ct.RefreshDefinition] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.4")
+    )
+    """Defines how the card can be refreshed by making a request to the target Bot."""
+
+    resources: Optional[list[ct.Resources]] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.5")
+    )
+    """Resources card elements can reference."""
+
     speak: Optional[str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    lang: Optional[str] = Field(
+    """The text that should be spoken for the entire card."""
+
+    version: str = Field(default=VERSION, json_schema_extra=utils.get_metadata("1.0"))
+    """The Adaptive Card schema version the card is authored against."""
+
+    background_image: Optional[ct.BackgroundImage | str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
+    """Defines the container's background image."""
+
+    fallback: Optional[Any | str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    """An alternate element to render if the type of this one is unsupported or if the host application
+    doesn't support all the capabilities specified in the requires property."""
+
+    grid_area: Optional[str] = Field(
+        default=None,
+        json_schema_extra=utils.get_metadata("1.5")
+        | {"limited_to_target_platforms": [tf.MicrosoftTeams.NAME]},
+        alias="grid.area",
+    )
+    """The area of a Layout.AreaGrid layout in which an element should be displayed."""
+
+    id: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    """A unique identifier for the element or action. Input elements must have an id, otherwise
+    they will not be validated and their values will not be sent to the Bot."""
+
+    is_sort_key: Optional[bool] = Field(
+        default=False, json_schema_extra=utils.get_metadata("1.5")
+    )
+    """Controls whether the element should be used as a sort key by elements that allow sorting across a collection of elements."""
+
+    is_visible: Optional[bool] = Field(
+        default=True, json_schema_extra=utils.get_metadata("1.2")
+    )
+    """Controls the visibility of the element."""
+
+    lang: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.1")
+    )
+    """The locale associated with the element."""
+
+    layouts: Optional[list[ct.Layout]] = Field(
+        default=None,
+        json_schema_extra=utils.get_metadata("1.5")
+        | {"limited_to_target_platforms": [tf.MicrosoftTeams.NAME]},
+    )
+    """The layouts associated with the container. The container can dynamically switch from one
+    layout to another as the card's width changes"""
+
+    min_height: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    """The minimum height, in pixels, of the container, in the <number>px format."""
+
+    requires: Optional[list[ct.HostCapabilities]] = Field(default={}, json_schema_extra=utils.get_metadata("1.2"))
+    """A list of capabilities the element requires the host application to support.
+    If the host application doesn't support at least one of the listed capabilities,
+    the element is not rendered (or its fallback is rendered if provided)."""
+
+    rtl: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.5")
+    )
+    """Controls if the content of the card is to be rendered left-to-right or right-to-left."""
+
+    select_action: Optional[SelectAction] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.1")
+    )
+    """An Action that will be invoked when the element is tapped or clicked. Action.ShowCard is not supported."""
+
+
+    style: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))
+    """The style of the container. Container styles control the colors of the background,
+    border and text inside the container, in such a way that contrast requirements are always met."""
+
     vertical_content_align: Optional[ct.VerticalAlignment] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.1")
     )
-    msteams: Optional[ct.MSTeams] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
-    )
+    """Controls how the container's content should be vertically aligned."""
 
     @staticmethod
     def new() -> AdaptiveCardBuilder:
