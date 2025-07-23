@@ -63,7 +63,7 @@ jobs:
     if: github.event_name == 'pull_request'
     permissions:
       contents: read
-      issues: write
+      id-token: write
     needs: build
     runs-on: ubuntu-latest
     environment: test
@@ -97,7 +97,7 @@ jobs:
     if: github.event_name == 'release'
     permissions:
       contents: read
-      issues: write
+      id-token: write
     needs: build
     runs-on: ubuntu-latest
     environment: release
