@@ -1,11 +1,12 @@
 """Implementations for all general card-related types and enums"""
 
 from __future__ import annotations
+
 from enum import Enum
 from typing import Optional
+
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
-
 
 from adaptive_cards import utils
 
@@ -325,7 +326,7 @@ class BackgroundImage(BaseModel):
     Represents the background image properties.
 
     Attributes:
-        uri: The URI of the background image.
+        url: The URL of the background image.
         fill_mode: The fill mode of the image.
         horizontal_alignment: The horizontal alignment of the image.
         vertical_alignment: The vertical alignment of the image.
@@ -333,7 +334,7 @@ class BackgroundImage(BaseModel):
 
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
-    uri: str = Field(json_schema_extra=utils.get_metadata("1.0"))
+    url: str = Field(json_schema_extra=utils.get_metadata("1.2"))
     fill_mode: Optional[ImageFillMode] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
     )
@@ -357,15 +358,9 @@ class Refresh(BaseModel):
 
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
-    action: Optional[str] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.4")
-    )
-    expires: Optional[str] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.6")
-    )
-    user_ids: Optional[list[str]] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.4")
-    )
+    action: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.4"))
+    expires: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.6"))
+    user_ids: Optional[list[str]] = Field(default=None, json_schema_extra=utils.get_metadata("1.4"))
 
 
 class TokenExchangeResource(BaseModel):
@@ -400,12 +395,8 @@ class AuthCardButtons(BaseModel):
 
     type: str = Field(default="", json_schema_extra=utils.get_metadata("1.4"))
     value: str = Field(default="", json_schema_extra=utils.get_metadata("1.4"))
-    title: Optional[str] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.4")
-    )
-    image: Optional[str] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.4")
-    )
+    title: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.4"))
+    image: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.4"))
 
 
 class Authentication(BaseModel):
@@ -421,9 +412,7 @@ class Authentication(BaseModel):
 
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
-    text: Optional[str] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.4")
-    )
+    text: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.4"))
     connection_name: Optional[str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.4")
     )
@@ -445,9 +434,7 @@ class Metadata(BaseModel):
 
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
-    web_url: Optional[str] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.6")
-    )
+    web_url: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.6"))
 
 
 class MSTeams(BaseModel):
