@@ -29,7 +29,7 @@ If you are interested in the general concepts of adaptive cards and want to dig 
 
 ## ⚠️ Disclaimer
 
-This library is covering the open source stream for [adaptive cards](https://adaptivecards.io/). In the meantime, there is a [parallel stream for some Microsoft products](https://adaptivecards.microsoft.com/) specifically, which offers a bigger variety of elements. Along with that, a Python SDK has been provided and is under development. So, if you want to use adaptive cards with MS Teams, Bot Frameworks or MS Outlook, you might also want to checkout the [Microsoft-backed library](learn.microsoft.com/en-us/microsoftteams/platform/teams-ai-library/in-depth-guides/adaptive-cards/overview?pivots=python).
+This library is covering the open source stream for [**adaptive cards**](https://adaptivecards.io/). In the meantime, there is a [**parallel stream for some Microsoft products**](https://adaptivecards.microsoft.com/) specifically, which offers a bigger variety of elements. Along with that, a Python SDK has been provided and is under development. So, if you want to use adaptive cards with MS Teams, Bot Frameworks or MS Outlook, you might also want to checkout the [**Microsoft-backed library**](https://learn.microsoft.com/en-us/microsoftteams/platform/teams-ai-library/in-depth-guides/adaptive-cards/overview?pivots=python).
 
 ## About
 
