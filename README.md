@@ -27,6 +27,10 @@ If you are interested in the general concepts of adaptive cards and want to dig 
 💡 **Please note**
 <br>This library is work in progress. Missing parts are planned to be added from time to time.
 
+## ⚠️ Disclaimer
+
+This library is covering the open source stream for [adaptive cards](https://adaptivecards.io/). In the meantime, there is a [parallel stream for some Microsoft products](https://adaptivecards.microsoft.com/) specifically, which offers a bigger variety of elements. Along with that, a Python SDK has been provided and is under development. So, if you want to use adaptive cards with MS Teams, Bot Frameworks or MS Outlook, you might also want to checkout the [Microsoft-backed library](learn.microsoft.com/en-us/microsoftteams/platform/teams-ai-library/in-depth-guides/adaptive-cards/overview?pivots=python).
+
 ## About
 
 This library is intended to provide a clear and simple interface for creating adaptive cards with only a few lines of code in a more robust way. The heavy usage of Python's `typing` mechanisms and the `pydantic` library should prevent one from creating invalid schemes and structures. Instead, creating and sending cards should be intuitive and supported by the typing system.
