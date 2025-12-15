@@ -1,13 +1,12 @@
 """Example: simple card"""
 
 from requests import Response
-
-import adaptive_cards.card_types as types
-from adaptive_cards.card import AdaptiveCard
-from adaptive_cards.client import TeamsClient
-from adaptive_cards.elements import TextBlock
-from adaptive_cards.validation import CardValidator, CardValidatorFactory
 from result import Result, is_ok
+
+import adaptive_cards.types as types
+from adaptive_cards.card import AdaptiveCard, TextBlock
+from adaptive_cards.client import TeamsClient
+from adaptive_cards.validation import CardValidator, CardValidatorFactory
 
 text_block: TextBlock = TextBlock(
     text="It's your second card",
