@@ -1,0 +1,437 @@
+{
+    "type": "AdaptiveCard",
+    "body": [
+        {
+            "type": "Container",
+            "id": "id_2",
+            "style": "emphasis",
+            "items": [
+                {
+                    "type": "ColumnSet",
+                    "id": "id_3",
+                    "columns": [
+                        {
+                            "type": "Column",
+                            "id": "id_4",
+                            "items": [
+                                {
+                                    "id": "id_5",
+                                    "type": "TextBlock",
+                                    "size": "large",
+                                    "weight": "Bolder",
+                                    "text": "**EXPENSE APPROVAL**",
+                                    "style": "heading",
+                                    "wrap": true
+                                }
+                            ],
+                            "width": "stretch"
+                        },
+                        {
+                            "type": "Column",
+                            "id": "id_6",
+                            "items": [
+                                {
+                                    "type": "Image",
+                                    "id": "id_7",
+                                    "url": "${status_url}",
+                                    "altText": "${status}",
+                                    "height": "30px"
+                                }
+                            ],
+                            "width": "auto"
+                        }
+                    ]
+                }
+            ],
+            "bleed": true
+        },
+        {
+            "type": "Container",
+            "id": "id_8",
+            "items": [
+                {
+                    "type": "ColumnSet",
+                    "id": "id_9",
+                    "columns": [
+                        {
+                            "type": "Column",
+                            "id": "id_10",
+                            "items": [
+                                {
+                                    "type": "TextBlock",
+                                    "id": "id_11",
+                                    "size": "Small",
+                                    "text": "${purpose}",
+                                    "wrap": true,
+                                    "style": "heading"
+                                }
+                            ],
+                            "width": "stretch"
+                        },
+                        {
+                            "type": "Column",
+                            "id": "id_12",
+                            "items": [
+                                {
+                                    "type": "ActionSet",
+                                    "id": "id_13",
+                                    "actions": [
+                                        {
+                                            "type": "Action.OpenUrl",
+                                            "id": "id_14",
+                                            "title": "EXPORT AS PDF",
+                                            "url": "https://adaptivecards.io"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "width": "auto"
+                        }
+                    ]
+                },
+                {
+                    "type": "TextBlock",
+                    "id": "id_15",
+                    "spacing": "Small",
+                    "size": "Small",
+                    "weight": "Bolder",
+                    "text": "[${code}](https://adaptivecards.io)",
+                    "wrap": true
+                },
+                {
+                    "type": "FactSet",
+                    "id": "id_16",
+                    "spacing": "Large",
+                    "facts": [
+                        {
+                            "title": "Submitted By",
+                            "value": "**${created_by_name}**  ${creater_email}"
+                        },
+                        {
+                            "title": "Duration",
+                            "value": "${formatTicks(min(select(expenses, x, int(x.created_by))), 'yyyy-MM-dd')} - ${formatTicks(max(select(expenses, x, int(x.created_by))), 'yyyy-MM-dd')}"
+                        },
+                        {
+                            "title": "Submitted On",
+                            "value": "${formatDateTime(submitted_date, 'yyyy-MM-dd')}"
+                        },
+                        {
+                            "title": "Reimbursable Amount",
+                            "value": "$${formatNumber(sum(select(expenses, x, if(x.is_reimbursable, x.total, 0))), 2)}"
+                        },
+                        {
+                            "title": "Awaiting approval from",
+                            "value": "**${approver}**  ${approver_email}"
+                        },
+                        {
+                            "title": "Submitted to",
+                            "value": "**${other_submitter}**   ${other_submitter_email}"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "Container",
+            "id": "id_23",
+            "spacing": "Large",
+            "style": "emphasis",
+            "items": [
+                {
+                    "type": "TextBlock",
+                    "id": "id_24",
+                    "weight": "Bolder",
+                    "text": "EXPENSE DETAILS",
+                    "wrap": true
+                }
+            ],
+            "bleed": true
+        },
+        {
+            "type": "ActionSet",
+            "id": "id_25",
+            "actions": [
+                {
+                    "type": "Action.ShowCard",
+                    "id": "id_26",
+                    "title": "${formatDateTime(created_time, 'MM-dd')}: ${description} - $${formatNumber(total, 2)}",
+                    "card": {
+                        "type": "AdaptiveCard",
+                        "body": [
+                            {
+                                "type": "Container",
+                                "id": "id_28",
+                                "items": [
+                                    {
+                                        "type": "Container",
+                                        "id": "id_29",
+                                        "items": [
+                                            {
+                                                "type": "TextBlock",
+                                                "id": "id_30",
+                                                "text": "* ${value}",
+                                                "isSubtle": true,
+                                                "wrap": true
+                                            },
+                                            {
+                                                "type": "Container",
+                                                "id": "id_31",
+                                                "items": [
+                                                    {
+                                                        "type": "Input.Text",
+                                                        "id": "id_32",
+                                                        "label": "Add your comment here"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "Container",
+                                        "id": "id_33",
+                                        "items": [
+                                            {
+                                                "type": "ColumnSet",
+                                                "id": "id_34",
+                                                "columns": [
+                                                    {
+                                                        "type": "Column",
+                                                        "id": "id_35",
+                                                        "items": [
+                                                            {
+                                                                "type": "ActionSet",
+                                                                "id": "id_36",
+                                                                "actions": [
+                                                                    {
+                                                                        "type": "Action.Submit",
+                                                                        "id": "id_37",
+                                                                        "title": "Send",
+                                                                        "data": {
+                                                                            "id": "_qkQW8dJlUeLVi7ZMEzYVw",
+                                                                            "action": "comment",
+                                                                            "lineItem": 1
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            }
+                                                        ],
+                                                        "width": "auto"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "type": "ColumnSet",
+            "id": "id_38",
+            "spacing": "Large",
+            "separator": true,
+            "columns": [
+                {
+                    "type": "Column",
+                    "id": "id_39",
+                    "items": [
+                        {
+                            "type": "TextBlock",
+                            "id": "id_40",
+                            "horizontalAlignment": "Right",
+                            "text": "Total Expense Amount \t",
+                            "wrap": true
+                        },
+                        {
+                            "type": "TextBlock",
+                            "id": "id_41",
+                            "horizontalAlignment": "Right",
+                            "text": "Non-reimbursable Amount",
+                            "wrap": true
+                        },
+                        {
+                            "type": "TextBlock",
+                            "id": "id_42",
+                            "horizontalAlignment": "Right",
+                            "text": "Advance Amount",
+                            "wrap": true
+                        }
+                    ],
+                    "width": "stretch"
+                },
+                {
+                    "type": "Column",
+                    "id": "id_43",
+                    "items": [
+                        {
+                            "type": "TextBlock",
+                            "id": "id_44",
+                            "text": "$${formatNumber(sum(select(expenses, x, x.total)), 2)}",
+                            "wrap": true
+                        },
+                        {
+                            "type": "TextBlock",
+                            "id": "id_45",
+                            "text": "(-) $${formatNumber(sum(select(expenses, x, if(x.is_reimbursable, 0, x.total))), 2)} \t",
+                            "wrap": true
+                        },
+                        {
+                            "type": "TextBlock",
+                            "id": "id_46",
+                            "text": "(-) 0.00 \t",
+                            "wrap": true
+                        }
+                    ],
+                    "width": "auto"
+                },
+                {
+                    "type": "Column",
+                    "id": "id_47",
+                    "width": "auto"
+                }
+            ]
+        },
+        {
+            "type": "Container",
+            "id": "id_48",
+            "style": "emphasis",
+            "items": [
+                {
+                    "type": "ColumnSet",
+                    "id": "id_49",
+                    "columns": [
+                        {
+                            "type": "Column",
+                            "id": "id_50",
+                            "items": [
+                                {
+                                    "type": "TextBlock",
+                                    "id": "id_51",
+                                    "horizontalAlignment": "Right",
+                                    "text": "Amount to be Reimbursed",
+                                    "wrap": true
+                                }
+                            ],
+                            "width": "stretch"
+                        },
+                        {
+                            "type": "Column",
+                            "id": "id_52",
+                            "items": [
+                                {
+                                    "type": "TextBlock",
+                                    "id": "id_53",
+                                    "weight": "Bolder",
+                                    "text": "$${formatNumber(sum(select(expenses, x, if(x.is_reimbursable, x.total, 0))), 2)}",
+                                    "wrap": true
+                                }
+                            ],
+                            "width": "auto"
+                        },
+                        {
+                            "type": "Column",
+                            "id": "id_54",
+                            "width": "auto"
+                        }
+                    ]
+                }
+            ],
+            "bleed": true
+        },
+        {
+            "type": "ActionSet",
+            "id": "id_55",
+            "actions": [
+                {
+                    "type": "Action.ShowCard",
+                    "id": "id_56",
+                    "title": "Show history",
+                    "card": {
+                        "type": "AdaptiveCard",
+                        "body": [
+                            {
+                                "type": "Container",
+                                "id": "id_58",
+                                "items": [
+                                    {
+                                        "type": "TextBlock",
+                                        "id": "id_59",
+                                        "text": "* Expense submitted by **${created_by_name}** on {{DATE(${formatDateTime(created_date, 'yyyy-MM-ddTHH:mm:ssZ')}, SHORT)}}",
+                                        "isSubtle": true,
+                                        "wrap": true
+                                    },
+                                    {
+                                        "type": "TextBlock",
+                                        "id": "id_60",
+                                        "text": "* Expense ${expenses[0].status} by **${expenses[0].approver}** on {{DATE(${formatDateTime(approval_date, 'yyyy-MM-ddTHH:mm:ssZ')}, SHORT)}}",
+                                        "isSubtle": true,
+                                        "wrap": true
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "type": "Container",
+            "id": "id_61",
+            "items": [
+                {
+                    "type": "ActionSet",
+                    "id": "id_62",
+                    "actions": [
+                        {
+                            "type": "Action.Submit",
+                            "id": "id_63",
+                            "title": "Approve",
+                            "style": "positive",
+                            "data": {
+                                "id": "_qkQW8dJlUeLVi7ZMEzYVw",
+                                "action": "approve"
+                            }
+                        },
+                        {
+                            "type": "Action.ShowCard",
+                            "id": "id_64",
+                            "title": "Reject",
+                            "style": "destructive",
+                            "card": {
+                                "type": "AdaptiveCard",
+                                "body": [
+                                    {
+                                        "type": "Input.Text",
+                                        "id": "id_66",
+                                        "label": "Please specify an appropriate reason for rejection",
+                                        "isMultiline": true,
+                                        "isRequired": true,
+                                        "errorMessage": "A reason for rejection is necessary"
+                                    }
+                                ],
+                                "actions": [
+                                    {
+                                        "type": "Action.Submit",
+                                        "id": "id_67",
+                                        "title": "Send",
+                                        "data": {
+                                            "id": "_qkQW8dJlUeLVi7ZMEzYVw",
+                                            "action": "reject"
+                                        }
+                                    }
+                                ],
+                                "$schema": "http://adaptivecards.io/schemas/adaptive-card.json"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+    "version": "1.6",
+    "fallbackText": "This card requires Adaptive Cards v1.5 support to be rendered properly."
+}
