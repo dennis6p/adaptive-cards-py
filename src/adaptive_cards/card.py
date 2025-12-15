@@ -500,7 +500,11 @@ class AdaptiveCardBuilder:
 # pylint: disable=too-many-instance-attributes
 
 
-class AdaptiveCard(BaseModel):
+class ComponentBaseModel(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+
+class AdaptiveCard(ComponentBaseModel):
     """
     Represents an Adaptive Card.
 
@@ -524,7 +528,6 @@ class AdaptiveCard(BaseModel):
         msteams: Set specific properties for MS Teams as the target framework
     """
 
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
     _items: dict[str, ItemType] = PrivateAttr({})
     _actions: dict[str, ActionType] = PrivateAttr({})
 
@@ -700,7 +703,7 @@ class AdaptiveCard(BaseModel):
         return self.model_dump(exclude_none=True, by_alias=True, warnings=False)
 
 
-class Action(BaseModel):
+class Action(ComponentBaseModel):
     # pylint: disable=too-many-instance-attributes
     """
     Represents an action that can be performed.
@@ -718,8 +721,6 @@ class Action(BaseModel):
         requires: An optional dictionary mapping string keys to string values representing the
         requirements for the
     """
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     title: Optional[str] = Field(
         default=None,
@@ -760,8 +761,6 @@ class ActionOpenUrl(Action):
         type: The type of the  Default is "Action.OpenUrl".
     """
 
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
-
     url: str = Field(json_schema_extra=utils.get_metadata("1.0"))
     type: Literal["Action.OpenUrl"] = Field(
         default="Action.OpenUrl",
@@ -781,8 +780,6 @@ class ActionSubmit(Action):
         data: Optional data associated with the
         associated_inputs: Optional associated inputs for the
     """
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     type: Literal["Action.Submit"] = Field(
         default="Action.Submit",
@@ -808,8 +805,6 @@ class ActionShowCard(Action):
         card: Optional card to show.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
-
     type: Literal["Action.ShowCard"] = Field(
         default="Action.ShowCard",
         json_schema_extra=utils.get_metadata("1.0"),
@@ -825,7 +820,7 @@ class ActionShowCard(Action):
     # import it inside the method or function where it's needed.
 
 
-class TargetElement(BaseModel):
+class TargetElement(ComponentBaseModel):
     """
     Represents a target element.
 
@@ -833,8 +828,6 @@ class TargetElement(BaseModel):
         element_id: The ID of the target element.
         is_visible: Optional flag indicating the visibility of the target element.
     """
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     element_id: str = Field(json_schema_extra=utils.get_metadata("1.0"))
     is_visible: Optional[bool] = Field(
@@ -852,8 +845,6 @@ class ActionToggleVisibility(Action):
         target_elements: A list of TargetElement objects representing the target elements to toggle.
         type: The type of the action, set to "Action.ToggleVisibility".
     """
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     target_elements: list[TargetElement] = Field(
         json_schema_extra=utils.get_metadata("1.2")
@@ -880,8 +871,6 @@ class ActionExecute(Action):
         inputs for the
     """
 
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
-
     type: Literal["Action.Execute"] = Field(
         default="Action.Execute",
         json_schema_extra=utils.get_metadata("1.4"),
@@ -898,7 +887,7 @@ class ActionExecute(Action):
     )
 
 
-class ContainerBase(BaseModel):
+class ContainerBase(ComponentBaseModel):
     """
     The ContainerBase class represents a base container for elements with various properties.
 
@@ -913,8 +902,6 @@ class ContainerBase(BaseModel):
         to be displayed.
         height: The height style to be applied to the container.
     """
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     fallback: Optional[Element | AnnotatedAction | InputTypes] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
@@ -948,8 +935,6 @@ class ActionSet(ContainerBase):
         type: The type of the action set. Defaults to "ActionSet".
     """
 
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
-
     type: Literal["ActionSet"] = Field(
         default="ActionSet", json_schema_extra=utils.get_metadata("1.2"), frozen=True
     )
@@ -973,8 +958,6 @@ class Container(ContainerBase):
         min_height: The minimum height of the container.
         rtl: Determines whether the container's content is displayed right-to-left.
     """
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     type: Literal["Container"] = Field(
         default="Container", json_schema_extra=utils.get_metadata("1.0"), frozen=True
@@ -1017,8 +1000,6 @@ class ColumnSet(ContainerBase):
         min_height: The minimum height of the column set.
         horizontal_alignment: The horizontal alignment of the column set.
     """
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     type: Literal["ColumnSet"] = Field(
         default="ColumnSet", json_schema_extra=utils.get_metadata("1.0"), frozen=True
@@ -1063,8 +1044,6 @@ class Column(ContainerBase):
         vertical_content_alignment: The vertical alignment of the column's content.
         width: The width of the column.
     """
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     type: Literal["Column"] = Field(
         default="Column", json_schema_extra=utils.get_metadata("1.0"), frozen=True
@@ -1114,23 +1093,19 @@ class FactSet(ContainerBase):
         type: The type of the fact set. Defaults to "FactSet".
     """
 
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
-
     type: Literal["FactSet"] = Field(
         default="FactSet", json_schema_extra=utils.get_metadata("1.0"), frozen=True
     )
     facts: list["Fact"] = Field(json_schema_extra=utils.get_metadata("1.0"))
 
 
-class Fact(BaseModel):
+class Fact(ComponentBaseModel):
     """Represents a fact.
 
     Attributes:
         title: The title of the fact.
         value: The value of the fact.
     """
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     title: str = Field(json_schema_extra=utils.get_metadata("1.0"))
     value: str = Field(json_schema_extra=utils.get_metadata("1.0"))
@@ -1147,8 +1122,6 @@ class ImageSet(ContainerBase):
         image_size: The size of the images within the image set.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
-
     images: list[Image] = Field(json_schema_extra=utils.get_metadata("1.0"))
     type: Literal["ImageSet"] = Field(
         default="ImageSet", json_schema_extra=utils.get_metadata("1.2"), frozen=True
@@ -1158,7 +1131,7 @@ class ImageSet(ContainerBase):
     )
 
 
-class TableColumnDefinition(BaseModel):
+class TableColumnDefinition(ComponentBaseModel):
     """Represents a definition for a table column.
 
     Attributes:
@@ -1166,8 +1139,6 @@ class TableColumnDefinition(BaseModel):
         vertical_cell_content_alignment: The vertical alignment of cell content.
         width: The width of the table column.
     """
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     horizontal_cell_content_alignment: Optional[ct.HorizontalAlignment] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.5")
@@ -1180,7 +1151,7 @@ class TableColumnDefinition(BaseModel):
     )
 
 
-class TableRow(BaseModel):
+class TableRow(ComponentBaseModel):
     """Represents a row within a table.
 
     Attributes:
@@ -1189,8 +1160,6 @@ class TableRow(BaseModel):
         vertical_cell_content_alignment: The vertical alignment of cell content.
         style: The style of the table row.
     """
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     type: Literal["TableRow"] = Field(
         default="TableRow", json_schema_extra=utils.get_metadata("1.5"), frozen=True
@@ -1226,8 +1195,6 @@ class Table(ContainerBase):
         vertical_cell_content_alignment: The vertical alignment of cell content.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
-
     type: Literal["Table"] = Field(
         default="Table", json_schema_extra=utils.get_metadata("1.5")
     )
@@ -1254,7 +1221,7 @@ class Table(ContainerBase):
     )
 
 
-class TableCell(BaseModel):
+class TableCell(ComponentBaseModel):
     # pylint: disable=too-many-instance-attributes
     """Represents a cell within a table.
 
@@ -1268,8 +1235,6 @@ class TableCell(BaseModel):
         min_height: The minimum height of the cell.
         rtl: Whether the cell should be rendered in right-to-left direction.
     """
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     type: Literal["TableCell"] = Field(
         default="TableCell", json_schema_extra=utils.get_metadata("1.5"), frozen=True
@@ -1298,7 +1263,7 @@ class TableCell(BaseModel):
     )
 
 
-class CardElement(BaseModel):
+class CardElement(ComponentBaseModel):
     """
     Represents a card element.
 
@@ -1311,8 +1276,6 @@ class CardElement(BaseModel):
         requires: The requirements for the element.
         height: The height of the element.
     """
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     element: Optional[Any | Element] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
@@ -1355,8 +1318,6 @@ class TextBlock(CardElement):
         wrap: Indicates whether the text should wrap within the text block.
         style: The style of the text block.
     """
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     text: str = Field(json_schema_extra=utils.get_metadata("1.0"))
     type: Literal["TextBlock"] = Field(
@@ -1412,8 +1373,6 @@ class Image(CardElement):
         width: The width of the image.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
-
     url: str = Field(json_schema_extra=utils.get_metadata("1.0"))
     type: Literal["Image"] = Field(
         default="Image", json_schema_extra=utils.get_metadata("1.0"), frozen=True
@@ -1458,8 +1417,6 @@ class Media(CardElement):
         caption_sources: The list of caption sources.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
-
     type: Literal["Media"] = Field(
         default="Media", json_schema_extra=utils.get_metadata("1.1"), frozen=True
     )
@@ -1475,7 +1432,7 @@ class Media(CardElement):
     )
 
 
-class MediaSource(BaseModel):
+class MediaSource(ComponentBaseModel):
     """
     Represents a media source.
 
@@ -1484,15 +1441,13 @@ class MediaSource(BaseModel):
         mime_type: The MIME type of the media source.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
-
     url: str = Field(json_schema_extra=utils.get_metadata("1.1"))
     mime_type: Optional[str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.1")
     )
 
 
-class CaptionSource(BaseModel):
+class CaptionSource(ComponentBaseModel):
     """
     Represents a caption source.
 
@@ -1501,8 +1456,6 @@ class CaptionSource(BaseModel):
         url: The URL of the caption source.
         label: The label of the caption source.
     """
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     mime_type: str = Field(json_schema_extra=utils.get_metadata("1.6"))
     url: str = Field(json_schema_extra=utils.get_metadata("1.6"))
@@ -1522,8 +1475,6 @@ class RichTextBlock(CardElement):
         horizontal_alignment: The horizontal alignment of the rich text block.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
-
     inlines: list[Union[str, "TextRun"]] = Field(
         json_schema_extra=utils.get_metadata("1.2")
     )
@@ -1537,7 +1488,7 @@ class RichTextBlock(CardElement):
     )
 
 
-class TextRun(BaseModel):
+class TextRun(ComponentBaseModel):
     # pylint: disable=too-many-instance-attributes
     """
     Represents a text run.
@@ -1556,8 +1507,6 @@ class TextRun(BaseModel):
         underline: Specifies whether the text run should be underlined.
         weight: The font weight of the text run.
     """
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     type: Literal["TextRun"] = Field(
         default="TextRun", json_schema_extra=utils.get_metadata("1.2"), frozen=True
@@ -1595,7 +1544,7 @@ class TextRun(BaseModel):
     )
 
 
-class Input(BaseModel):
+class Input(ComponentBaseModel):
     # pylint: disable=too-many-instance-attributes
     """
     Represents an input.
@@ -1611,8 +1560,6 @@ class Input(BaseModel):
         is_visible: Specifies whether the input is visible.
         requires: The requirements for the input.
     """
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     error_message: Optional[str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.3")
@@ -1662,8 +1609,6 @@ class InputText(Input):
         value: The initial value of the input.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
-
     type: Literal["Input.Text"] = Field(
         default="Input.Text", json_schema_extra=utils.get_metadata("1.0"), frozen=True
     )
@@ -1706,8 +1651,6 @@ class InputNumber(Input):
         value: The initial value of the input. Optional.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
-
     type: Literal["Input.Number"] = Field(
         default="Input.Number", json_schema_extra=utils.get_metadata("1.0"), frozen=True
     )
@@ -1740,8 +1683,6 @@ class InputDate(Input):
         value: The initial value of the input. Optional.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
-
     id: str = Field(json_schema_extra=utils.get_metadata("1.0"))  # pylint: disable=C0103
     type: Literal["Input.Date"] = Field(
         default="Input.Date", json_schema_extra=utils.get_metadata("1.0"), frozen=True
@@ -1771,8 +1712,6 @@ class InputTime(Input):
         placeholder: The placeholder text for the input. Optional.
         value: The initial value of the input. Optional.
     """
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     type: Literal["Input.Time"] = Field(
         default="Input.Time", json_schema_extra=utils.get_metadata("1.0"), frozen=True
@@ -1807,8 +1746,6 @@ class InputToggle(Input):
         value_on: The value when the toggle is turned on. Optional.
         wrap: Indicates whether the input should wrap to the next line if needed. Optional.
     """
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     type: Literal["Input.Toggle"] = Field(
         default="Input.Toggle", json_schema_extra=utils.get_metadata("1.0"), frozen=True
@@ -1847,8 +1784,6 @@ class InputChoiceSet(Input):
         wrap: Indicates whether the input should wrap to the next line if needed. Optional.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
-
     type: Literal["Input.ChoiceSet"] = Field(
         default="Input.ChoiceSet",
         json_schema_extra=utils.get_metadata("1.0"),
@@ -1875,7 +1810,7 @@ class InputChoiceSet(Input):
     )
 
 
-class InputChoice(BaseModel):
+class InputChoice(ComponentBaseModel):
     """
     Represents a choice within an input choice set.
 
@@ -1883,8 +1818,6 @@ class InputChoice(BaseModel):
         title: The title or display text of the choice.
         value: The value associated with the choice.
     """
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     title: str = Field(json_schema_extra=utils.get_metadata("1.0"))
     value: str = Field(json_schema_extra=utils.get_metadata("1.0"))

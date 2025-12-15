@@ -332,7 +332,11 @@ class ChoiceInputStyle(CaseInsensitiveMixin):
     FILTERED = "filtered"
 
 
-class BackgroundImage(BaseModel):
+class TypeBaseModel(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+
+class BackgroundImage(TypeBaseModel):
     """
     Represents the background image properties.
 
@@ -342,8 +346,6 @@ class BackgroundImage(BaseModel):
         horizontal_alignment: The horizontal alignment of the image.
         vertical_alignment: The vertical alignment of the image.
     """
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     url: str = Field(json_schema_extra=utils.get_metadata("1.2"))
     fill_mode: Optional[ImageFillMode] = Field(
@@ -357,7 +359,7 @@ class BackgroundImage(BaseModel):
     )
 
 
-class Refresh(BaseModel):
+class Refresh(TypeBaseModel):
     """
     Represents the refresh properties.
 
@@ -366,8 +368,6 @@ class Refresh(BaseModel):
         expires: The expiration time of the refresh.
         user_ids: The list of user IDs associated with the refresh.
     """
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     action: Optional[str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.4")
@@ -380,7 +380,7 @@ class Refresh(BaseModel):
     )
 
 
-class TokenExchangeResource(BaseModel):
+class TokenExchangeResource(TypeBaseModel):
     """
     Represents a token exchange resource.
 
@@ -390,14 +390,12 @@ class TokenExchangeResource(BaseModel):
         provider_id: The provider ID associated with the resource.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
-
     id: str = Field(default="", json_schema_extra=utils.get_metadata("1.4"))  # pylint: disable=C0103
     uri: str = Field(default="", json_schema_extra=utils.get_metadata("1.4"))
     provider_id: str = Field(default="", json_schema_extra=utils.get_metadata("1.4"))
 
 
-class AuthCardButtons(BaseModel):
+class AuthCardButtons(TypeBaseModel):
     """
     Represents buttons used in an authentication card.
 
@@ -407,8 +405,6 @@ class AuthCardButtons(BaseModel):
         title: The title of the button.
         image: The image URL of the button.
     """
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     type: str = Field(default="", json_schema_extra=utils.get_metadata("1.4"))
     value: str = Field(default="", json_schema_extra=utils.get_metadata("1.4"))
@@ -420,7 +416,7 @@ class AuthCardButtons(BaseModel):
     )
 
 
-class Authentication(BaseModel):
+class Authentication(TypeBaseModel):
     """
     Represents authentication properties.
 
@@ -430,8 +426,6 @@ class Authentication(BaseModel):
         token_exchange_resource: The token exchange resource.
         buttons: The authentication buttons.
     """
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     text: Optional[str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.4")
@@ -447,7 +441,7 @@ class Authentication(BaseModel):
     )
 
 
-class Metadata(BaseModel):
+class Metadata(TypeBaseModel):
     """
     Represents metadata properties.
 
@@ -455,14 +449,12 @@ class Metadata(BaseModel):
         web_url: The web URL.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
-
     web_url: Optional[str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.6")
     )
 
 
-class MSTeams(BaseModel):
+class MSTeams(TypeBaseModel):
     """
     Represents specific properties for MS Teams as the target framework.
 
@@ -470,8 +462,6 @@ class MSTeams(BaseModel):
         width: The total horizontal space an adaptive cards is allowed to occupy
                when posted to MS Teams. Defaults to "None".
     """
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     width: Optional[MSTeamsCardWidth] = Field(
         default=MSTeamsCardWidth.DEFAULT, json_schema_extra=utils.get_metadata("1.0")
