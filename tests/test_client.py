@@ -1,9 +1,10 @@
-import pytest
-from unittest.mock import patch, Mock
 from http import HTTPStatus
-from adaptive_cards.card import AdaptiveCard
+from unittest.mock import Mock, patch
+
+import pytest
+
+from adaptive_cards.card import AdaptiveCard, TextBlock
 from adaptive_cards.client import TeamsClient
-from adaptive_cards.elements import TextBlock
 
 # filepath: src/adaptive_cards/test_client.py
 

@@ -1,8 +1,8 @@
-from adaptive_cards.card import AdaptiveCard
-from adaptive_cards.validation import CardValidatorFactory, CardValidator, Finding
 from result import Result, is_ok
-from adaptive_cards.elements import TextBlock
-import adaptive_cards.card_types as types
+
+import adaptive_cards.types as types
+from adaptive_cards.card import AdaptiveCard, TextBlock
+from adaptive_cards.validation import CardValidator, CardValidatorFactory, Finding
 
 text_block: TextBlock = TextBlock(
     text="It's your second card",

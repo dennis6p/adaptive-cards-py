@@ -7,14 +7,22 @@ import sys
 from requests import Response
 
 sys.path.append("../../")
-import adaptive_cards.card_types as types
-from adaptive_cards.actions import ActionToggleVisibility, TargetElement
-from adaptive_cards.card import AdaptiveCard
-from adaptive_cards.client import TeamsClient
-from adaptive_cards.containers import Column, ColumnSet, Container, ContainerTypes
-from adaptive_cards.elements import Image, TextBlock
-from adaptive_cards.validation import CardValidator, CardValidatorFactory
 from result import Result, is_ok
+
+import adaptive_cards.types as types
+from adaptive_cards.card import (
+    ActionToggleVisibility,
+    AdaptiveCard,
+    Column,
+    ColumnSet,
+    Container,
+    ContainerTypes,
+    Image,
+    TargetElement,
+    TextBlock,
+)
+from adaptive_cards.client import TeamsClient
+from adaptive_cards.validation import CardValidator, CardValidatorFactory
 
 containers: list[ContainerTypes] = []
 

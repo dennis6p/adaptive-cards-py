@@ -1,10 +1,9 @@
 """Example: simple card"""
 
-import adaptive_cards.card_types as types
-from adaptive_cards.actions import ActionOpenUrl
-from adaptive_cards.card import AdaptiveCard
-from adaptive_cards.elements import TextBlock
 from result import Result, is_ok
+
+import adaptive_cards.types as types
+from adaptive_cards.card import ActionOpenUrl, AdaptiveCard, TextBlock
 
 text_block: TextBlock = TextBlock(
     id="text-id",

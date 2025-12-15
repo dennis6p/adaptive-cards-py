@@ -11,7 +11,19 @@ from pydantic.alias_generators import to_camel
 from adaptive_cards import utils
 
 
-class MSTeamsCardWidth(str, Enum):
+class CaseInsensitiveMixin(str, Enum):
+    @classmethod
+    def _missing_(cls, value):
+        # Convert the input value to lowercase for case-insensitive matching
+        value = value.lower()
+        for member in cls:
+            if member.value.lower() == value:
+                return member
+        # If no match is found, raise a ValueError
+        raise ValueError(f"'{value}' is not a valid {cls.__name__}")
+
+
+class MSTeamsCardWidth(CaseInsensitiveMixin):
     """
     Enumerates the different fill modes for an image.
 
@@ -25,7 +37,7 @@ class MSTeamsCardWidth(str, Enum):
     DEFAULT = None
 
 
-class ImageFillMode(str, Enum):
+class ImageFillMode(CaseInsensitiveMixin):
     """
     Enumerates the different fill modes for an image.
 
@@ -43,7 +55,7 @@ class ImageFillMode(str, Enum):
     REPEAT = "repeat"
 
 
-class HorizontalAlignment(str, Enum):
+class HorizontalAlignment(CaseInsensitiveMixin):
     """
     Enumerates the horizontal alignment options.
 
@@ -58,7 +70,7 @@ class HorizontalAlignment(str, Enum):
     RIGHT = "right"
 
 
-class VerticalAlignment(str, Enum):
+class VerticalAlignment(CaseInsensitiveMixin):
     """
     Enumerates the vertical alignment options.
 
@@ -73,7 +85,7 @@ class VerticalAlignment(str, Enum):
     BOTTOM = "bottom"
 
 
-class Colors(str, Enum):
+class Colors(CaseInsensitiveMixin):
     """
     Enumerates the color options.
 
@@ -96,8 +108,7 @@ class Colors(str, Enum):
     ATTENTION = "attention"
 
 
-# class FontType(str, Enum):
-class FontType(str, Enum):
+class FontType(CaseInsensitiveMixin):
     """
     Enumerates the font type options.
 
@@ -110,7 +121,7 @@ class FontType(str, Enum):
     MONOSPACE = "monospace"
 
 
-class FontSize(str, Enum):
+class FontSize(CaseInsensitiveMixin):
     """
     Enumerates the font size options.
 
@@ -129,7 +140,7 @@ class FontSize(str, Enum):
     EXTRA_LARGE = "extraLarge"
 
 
-class FontWeight(str, Enum):
+class FontWeight(CaseInsensitiveMixin):
     """
     Enumerates the font weight options.
 
@@ -144,7 +155,7 @@ class FontWeight(str, Enum):
     BOLDER = "bolder"
 
 
-class TextBlockStyle(str, Enum):
+class TextBlockStyle(CaseInsensitiveMixin):
     """
     Enumerates the text block style options.
 
@@ -157,7 +168,7 @@ class TextBlockStyle(str, Enum):
     HEADING = "heading"
 
 
-class BlockElementHeight(str, Enum):
+class BlockElementHeight(CaseInsensitiveMixin):
     """
     Enumerates the block element height options.
 
@@ -170,7 +181,7 @@ class BlockElementHeight(str, Enum):
     STRETCH = "stretch"
 
 
-class ImageSize(str, Enum):
+class ImageSize(CaseInsensitiveMixin):
     """
     Enumerates the image size options.
 
@@ -189,7 +200,7 @@ class ImageSize(str, Enum):
     LARGE = "large"
 
 
-class ImageStyle(str, Enum):
+class ImageStyle(CaseInsensitiveMixin):
     """
     Enumerates the image style options.
 
@@ -202,7 +213,7 @@ class ImageStyle(str, Enum):
     PERSON = "person"
 
 
-class ContainerStyle(str, Enum):
+class ContainerStyle(CaseInsensitiveMixin):
     """
     Enumerates the container styles.
 
@@ -223,7 +234,7 @@ class ContainerStyle(str, Enum):
     ACCENT = "accent"
 
 
-class Spacing(str, Enum):
+class Spacing(CaseInsensitiveMixin):
     """
     Enumerates the spacing options.
 
@@ -246,7 +257,7 @@ class Spacing(str, Enum):
     PADDING = "padding"
 
 
-class AssociatedInputs(str, Enum):
+class AssociatedInputs(CaseInsensitiveMixin):
     """
     Enumerates the associated inputs options.
 
@@ -259,7 +270,7 @@ class AssociatedInputs(str, Enum):
     NONE = "none"
 
 
-class ActionStyle(str, Enum):
+class ActionStyle(CaseInsensitiveMixin):
     """
     Enumerates the action styles.
 
@@ -274,7 +285,7 @@ class ActionStyle(str, Enum):
     DESTRUCTIVE = "destructive"
 
 
-class ActionMode(str, Enum):
+class ActionMode(CaseInsensitiveMixin):
     """
     Enumerates the action modes.
 
@@ -287,7 +298,7 @@ class ActionMode(str, Enum):
     SECONDARY = "secondary"
 
 
-class TextInputStyle(str, Enum):
+class TextInputStyle(CaseInsensitiveMixin):
     """
     Enumerates the text input styles.
 
@@ -306,7 +317,7 @@ class TextInputStyle(str, Enum):
     PASSWORD = "password"
 
 
-class ChoiceInputStyle(str, Enum):
+class ChoiceInputStyle(CaseInsensitiveMixin):
     """
     Enumerates the choice input styles.
 
@@ -321,7 +332,11 @@ class ChoiceInputStyle(str, Enum):
     FILTERED = "filtered"
 
 
-class BackgroundImage(BaseModel):
+class TypeBaseModel(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+
+class BackgroundImage(TypeBaseModel):
     """
     Represents the background image properties.
 
@@ -331,8 +346,6 @@ class BackgroundImage(BaseModel):
         horizontal_alignment: The horizontal alignment of the image.
         vertical_alignment: The vertical alignment of the image.
     """
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     url: str = Field(json_schema_extra=utils.get_metadata("1.2"))
     fill_mode: Optional[ImageFillMode] = Field(
@@ -346,7 +359,7 @@ class BackgroundImage(BaseModel):
     )
 
 
-class Refresh(BaseModel):
+class Refresh(TypeBaseModel):
     """
     Represents the refresh properties.
 
@@ -356,14 +369,18 @@ class Refresh(BaseModel):
         user_ids: The list of user IDs associated with the refresh.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+    action: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.4")
+    )
+    expires: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.6")
+    )
+    user_ids: Optional[list[str]] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.4")
+    )
 
-    action: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.4"))
-    expires: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.6"))
-    user_ids: Optional[list[str]] = Field(default=None, json_schema_extra=utils.get_metadata("1.4"))
 
-
-class TokenExchangeResource(BaseModel):
+class TokenExchangeResource(TypeBaseModel):
     """
     Represents a token exchange resource.
 
@@ -373,14 +390,12 @@ class TokenExchangeResource(BaseModel):
         provider_id: The provider ID associated with the resource.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
-
     id: str = Field(default="", json_schema_extra=utils.get_metadata("1.4"))  # pylint: disable=C0103
     uri: str = Field(default="", json_schema_extra=utils.get_metadata("1.4"))
     provider_id: str = Field(default="", json_schema_extra=utils.get_metadata("1.4"))
 
 
-class AuthCardButtons(BaseModel):
+class AuthCardButtons(TypeBaseModel):
     """
     Represents buttons used in an authentication card.
 
@@ -391,15 +406,17 @@ class AuthCardButtons(BaseModel):
         image: The image URL of the button.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
-
     type: str = Field(default="", json_schema_extra=utils.get_metadata("1.4"))
     value: str = Field(default="", json_schema_extra=utils.get_metadata("1.4"))
-    title: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.4"))
-    image: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.4"))
+    title: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.4")
+    )
+    image: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.4")
+    )
 
 
-class Authentication(BaseModel):
+class Authentication(TypeBaseModel):
     """
     Represents authentication properties.
 
@@ -410,9 +427,9 @@ class Authentication(BaseModel):
         buttons: The authentication buttons.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
-
-    text: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.4"))
+    text: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.4")
+    )
     connection_name: Optional[str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.4")
     )
@@ -424,7 +441,7 @@ class Authentication(BaseModel):
     )
 
 
-class Metadata(BaseModel):
+class Metadata(TypeBaseModel):
     """
     Represents metadata properties.
 
@@ -432,12 +449,12 @@ class Metadata(BaseModel):
         web_url: The web URL.
     """
 
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+    web_url: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.6")
+    )
 
-    web_url: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.6"))
 
-
-class MSTeams(BaseModel):
+class MSTeams(TypeBaseModel):
     """
     Represents specific properties for MS Teams as the target framework.
 
@@ -445,8 +462,6 @@ class MSTeams(BaseModel):
         width: The total horizontal space an adaptive cards is allowed to occupy
                when posted to MS Teams. Defaults to "None".
     """
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     width: Optional[MSTeamsCardWidth] = Field(
         default=MSTeamsCardWidth.DEFAULT, json_schema_extra=utils.get_metadata("1.0")
