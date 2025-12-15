@@ -24,9 +24,6 @@ A thin Python wrapper for creating [**Adaptive Cards**](https://adaptivecards.io
 
 If you are interested in the general concepts of adaptive cards and want to dig a bit deeper, have a look into the [**official documentation**](https://learn.microsoft.com/en-us/adaptive-cards/) or get used to the [**schema**](https://adaptivecards.io/explorer/) first.
 
-💡 **Please note**
-<br>This library is work in progress. Missing parts are planned to be added from time to time.
-
 ## ⚠️ Disclaimer
 
 This library is covering the open source stream for [**adaptive cards**](https://adaptivecards.io/). In the meantime, there is a [**parallel stream for some Microsoft products**](https://adaptivecards.microsoft.com/) specifically, which offers a bigger variety of elements. Along with that, a Python SDK has been provided and is under development. So, if you want to use adaptive cards with MS Teams, Bot Frameworks or MS Outlook, you might also want to checkout the [**Microsoft-backed library**](https://learn.microsoft.com/en-us/microsoftteams/platform/teams-ai-library/in-depth-guides/adaptive-cards/overview?pivots=python).
@@ -50,14 +47,15 @@ Further resources can be found here:
 💡 **Please note**
 <br>It's highly recommended to turn on the **type check** capabilities for Python in your editor. This will serve you with direct feedback about the structures you create. If you are trying to assign values of incompatible types, your editor will mark it as such and yell at you right in the moment you are about to do so. Otherwise, invalid schemas can be detected by making use of the card validation, once the card has been successfully created. Cards are validated against the official schema there and possible incompatibilities can be detected.
 
-**Key aspects**
+**Key Features**
 
 + Type annotated components based on `pydantic` and `typing`
 + Validation of versions, card size and schema
-+ Simple `json` and `dict` export
++ Card reading from plain `json`
++ Card exports to `json` or `dict`
 + Update methods for manipulating card components after creation
 + [**Passive error handling**](https://github.com/rustedpy/result) via the `result` package for validation and card updates (similar to Rust approach) 
-+ Compliant with the official structures and ideas
++ Compliant with the official structures and ideas (**adaptivecards.io!**)
 + Communication via `TeamsClient`
 
 ## Dependencies
@@ -82,9 +80,9 @@ uv add adaptive-cards-py
 
 ## Library structure
 
-**Adaptive cards** can consist of different kinds of components. The four main categories beside the actual cards are **Elements**, **Containers**, **Actions** and **Inputs**. You can find all available components for each category within the corresponding module. The `AdaptiveCard` is defined in the `cards` module.
+**Adaptive cards** can consist of different kinds of components. The four main categories beside the actual cards are **Elements**, **Containers**, **Actions** and **Inputs**. You can find all available components within the `cards` module.
 
-In addition to that, some fields of certain components are of custom types. These types are living inside the `card_types` module. For instance, if you are about to assign a color to a `TextBlock`, the field `color` will only accept a value of type `Colors`, which is implemented in the aforementioned Python file.
+In addition to that, some fields of certain components are of custom types. These types are living inside the `types` module. For instance, if you are about to assign a color to a `TextBlock`, the field `color` will only accept a value of type `Colors`, which is implemented in the aforementioned Python file.
 
 To perform validation on a fully initialized card, one can make use of the `CardValidator` class (`validation` module). Similar to the whole library, this class provides a simple interface. For creating a validator, a factory (`CardValidatorFactory`) can be used, in order to account for the desired target framework. Validation will check the following points:
 
@@ -103,21 +101,21 @@ To perform validation on a fully initialized card, one can make use of the `Card
 A simple `TextBlock` lives in the `elements` module and can be used after it's import.
 
 ```Python
-from adaptive_cards.elements import TextBlock
+from adaptive_cards.card import TextBlock
 
 text_block: TextBlock = TextBlock(text="It's your first card")
 ```
 For this component, `text` is the only required property. However, if more customization is needed, further available fields can be used.
 
 ```Python
-from adaptive_cards.elements import TextBlock
-import adaptive_cards.card_types as types
+from adaptive_cards.card import TextBlock
+from adaptive_cards.types import Colors, FontSize, HorizontalAlignment
 
 text_block: TextBlock = TextBlock(
     text="It's your second card",
-    color=types.Colors.ACCENT,
-    size=types.FontSize.EXTRA_LARGE,
-    horizontal_alignment=types.HorizontalAlignment.CENTER,
+    color=Colors.ACCENT,
+    size=FontSize.EXTRA_LARGE,
+    horizontal_alignment=HorizontalAlignment.CENTER,
 )
 ```
 
@@ -154,14 +152,14 @@ with open("path/to/out/file.json", "w+") as f:
 Assuming you have a bunch of components you want your card to enrich with. There is also a method for doing so. Let's re-use the example from before, but add another `Image` component here as well.
 
 ```Python
-from adaptive_cards.elements import TextBlock, Image
-import adaptive_cards.card_types as types
+from adaptive_cards.card import TextBlock, Image
+from adaptive_cards.types import Colors, FontSize, HorizontalAlignment
 
 text_block: TextBlock = TextBlock(
     text="It's your third card",
-    color=types.Colors.ACCENT,
-    size=types.FontSize.EXTRA_LARGE,
-    horizontal_alignment=types.HorizontalAlignment.CENTER,
+    color=Colors.ACCENT,
+    size=FontSize.EXTRA_LARGE,
+    horizontal_alignment=HorizontalAlignment.CENTER,
 )
 
 image: Image = Image(url="https://adaptivecards.io/content/bf-logo.png")
@@ -198,13 +196,21 @@ You can have a look on the following example for getting an idea of what's actua
 <summary>Code</summary>
 
 ```python
-import adaptive_cards.card_types as types
-from adaptive_cards.actions import ActionToggleVisibility, TargetElement
+from result import Err, Ok, Result, is_ok
+
+from adaptive_cards.card import (
+    ActionToggleVisibility,
+    AdaptiveCard,
+    Column,
+    ColumnSet,
+    Container,
+    ContainerTypes,
+    Image,
+    TargetElement,
+    TextBlock,
+)
+import adaptive_cards.types
 from adaptive_cards.validation import SchemaValidator
-from adaptive_cards.card import AdaptiveCard
-from adaptive_cards.elements import TextBlock, Image
-from adaptive_cards.containers import Container, ContainerTypes, ColumnSet, Column
-from result import Result, Ok, Err, is_ok
 
 containers: list[ContainerTypes] = []
 
@@ -617,15 +623,55 @@ print(f"Validation was successful: {is_ok(result)}")
 
 </details>
 
-### Update card components
+### Read card from `json`
 
-Updating components and their fields can be done in-place via the `update_item(...)`/`update_action(...)` methods executed on a card object. Please note, that this is only possible for components which got assigned a proper `id` and have been part of the **initial** card setup. IDs for components added to the layout via the update method are not tracked. Hence, updating these components won't have any effect!
+You can create a card directly from an existing JSON file or JSON string using the `from_json()` method.
+
+```json
+// A serialized card stored as a json file
+{
+    "type": "AdaptiveCard",
+    "version": "1.4",
+    "body": [
+        {
+            "type": "TextBlock",
+            "text": "I am a serialized adaptive card!"
+        }
+    ]
+}
+```
 
 ```python
-import adaptive_cards.card_types as types
-from adaptive_cards.actions import ActionOpenUrl
-from adaptive_cards.card import AdaptiveCard
-from adaptive_cards.elements import TextBlock
+from adaptive_cards.card import AdaptiveCard, TextBlock
+
+# Read from a JSON file
+with open("path/to/card.json", "r") as f:
+    card: AdaptiveCard = AdaptiveCard.new().from_json(f.read()).create()
+
+```
+
+This is particularly useful when you have existing card schemas or want to load cards from external sources. The JSON must conform to the adaptive card schema structure, otherwise pydantic will raise validation errors.
+
+You can either extend cards on the fly after parsing it
+
+```python
+
+# Read from a JSON file
+with open("path/to/card.json", "r") as f:
+    card: AdaptiveCard = AdaptiveCard.new().from_json(f.read()).add_item(TextBlock(text="I was added afterwards")).create()
+```
+
+or update it after it has been finally created (see chapter [Update card components](#update-card-components))
+
+### Update card components
+
+Updating components and their fields can be done in-place via the `update_item(...)`/`update_action(...)` methods executed on a card object. Please note, that this is only possible for components which got assigned a proper `id` and have been part of the **initial** card setup. IDs for components added to the layout via the update method are not tracked. Hence, updating these components won't have any effect (e.g. if a nested component is assigned to a field). 
+
+Please note: If multiple components are sharing the same `id` within one card, no error is thrown. In that case, the last found component for the respective `id` is referenced during the update.  
+
+```python
+import adaptive_cards.types
+from adaptive_cards.card import ActionOpenUrl, AdaptiveCard, TextBlock
 
 text_block: TextBlock = TextBlock(
     id="text-id",
@@ -648,6 +694,9 @@ card.update_item(
 )
 card.update_action(id="action-id", url="new-url")
 ```
+
+Card objects created from a JSON file or string can also be updated, given that that the `id` field for components to be updated is set.
+All available `ids` will be mapped during parsing. Duplicates will not be handled but only the last found component is stored. 
 
 Updates will **only succeed** if the following three conditions are fulfilled:
 - ID of an component has been set when the card was created initially
@@ -738,7 +787,8 @@ If you are interested in more comprehensive examples or the actual source code, 
 * [x] Add proper schema validation
 * [x] Add further target framework validators
 * [x] Update card components after creation
-* [ ] Allow reading of json-like schemas
+* [x] Allow reading of json-like schemas
+* [ ] Support Schmema from adaptivecards.microsoft.com
 
 ## Contribution
 
