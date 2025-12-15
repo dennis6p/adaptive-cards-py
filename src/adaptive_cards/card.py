@@ -1,22 +1,119 @@
 """Implementation of the adaptive card type"""
 
 from __future__ import annotations
-from typing import Any, Literal, Optional, Sequence, get_origin, get_args
+
+from typing import (
+    Annotated,
+    Any,
+    List,
+    Literal,
+    Optional,
+    Sequence,
+    Union,
+    get_args,
+    get_origin,
+)
+
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
 from pydantic.alias_generators import to_camel
+from result import Err, Ok, Result
 
-import adaptive_cards.card_types as ct
+import adaptive_cards.types as ct
 from adaptive_cards import utils
-from adaptive_cards.actions import ActionTypes, SelectAction
-from adaptive_cards.containers import ContainerTypes
-from adaptive_cards.elements import Element
-from adaptive_cards.inputs import InputTypes
-from result import Ok, Err, Result
 
 SCHEMA: str = "http://adaptivecards.io/schemas/adaptive-card.json"
 TYPE: str = "AdaptiveCard"
 CardVersion = Literal["1.0", "1.1", "1.2", "1.3", "1.4", "1.5", "1.6"]
 VERSION: CardVersion = "1.0"
+
+InputTypes = Union[
+    "InputText",
+    "InputNumber",
+    "InputDate",
+    "InputTime",
+    "InputToggle",
+    "InputChoiceSet",
+]
+
+Element = Union[
+    "Image",
+    "TextBlock",
+    "Media",
+    "CaptionSource",
+    "RichTextBlock",
+]
+
+ContainerTypes = Union[
+    "ActionSet",
+    "Container",
+    "ColumnSet",
+    "FactSet",
+    "ImageSet",
+    "Table",
+]
+
+ActionTypes = Union[
+    "ActionOpenUrl",
+    "ActionSubmit",
+    "ActionShowCard",
+    "ActionToggleVisibility",
+    "ActionExecute",
+]
+
+SelectAction = Union[
+    "ActionExecute",
+    "ActionOpenUrl",
+    "ActionSubmit",
+    "ActionToggleVisibility",
+]
+
+ItemType = Union[Element, ContainerTypes, InputTypes]
+ActionType = ActionTypes
+
+AnnotatedItemType = Annotated[
+    Union[
+        "InputText",
+        "InputNumber",
+        "InputDate",
+        "InputTime",
+        "InputToggle",
+        "InputChoiceSet",
+        "Image",
+        "TextBlock",
+        "Media",
+        "RichTextBlock",
+        "ActionSet",
+        "Container",
+        "ColumnSet",
+        "FactSet",
+        "ImageSet",
+        "Table",
+    ],
+    Field(discriminator="type"),
+]
+AnnotatedItemNoType = Annotated[Union["CaptionSource"], Field()]
+AnnotatedItem = Annotated[Union[AnnotatedItemType, AnnotatedItemNoType], Field()]
+
+AnnotatedAction = Annotated[
+    Union[
+        "ActionOpenUrl",
+        "ActionSubmit",
+        "ActionShowCard",
+        "ActionToggleVisibility",
+        "ActionExecute",
+    ],
+    Field(discriminator="type"),
+]
+
+AnnotatedSelectAction = Annotated[
+    Union[
+        "ActionExecute",
+        "ActionOpenUrl",
+        "ActionSubmit",
+        "ActionToggleVisibility",
+    ],
+    Field(discriminator="type"),
+]
 
 
 class AdaptiveCardBuilder:
@@ -25,9 +122,65 @@ class AdaptiveCardBuilder:
     def __init__(self) -> None:
         self.__reset()
 
+    @classmethod
+    def __collect_id_mappings(
+        cls, component: Any
+    ) -> dict[str, ItemType] | dict[str, ActionType]:
+        """Collect all IDs from a given component and its children recursively.
+
+        Note:
+            - If ids are not set they will not be collected
+            - If multiple components share the same ID, the last one found will be stored
+
+        Args:
+            component (Any): Component to collect IDs from
+        Returns:
+            dict[str, ItemType] | dict[str, ActionType]: Dictionary with collected IDs and a reference to the component
+        """
+        components: dict[str, ItemType] | dict[str, ActionType] = {
+            "actions": {},
+            "items": {},
+        }
+
+        if component is None:
+            return components
+
+        if isinstance(component, list):
+            for c in component:
+                results = cls.__collect_id_mappings(c)
+                components["actions"].update(results["actions"])
+                components["items"].update(results["items"])
+
+        if isinstance(component, AdaptiveCard):
+            results: dict[str, dict[str, ItemType] | dict[str, ActionType]] = (
+                cls.__collect_id_mappings(
+                    component.body or [] + component.actions or []
+                )
+            )
+            components["actions"].update(results["actions"])
+            components["items"].update(results["items"])
+
+        id = cls.__get_id(component)
+        if isinstance(component, BaseModel):
+            if id := cls.__get_id(component):
+                key = (
+                    "actions" if "Action" in getattr(component, "type", "") else "items"
+                )
+                components[key][id] = component
+
+            for field, _ in component.model_fields.items():
+                value = getattr(component, field)
+                if not value:
+                    continue
+                results = cls.__collect_id_mappings(value)
+                components["actions"].update(results["actions"])
+                components["items"].update(results["items"])
+
+        return components
+
     @staticmethod
     def __get_id(
-        component: Element | ContainerTypes | InputTypes | ActionTypes,
+        component: ItemType | ActionType,
     ) -> str | None:
         if not hasattr(component, "id"):
             return
@@ -36,8 +189,8 @@ class AdaptiveCardBuilder:
 
     def __reset(self) -> None:
         self.__card = AdaptiveCard()
-        self.__items: dict[str, Element | ContainerTypes | InputTypes] = {}
-        self.__actions: dict[str, ActionTypes] = {}
+        self.__items: dict[str, ItemType] = {}
+        self.__actions: dict[str, ActionType] = {}
 
     def version(self, version: CardVersion) -> "AdaptiveCardBuilder":
         """
@@ -234,14 +387,33 @@ class AdaptiveCardBuilder:
         self.__card.msteams = None
         return self
 
-    def add_item(
-        self, item: Element | ContainerTypes | InputTypes
-    ) -> "AdaptiveCardBuilder":
+    def from_json(self, json_data: str) -> "AdaptiveCardBuilder":
+        """
+        Load adaptive card from JSON string
+
+        Args:
+            json_string (str): JSON string representing an adaptive card
+        Returns:
+            AdaptiveCardBuilder: Builder object
+        """
+        self.__card = AdaptiveCard.model_validate_json(
+            json_data,
+        )
+
+        # we have to re-collect all IDs defined in the json file in order to allow updating elements later on
+        collected_ids = AdaptiveCardBuilder.__collect_id_mappings(self.__card)
+
+        self.__items = collected_ids["items"]
+        self.__actions = collected_ids["actions"]
+
+        return self
+
+    def add_item(self, item: ItemType) -> "AdaptiveCardBuilder":
         """
         Add single element, container or input to card
 
         Args:
-            item (Element | ContainerTypes | InputTypes): Item to be added to card
+            item (ItemType): Item to be added to card
 
         Returns:
             AdaptiveCardBuilder: Builder object
@@ -256,9 +428,7 @@ class AdaptiveCardBuilder:
 
         return self
 
-    def add_items(
-        self, items: Sequence[Element | ContainerTypes | InputTypes]
-    ) -> "AdaptiveCardBuilder":
+    def add_items(self, items: Sequence[ItemType]) -> "AdaptiveCardBuilder":
         """
         Add multiple elements, containers or inputs to card
 
@@ -275,12 +445,12 @@ class AdaptiveCardBuilder:
 
         return self
 
-    def add_action(self, action: ActionTypes) -> "AdaptiveCardBuilder":
+    def add_action(self, action: ActionType) -> "AdaptiveCardBuilder":
         """
         Add single action to card
 
         Args:
-            action (ActionTypes): Action to be added
+            action (ActionType): Action to be added
 
         Returns:
             AdaptiveCardBuilder: Builder object
@@ -294,12 +464,12 @@ class AdaptiveCardBuilder:
             self.__actions[id] = action
         return self
 
-    def add_actions(self, actions: list[ActionTypes]) -> "AdaptiveCardBuilder":
+    def add_actions(self, actions: list[ActionType]) -> "AdaptiveCardBuilder":
         """
         Add multiple actions to card
 
         Args:
-            actions (list[ActionTypes]): Actions to be added
+            actions (list[ActionType]): Actions to be added
 
         Returns:
             AdaptiveCardBuilder: Builder object
@@ -341,7 +511,7 @@ class AdaptiveCard(BaseModel):
         refresh: The refresh settings for the card.
         authentication: The authentication settings for the card.
         body: The list of card items.
-        actions: The list of card actions.
+        actions: The list of card
         select_action: The select action for the card.
         fallback_text: The fallback text for the card.
         background_image: The background image for the card.
@@ -355,11 +525,11 @@ class AdaptiveCard(BaseModel):
     """
 
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
-    _items: dict[str, Element | ContainerTypes | InputTypes] = PrivateAttr({})
-    _actions: dict[str, ActionTypes] = PrivateAttr({})
+    _items: dict[str, ItemType] = PrivateAttr({})
+    _actions: dict[str, ActionType] = PrivateAttr({})
 
-    type: str = Field(
-        default=TYPE, json_schema_extra=utils.get_metadata("1.0"), frozen=True
+    type: Literal["AdaptiveCard"] = Field(
+        default="AdaptiveCard", json_schema_extra=utils.get_metadata("1.0"), frozen=True
     )
     version: str = Field(default=VERSION, json_schema_extra=utils.get_metadata("1.0"))
     schema_: str = Field(
@@ -373,13 +543,14 @@ class AdaptiveCard(BaseModel):
     authentication: Optional[ct.Authentication] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.4")
     )
-    body: Optional[list[Element | ContainerTypes | InputTypes]] = Field(
+    body: Optional[List[AnnotatedItem]] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    actions: Optional[list[ActionTypes]] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.0")
+    actions: Optional[List[AnnotatedAction]] = Field(
+        default=None,
+        json_schema_extra=utils.get_metadata("1.0"),
     )
-    select_action: Optional[SelectAction] = Field(
+    select_action: Optional[AnnotatedSelectAction] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.1")
     )
     fallback_text: Optional[str] = Field(
@@ -437,8 +608,7 @@ class AdaptiveCard(BaseModel):
 
     @staticmethod
     def __update(
-        components: dict[str, Element | ContainerTypes | InputTypes]
-        | dict[str, ActionTypes],
+        components: dict[str, AnnotatedItem] | dict[str, AnnotatedAction],
         id: str,
         **kwargs,
     ) -> Result[None, str]:
@@ -529,5 +699,1199 @@ class AdaptiveCard(BaseModel):
 
         return self.model_dump(exclude_none=True, by_alias=True, warnings=False)
 
+
+class Action(BaseModel):
+    # pylint: disable=too-many-instance-attributes
+    """
+    Represents an action that can be performed.
+
+    Attributes:
+        title: An optional string representing the title of the
+        icon_url: An optional string representing the URL of the icon associated with the
+        id: An optional string representing the ID of the
+        style: An optional ActionStyle enum value representing the style of the
+        fallback: An optional fallback AnnotatedAction object representing the fallback action to be
+        performed.
+        tooltip: An optional string representing the tooltip text for the
+        is_enabled: An optional boolean indicating whether the action is enabled or disabled.
+        mode: An optional ActionMode enum value representing the mode of the
+        requires: An optional dictionary mapping string keys to string values representing the
+        requirements for the
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    title: Optional[str] = Field(
+        default=None,
+        json_schema_extra=utils.get_metadata("1.0"),
+    )
+    icon_url: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.1")
+    )
+    id: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))  # pylint: disable=C0103
+    style: Optional[ct.ActionStyle] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    fallback: Optional["AnnotatedAction"] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    tooltip: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.5")
+    )
+    is_enabled: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.5")
+    )
+    mode: Optional[ct.ActionMode] = Field(
+        default=ct.ActionMode.PRIMARY, json_schema_extra=utils.get_metadata("1.5")
+    )
+    requires: Optional[dict[str, str]] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+
+
+class ActionOpenUrl(Action):
+    """
+    Represents an action to open a URL.
+
+    Inherits from Action
+
+    Attributes:
+        url: The URL to be opened.
+        type: The type of the  Default is "Action.OpenUrl".
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    url: str = Field(json_schema_extra=utils.get_metadata("1.0"))
+    type: Literal["Action.OpenUrl"] = Field(
+        default="Action.OpenUrl",
+        json_schema_extra=utils.get_metadata("1.0"),
+        frozen=True,
+    )
+
+
+class ActionSubmit(Action):
+    """
+    Represents an action to submit data.
+
+    Inherits from Action.
+
+    Attributes:
+        type: The type of the  Default is "Action.Submit".
+        data: Optional data associated with the
+        associated_inputs: Optional associated inputs for the
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    type: Literal["Action.Submit"] = Field(
+        default="Action.Submit",
+        json_schema_extra=utils.get_metadata("1.0"),
+        frozen=True,
+    )
+    data: Optional[str | dict[Any, Any]] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    associated_inputs: Optional[ct.AssociatedInputs] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.3")
+    )
+
+
+class ActionShowCard(Action):
+    """
+    Represents an action to show a card.
+
+    Inherits from Action.
+
+    Attributes:
+        type: The type of the  Default is "Action.ShowCard".
+        card: Optional card to show.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    type: Literal["Action.ShowCard"] = Field(
+        default="Action.ShowCard",
+        json_schema_extra=utils.get_metadata("1.0"),
+        frozen=True,
+    )
+
+    card: Optional["AdaptiveCard"] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+
+    # Note: The type hint for 'card' uses a string ("AdaptiveCard") to avoid circular imports.
+    # If you need to use AdaptiveCard at runtime (not just for type checking),
+    # import it inside the method or function where it's needed.
+
+
+class TargetElement(BaseModel):
+    """
+    Represents a target element.
+
+    Attributes:
+        element_id: The ID of the target element.
+        is_visible: Optional flag indicating the visibility of the target element.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    element_id: str = Field(json_schema_extra=utils.get_metadata("1.0"))
+    is_visible: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+
+
+class ActionToggleVisibility(Action):
+    """
+    Represents an action that toggles the visibility of target
+
+    Inherits from Action.
+
+    Attributes:
+        target_elements: A list of TargetElement objects representing the target elements to toggle.
+        type: The type of the action, set to "Action.ToggleVisibility".
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    target_elements: list[TargetElement] = Field(
+        json_schema_extra=utils.get_metadata("1.2")
+    )
+    type: Literal["Action.ToggleVisibility"] = Field(
+        default="Action.ToggleVisibility",
+        json_schema_extra=utils.get_metadata("1.2"),
+        frozen=True,
+    )
+
+
+class ActionExecute(Action):
+    """
+    Represents an action that executes a command or performs an
+
+    Inherits from Action.
+
+    Attributes:
+        type: The type of the action, set to "Action.Execute".
+        verb: An optional string representing the verb of the
+        data: An optional string or Any type representing additional data associated
+        with the
+        associated_inputs: An optional AssociatedInputs object representing associated
+        inputs for the
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    type: Literal["Action.Execute"] = Field(
+        default="Action.Execute",
+        json_schema_extra=utils.get_metadata("1.4"),
+        frozen=True,
+    )
+    verb: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.4")
+    )
+    data: Optional[str | Any] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.4")
+    )
+    associated_inputs: Optional[ct.AssociatedInputs] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.4")
+    )
+
+
+class ContainerBase(BaseModel):
+    """
+    The ContainerBase class represents a base container for elements with various properties.
+
+    Attributes:
+        fallback: The fallback element, if any, to be displayed when the container
+        cannot be rendered.
+        separator: Determines whether a separator should be shown above the container.
+        spacing: The spacing style to be applied within the container.
+        id: The unique identifier of the container.
+        is_visible: Determines whether the container is visible.
+        requires: A dictionary of requirements that must be satisfied for the container
+        to be displayed.
+        height: The height style to be applied to the container.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    fallback: Optional[Element | AnnotatedAction | InputTypes] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    separator: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    spacing: Optional[ct.Spacing] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    # pylint: disable=C0103
+    id: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.2"))
+    is_visible: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    requires: Optional[dict[str, str]] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    height: Optional[ct.BlockElementHeight] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.1")
+    )
+
+
+class ActionSet(ContainerBase):
+    """Represents an action set, a container for a list of actions
+
+    Inherits from ContainerBase.
+
+    Attributes:
+        actions: A list of actions in the action set.
+        type: The type of the action set. Defaults to "ActionSet".
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    type: Literal["ActionSet"] = Field(
+        default="ActionSet", json_schema_extra=utils.get_metadata("1.2"), frozen=True
+    )
+    actions: List[AnnotatedAction] = Field(json_schema_extra=utils.get_metadata("1.2"))
+
+
+class Container(ContainerBase):
+    # pylint: disable=too-many-instance-attributes
+    """Represents a container for elements with various properties.
+
+    Inherits from ContainerBase.
+
+    Attributes:
+        items: A list of elements, sub-containers, or input elements contained within the container.
+        type: The type of the container. Defaults to "Container".
+        select_action: An optional select action associated with the container.
+        style: The style of the container.
+        vertical_content_alignment: The vertical alignment of the container's content.
+        bleed: Determines whether the container bleeds beyond its boundary.
+        background_image: The background image of the container.
+        min_height: The minimum height of the container.
+        rtl: Determines whether the container's content is displayed right-to-left.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    type: Literal["Container"] = Field(
+        default="Container", json_schema_extra=utils.get_metadata("1.0"), frozen=True
+    )
+    items: List[AnnotatedItem] = Field(json_schema_extra=utils.get_metadata("1.0"))
+    select_action: Optional[AnnotatedSelectAction] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.1")
+    )
+    style: Optional[ct.ContainerStyle] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    vertical_content_alignment: Optional[ct.VerticalAlignment] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.1")
+    )
+    bleed: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    background_image: Optional[ct.BackgroundImage | str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    min_height: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    rtl: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.5")
+    )
+
+
+class ColumnSet(ContainerBase):
+    """Represents a set of columns within a container.
+
+    Inherits from ContainerBase.
+
+    Attributes:
+        type: The type of the column set. Defaults to "ColumnSet".
+        columns: An optional list of Column objects within the column set.
+        select_action: An optional select action associated with the column set.
+        style: The style of the column set.
+        bleed: Determines whether the column set bleeds beyond its boundary.
+        min_height: The minimum height of the column set.
+        horizontal_alignment: The horizontal alignment of the column set.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    type: Literal["ColumnSet"] = Field(
+        default="ColumnSet", json_schema_extra=utils.get_metadata("1.0"), frozen=True
+    )
+    columns: Optional[list["Column"]] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    select_action: Optional[AnnotatedSelectAction] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.1")
+    )
+    style: Optional[ct.ContainerStyle] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    bleed: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    min_height: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    horizontal_alignment: Optional[ct.HorizontalAlignment] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+
+
+class Column(ContainerBase):
+    # pylint: disable=too-many-instance-attributes
+    """Represents a column within a container.
+
+    Inherits from ContainerBase.
+
+    Attributes:
+        type: The type of the column. Defaults to "Column".
+        items: An optional list of elements contained within the column.
+        background_image: The background image of the column.
+        bleed: Determines whether the column bleeds beyond its boundary.
+        min_height: The minimum height of the column.
+        rtl: Determines whether the column's content is displayed right-to-left.
+        separator: Determines whether a separator should be shown above the column.
+        spacing: The spacing style to be applied within the column.
+        select_action: An optional select action associated with the column.
+        style: The style of the column.
+        vertical_content_alignment: The vertical alignment of the column's content.
+        width: The width of the column.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    type: Literal["Column"] = Field(
+        default="Column", json_schema_extra=utils.get_metadata("1.0"), frozen=True
+    )
+    items: Optional[list[Element | ContainerTypes | Input]] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    background_image: Optional[ct.BackgroundImage | str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    bleed: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    min_height: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    rtl: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.5")
+    )
+    separator: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    spacing: Optional[ct.Spacing] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    select_action: Optional[AnnotatedSelectAction] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.1")
+    )
+    style: Optional[ct.ContainerStyle] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    vertical_content_alignment: Optional[ct.VerticalAlignment] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.1")
+    )
+    width: Optional[str | int] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+
+
+class FactSet(ContainerBase):
+    """Represents a set of facts within a container.
+
+    Inherits from ContainerBase.
+
+    Attributes:
+        facts: A list of Fact objects within the fact set.
+        type: The type of the fact set. Defaults to "FactSet".
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    type: Literal["FactSet"] = Field(
+        default="FactSet", json_schema_extra=utils.get_metadata("1.0"), frozen=True
+    )
+    facts: list["Fact"] = Field(json_schema_extra=utils.get_metadata("1.0"))
+
+
+class Fact(BaseModel):
+    """Represents a fact.
+
+    Attributes:
+        title: The title of the fact.
+        value: The value of the fact.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    title: str = Field(json_schema_extra=utils.get_metadata("1.0"))
+    value: str = Field(json_schema_extra=utils.get_metadata("1.0"))
+
+
+class ImageSet(ContainerBase):
+    """Represents a set of images within a container.
+
+    Inherits from ContainerBase.
+
+    Attributes:
+        images: A list of Image objects within the image set.
+        type: The type of the image set. Defaults to "ImageSet".
+        image_size: The size of the images within the image set.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    images: list[Image] = Field(json_schema_extra=utils.get_metadata("1.0"))
+    type: Literal["ImageSet"] = Field(
+        default="ImageSet", json_schema_extra=utils.get_metadata("1.2"), frozen=True
+    )
+    image_size: Optional[ct.ImageSize] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+
+
+class TableColumnDefinition(BaseModel):
+    """Represents a definition for a table column.
+
+    Attributes:
+        horizontal_cell_content_alignment: The horizontal alignment of cell content.
+        vertical_cell_content_alignment: The vertical alignment of cell content.
+        width: The width of the table column.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    horizontal_cell_content_alignment: Optional[ct.HorizontalAlignment] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.5")
+    )
+    vertical_cell_content_alignment: Optional[ct.VerticalAlignment] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.5")
+    )
+    width: Optional[str | int] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.5")
+    )
+
+
+class TableRow(BaseModel):
+    """Represents a row within a table.
+
+    Attributes:
+        cells: The cells within the table row.
+        horizontal_cell_content_alignment: The horizontal alignment of cell content.
+        vertical_cell_content_alignment: The vertical alignment of cell content.
+        style: The style of the table row.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    type: Literal["TableRow"] = Field(
+        default="TableRow", json_schema_extra=utils.get_metadata("1.5"), frozen=True
+    )
+    cells: Optional[list["TableCell"]] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.5")
+    )
+    horizontal_cell_content_alignment: Optional[ct.HorizontalAlignment] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.5")
+    )
+    vertical_cell_content_alignment: Optional[ct.VerticalAlignment] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.5")
+    )
+    style: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.5")
+    )
+
+
+class Table(ContainerBase):
+    # pylint: disable=too-many-instance-attributes
+    """Represents a table within a container.
+
+    Inherits from ContainerBase.
+
+    Attributes:
+        type: The type of the table. Defaults to "Table".
+        columns: The column definitions of the table.
+        rows: The rows of the table.
+        first_row_as_header: Whether the first row should be treated as a header.
+        show_grid_lines: Whether to show grid lines in the table.
+        grid_style: The style of the table grid.
+        horizontal_cell_content_alignment: The horizontal alignment of cell content.
+        vertical_cell_content_alignment: The vertical alignment of cell content.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    type: Literal["Table"] = Field(
+        default="Table", json_schema_extra=utils.get_metadata("1.5")
+    )
+    columns: Optional[list[TableColumnDefinition]] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.5")
+    )
+    rows: Optional[list[TableRow]] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.5")
+    )
+    first_row_as_header: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.5")
+    )
+    show_grid_lines: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.5")
+    )
+    grid_style: Optional[ct.ContainerStyle] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.5")
+    )
+    horizontal_cell_content_alignment: Optional[ct.HorizontalAlignment] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.5")
+    )
+    vertical_cell_content_alignment: Optional[ct.VerticalAlignment] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.5")
+    )
+
+
+class TableCell(BaseModel):
+    # pylint: disable=too-many-instance-attributes
+    """Represents a cell within a table.
+
+    Attributes:
+        items: The elements within the cell.
+        select_action: The action to perform when the cell is selected.
+        style: The style of the cell.
+        vertical_content_alignment: The vertical alignment of cell content.
+        bleed: Whether the cell should bleed beyond its boundaries.
+        background_image: The background image of the cell.
+        min_height: The minimum height of the cell.
+        rtl: Whether the cell should be rendered in right-to-left direction.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    type: Literal["TableCell"] = Field(
+        default="TableCell", json_schema_extra=utils.get_metadata("1.5"), frozen=True
+    )
+    items: list[Element] = Field(json_schema_extra=utils.get_metadata("1.5"))
+    select_action: Optional[AnnotatedSelectAction] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.1")
+    )
+    style: Optional[ct.ContainerStyle] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.5")
+    )
+    vertical_content_alignment: Optional[ct.VerticalAlignment] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.1")
+    )
+    bleed: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    background_image: Optional[ct.BackgroundImage | str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    min_height: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    rtl: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.5")
+    )
+
+
+class CardElement(BaseModel):
+    """
+    Represents a card element.
+
+    Attributes:
+        Element: The element of the card.
+        separator: Indicates whether a separator should be displayed before the element.
+        spacing: The spacing for the element.
+        id: The ID of the element.
+        is_visible: Indicates whether the element is visible.
+        requires: The requirements for the element.
+        height: The height of the element.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    element: Optional[Any | Element] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    separator: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    spacing: Optional[ct.Spacing] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    id: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))  # pylint: disable=C0103
+    is_visible: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    requires: Optional[dict[str, str]] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    height: Optional[ct.BlockElementHeight] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.1")
+    )
+
+
+class TextBlock(CardElement):
+    # pylint: disable=too-many-instance-attributes
+    """
+    Represents a text block card element.
+
+    Inherits from CardElement.
+
+    Attributes:
+        text: The text content of the text block.
+        type: The type of the card element.
+        color: The color of the text block.
+        font_type: The font type of the text block.
+        horizontal_alignment: The horizontal alignment of the text block.
+        is_subtle: Indicates whether the text block has subtle styling.
+        max_lines: The maximum number of lines to display for the text block.
+        size: The font size of the text block.
+        weight: The font weight of the text block.
+        wrap: Indicates whether the text should wrap within the text block.
+        style: The style of the text block.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    text: str = Field(json_schema_extra=utils.get_metadata("1.0"))
+    type: Literal["TextBlock"] = Field(
+        default="TextBlock", json_schema_extra=utils.get_metadata("1.0"), frozen=True
+    )
+    color: Optional[ct.Colors] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    font_type: Optional[ct.FontType] = Field(
+        default=None,
+        json_schema_extra=utils.get_metadata("1.2"),
+    )
+    horizontal_alignment: Optional[ct.HorizontalAlignment] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    is_subtle: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    max_lines: Optional[int] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    size: Optional[ct.FontSize] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    weight: Optional[ct.FontWeight] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    wrap: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    style: Optional[ct.TextBlockStyle] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.5")
+    )
+
+
+class Image(CardElement):
+    # pylint: disable=too-many-instance-attributes
+    """
+    Represents an image card element.
+
+    Inherits from CardElement.
+
+    Attributes:
+        url: The URL of the image.
+        type: The type of the card element.
+        alt_text: The alternative text for the image.
+        background_color: The background color of the image.
+        height: The height of the image.
+        horizontal_alignment: The horizontal alignment of the image.
+        select_action: The select action associated with the image.
+        size: The size of the image.
+        style: The style of the image.
+        width: The width of the image.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    url: str = Field(json_schema_extra=utils.get_metadata("1.0"))
+    type: Literal["Image"] = Field(
+        default="Image", json_schema_extra=utils.get_metadata("1.0"), frozen=True
+    )
+    alt_text: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    background_color: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.1")
+    )
+    height: Optional[str | ct.BlockElementHeight] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.1")
+    )
+    horizontal_alignment: Optional[ct.HorizontalAlignment] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    select_action: Optional[AnnotatedSelectAction] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.1")
+    )
+    size: Optional[ct.ImageSize] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    style: Optional[ct.ImageStyle] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    width: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.1")
+    )
+
+
+class Media(CardElement):
+    """
+    Represents a media card element.
+
+    Inherits from CardElement.
+
+    Attributes:
+        type: The type of the card element.
+        sources: The list of media sources.
+        poster: The poster image URL.
+        alt_text: The alternative text for the media.
+        caption_sources: The list of caption sources.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    type: Literal["Media"] = Field(
+        default="Media", json_schema_extra=utils.get_metadata("1.1"), frozen=True
+    )
+    sources: list["MediaSource"] = Field(json_schema_extra=utils.get_metadata("1.1"))
+    poster: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.1")
+    )
+    alt_text: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.1")
+    )
+    caption_sources: Optional[list["CaptionSource"]] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.6")
+    )
+
+
+class MediaSource(BaseModel):
+    """
+    Represents a media source.
+
+    Attributes:
+        url: The URL of the media source.
+        mime_type: The MIME type of the media source.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    url: str = Field(json_schema_extra=utils.get_metadata("1.1"))
+    mime_type: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.1")
+    )
+
+
+class CaptionSource(BaseModel):
+    """
+    Represents a caption source.
+
+    Attributes:
+        mime_type: The MIME type of the caption source.
+        url: The URL of the caption source.
+        label: The label of the caption source.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    mime_type: str = Field(json_schema_extra=utils.get_metadata("1.6"))
+    url: str = Field(json_schema_extra=utils.get_metadata("1.6"))
+    label: str = Field(json_schema_extra=utils.get_metadata("1.6"))
+
+
+class RichTextBlock(CardElement):
+    """
+    Represents a rich text block.
+
+    Inherits from CardElement.
+
+    Attributes:
+        inlines: A list of inlines in the rich text block. Each inline can be a string
+        or a TextRun object.
+        type: The type of the rich text block.
+        horizontal_alignment: The horizontal alignment of the rich text block.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    inlines: list[Union[str, "TextRun"]] = Field(
+        json_schema_extra=utils.get_metadata("1.2")
+    )
+    type: Literal["RichTextBlock"] = Field(
+        default="RichTextBlock",
+        json_schema_extra=utils.get_metadata("1.2"),
+        frozen=True,
+    )
+    horizontal_alignment: Optional[ct.HorizontalAlignment] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+
+
+class TextRun(BaseModel):
+    # pylint: disable=too-many-instance-attributes
+    """
+    Represents a text run.
+
+    Attributes:
+        text: The text content of the text run.
+        type: The type of the text run.
+        color: The color of the text run.
+        font_type: The font type of the text run.
+        highlight: Specifies whether the text run should be highlighted.
+        is_subtle: Specifies whether the text run is subtle.
+        italic: Specifies whether the text run is italicized.
+        select_action: The select action associated with the text run.
+        size: The font size of the text run.
+        strikethrough: Specifies whether the text run should have a strikethrough effect.
+        underline: Specifies whether the text run should be underlined.
+        weight: The font weight of the text run.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    type: Literal["TextRun"] = Field(
+        default="TextRun", json_schema_extra=utils.get_metadata("1.2"), frozen=True
+    )
+    text: str = Field(json_schema_extra=utils.get_metadata("1.2"))
+    color: Optional[ct.Colors] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    font_type: Optional[ct.FontType] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    highlight: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    is_subtle: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    italic: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    select_action: Optional[AnnotatedSelectAction] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    size: Optional[ct.FontSize] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    strikethrough: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    underline: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.3")
+    )
+    weight: Optional[ct.FontWeight] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+
+
+class Input(BaseModel):
+    # pylint: disable=too-many-instance-attributes
+    """
+    Represents an input.
+
+    Attributes:
+        error_message: The error message for the input.
+        is_required: Specifies whether the input is required.
+        label: The label of the input.
+        fallback: The fallback input.
+        height: The height of the input.
+        separator: Specifies whether a separator should be displayed before the input.
+        spacing: The spacing of the input.
+        is_visible: Specifies whether the input is visible.
+        requires: The requirements for the input.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    error_message: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.3")
+    )
+    is_required: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.3")
+    )
+    label: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.3")
+    )
+    fallback: Optional[InputTypes] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    height: Optional[ct.BlockElementHeight] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.1")
+    )
+    separator: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    spacing: Optional[ct.Spacing] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    is_visible: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    requires: Optional[dict[str, str]] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+
+
+class InputText(Input):
+    # pylint: disable=too-many-instance-attributes
+    """
+    Represents a text input.
+
+    Inherits from Input.
+
+    Attributes:
+        id: The ID of the input.
+        type: The type of the input.
+        is_multiline: Specifies whether the input supports multiline text.
+        max_length: The maximum length of the input text.
+        placeholder: The placeholder text for the input.
+        regex: The regular expression pattern for validating the input text.
+        style: The style of the text input.
+        inline_action: The inline action associated with the input.
+        value: The initial value of the input.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    type: Literal["Input.Text"] = Field(
+        default="Input.Text", json_schema_extra=utils.get_metadata("1.0"), frozen=True
+    )
+    id: str = Field(json_schema_extra=utils.get_metadata("1.0"))  # pylint: disable=C0103
+    is_multiline: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    max_length: Optional[int] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    placeholder: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    regex: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.3")
+    )
+    style: Optional[ct.TextInputStyle] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    inline_action: Optional[AnnotatedSelectAction] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+    value: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+
+
+class InputNumber(Input):
+    """
+    Represents an input field for numerical values.
+
+    Inherits from Input.
+
+    Attributes:
+        id: The ID of the input.
+        type: The type of the input, which is "Input.Number".
+        max: The maximum value allowed for the input. Optional.
+        min: The minimum value allowed for the input. Optional.
+        placeholder: The placeholder text for the input. Optional.
+        value: The initial value of the input. Optional.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    type: Literal["Input.Number"] = Field(
+        default="Input.Number", json_schema_extra=utils.get_metadata("1.0"), frozen=True
+    )
+    id: str = Field(json_schema_extra=utils.get_metadata("1.0"))  # pylint: disable=C0103
+    max: Optional[int] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    min: Optional[int] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    placeholder: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    value: Optional[int] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+
+
+class InputDate(Input):
+    """
+    Represents an input field for date values.
+
+    Inherits from Input.
+
+    Attributes:
+        id: The ID of the input.
+        type: The type of the input, which is "Input.Date".
+        max: The maximum date allowed for the input. Optional.
+        placeholder: The placeholder text for the input. Optional.
+        value: The initial value of the input. Optional.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    id: str = Field(json_schema_extra=utils.get_metadata("1.0"))  # pylint: disable=C0103
+    type: Literal["Input.Date"] = Field(
+        default="Input.Date", json_schema_extra=utils.get_metadata("1.0"), frozen=True
+    )
+    max: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    placeholder: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    value: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+
+
+class InputTime(Input):
+    """
+    Represents an input field for time values.
+
+    Inherits from Input.
+
+    Attributes:
+        id: The ID of the input.
+        type: The type of the input, which is "Input.Time".
+        max: The maximum time allowed for the input. Optional.
+        min: The minimum time allowed for the input. Optional.
+        placeholder: The placeholder text for the input. Optional.
+        value: The initial value of the input. Optional.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    type: Literal["Input.Time"] = Field(
+        default="Input.Time", json_schema_extra=utils.get_metadata("1.0"), frozen=True
+    )
+    id: str = Field(json_schema_extra=utils.get_metadata("1.0"))  # pylint: disable=C0103
+    max: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    min: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    placeholder: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    value: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+
+
+class InputToggle(Input):
+    """
+    Represents a toggle input field.
+
+    Inherits from Input.
+
+    Attributes:
+        id: The ID of the input.
+        title: The title or label for the input.
+        type: The type of the input, which is "Input.Toggle".
+        value: The initial value of the input. Optional.
+        value_off: The value when the toggle is turned off. Optional.
+        value_on: The value when the toggle is turned on. Optional.
+        wrap: Indicates whether the input should wrap to the next line if needed. Optional.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    type: Literal["Input.Toggle"] = Field(
+        default="Input.Toggle", json_schema_extra=utils.get_metadata("1.0"), frozen=True
+    )
+    id: str = Field(json_schema_extra=utils.get_metadata("1.0"))  # pylint: disable=C0103
+    title: str = Field(json_schema_extra=utils.get_metadata("1.0"))
+    value: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    value_off: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    value_on: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    wrap: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+
+
+class InputChoiceSet(Input):
+    # pylint: disable=too-many-instance-attributes
+    """
+    Represents a choice set input field.
+
+    Inherits from Input.
+
+    Attributes:
+        id: The ID of the input.
+        type: The type of the input, which is "Input.ChoiceSet".
+        choices: The list of choices for the input. Optional.
+        is_multi_select: Indicates whether multiple choices can be selected. Optional.
+        style: The style of the choice input. Optional.
+        value: The initial value of the input. Optional.
+        placeholder: The placeholder text for the input. Optional.
+        wrap: Indicates whether the input should wrap to the next line if needed. Optional.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    type: Literal["Input.ChoiceSet"] = Field(
+        default="Input.ChoiceSet",
+        json_schema_extra=utils.get_metadata("1.0"),
+        frozen=True,
+    )
+    id: str = Field(json_schema_extra=utils.get_metadata("1.0"))  # pylint: disable=C0103
+    choices: Optional[list["InputChoice"]] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    is_multi_select: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    style: Optional[ct.ChoiceInputStyle] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    value: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    placeholder: Optional[str] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.0")
+    )
+    wrap: Optional[bool] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+
+
+class InputChoice(BaseModel):
+    """
+    Represents a choice within an input choice set.
+
+    Attributes:
+        title: The title or display text of the choice.
+        value: The value associated with the choice.
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    title: str = Field(json_schema_extra=utils.get_metadata("1.0"))
+    value: str = Field(json_schema_extra=utils.get_metadata("1.0"))
+
+
+Action.model_rebuild()
+ContainerBase.model_rebuild()
+Input.model_rebuild()
 
 AdaptiveCard.model_rebuild()
