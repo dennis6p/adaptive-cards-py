@@ -630,20 +630,6 @@ print(f"Validation was successful: {is_ok(result)}")
 
 You can create a card directly from an existing JSON file or JSON string using the `from_json()` method.
 
-```json
-// A serialized card stored as a json file
-{
-    "type": "AdaptiveCard",
-    "version": "1.4",
-    "body": [
-        {
-            "type": "TextBlock",
-            "text": "I am a serialized adaptive card!"
-        }
-    ]
-}
-```
-
 ```python
 from adaptive_cards.card import AdaptiveCard, TextBlock
 
@@ -661,7 +647,12 @@ You can either extend cards on the fly after parsing it
 
 # Read from a JSON file
 with open("path/to/card.json", "r") as f:
-    card: AdaptiveCard = AdaptiveCard.new().from_json(f.read()).add_item(TextBlock(text="I was added afterwards")).create()
+    card: AdaptiveCard = (
+        AdaptiveCard.new()
+        .from_json(f.read())
+        .add_item(TextBlock(text="I was added afterwards"))
+        .create()
+    )
 ```
 
 or update it after it has been finally created (see chapter [Update card components](#update-card-components))
