@@ -1,16 +1,16 @@
 """Tests for validation module"""
 
-from adaptive_cards.card import AdaptiveCard
+from pydantic import BaseModel, Field
+from result import is_err, is_ok
+
+from adaptive_cards import utils
+from adaptive_cards.card import AdaptiveCard, TextBlock
+from adaptive_cards.types import FontType
 from adaptive_cards.validation import (
     CardValidator,
     CardValidatorFactory,
     ValidationFailure,
 )
-from adaptive_cards.elements import TextBlock
-from adaptive_cards.card_types import FontType
-from adaptive_cards import utils
-from result import is_ok, is_err
-from pydantic import BaseModel, Field
 
 
 class TestCardValidation:
