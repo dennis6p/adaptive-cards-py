@@ -635,7 +635,7 @@ from adaptive_cards.card import AdaptiveCard, TextBlock
 
 # Read from a JSON file
 with open("path/to/card.json", "r") as f:
-    card: AdaptiveCard = AdaptiveCard.new().from_json(f.read()).create()
+    card: AdaptiveCard = AdaptiveCard.from_json(f.read()).create()
 
 ```
 

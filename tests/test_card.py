@@ -23,7 +23,8 @@ class TestAdaptiveCard:
 
     def test_create_card_from_file(self, sample_card_json):
         """Test creating an AdaptiveCard from a JSON file and checking its type, version, body, and actions."""
-        card = AdaptiveCard.new().from_json(sample_card_json).create()
+        card = AdaptiveCard.from_json(sample_card_json).create()
+
         assert card.type == "AdaptiveCard"
         assert card.version == "1.6"
         assert card.body is not None
@@ -32,8 +33,7 @@ class TestAdaptiveCard:
     def test_create_card_from_file_and_extend(self, sample_card_small_json):
         """Test creating an AdaptiveCard from a JSON file and adding an item afterwards."""
         card = (
-            AdaptiveCard.new()
-            .from_json(sample_card_small_json)
+            AdaptiveCard.from_json(sample_card_small_json)
             .add_item(TextBlock(text="added_afterwards", id="added_afterwards"))
             .create()
         )
@@ -43,7 +43,7 @@ class TestAdaptiveCard:
 
     def test_create_card_from_file_and_update(self, sample_card_small_json):
         """Test creating an AdaptiveCard from a JSON file and updating an item's field afterwards."""
-        card = AdaptiveCard.new().from_json(sample_card_small_json).create()
+        card = AdaptiveCard.from_json(sample_card_small_json).create()
         assert len(card.body) == 1
         assert card._items.get("id_1") is not None
         assert card._items["id_1"].text == "Welcome to Adaptive Cards!"
@@ -53,7 +53,7 @@ class TestAdaptiveCard:
 
     def test_create_card_from_file_all_items_found(self, sample_card_json):
         """Test that all items from the sample card are found by their IDs and types."""
-        card = AdaptiveCard.new().from_json(sample_card_json).create()
+        card = AdaptiveCard.from_json(sample_card_json).create()
         items: dict[str, str] = {
             "id_2": "Container",
             "id_3": "ColumnSet",
@@ -109,7 +109,7 @@ class TestAdaptiveCard:
 
     def test_create_card_from_file_all_actions_found(self, sample_card_json):
         """Test that all actions from the sample card are found by their IDs and types."""
-        card = AdaptiveCard.new().from_json(sample_card_json).create()
+        card = AdaptiveCard.from_json(sample_card_json).create()
         actions: dict[str, str] = {
             "id_13": "ActionSet",
             "id_14": "Action.OpenUrl",
@@ -151,7 +151,7 @@ class TestAdaptiveCard:
 
     def test_update_item_from_json_success(self, sample_card_json):
         """Test updating an item's field value successfully."""
-        card = AdaptiveCard.new().from_json(sample_card_json).create()
+        card = AdaptiveCard.from_json(sample_card_json).create()
         assert card._items["id_40"].text == "Total Expense Amount \t"
 
         result = card.update_item("id_40", text="Updated TextBlock")

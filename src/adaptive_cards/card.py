@@ -119,8 +119,8 @@ AnnotatedSelectAction = Annotated[
 class AdaptiveCardBuilder:
     """Builder class for creating adaptive cards dynamically"""
 
-    def __init__(self) -> None:
-        self.__reset()
+    def __init__(self, card: AdaptiveCard | None = None) -> None:
+        self.__init(card)
 
     @classmethod
     def __collect_id_mappings(
@@ -187,10 +187,18 @@ class AdaptiveCardBuilder:
 
         return component.id  # type: ignore -> safe as attribute is checked before
 
-    def __reset(self) -> None:
-        self.__card = AdaptiveCard()
+    def __init(self, card: AdaptiveCard | None) -> None:
+        self.__card = card or AdaptiveCard()
         self.__items: dict[str, ItemType] = {}
         self.__actions: dict[str, ActionType] = {}
+
+        if not card:
+            return
+
+        # ids might exist if a pre-initialized card has been handed over -> e.g. read from json
+        collected_ids = AdaptiveCardBuilder.__collect_id_mappings(self.__card)
+        self.__items = collected_ids["items"]
+        self.__actions = collected_ids["actions"]
 
     def version(self, version: CardVersion) -> "AdaptiveCardBuilder":
         """
@@ -387,27 +395,6 @@ class AdaptiveCardBuilder:
         self.__card.msteams = None
         return self
 
-    def from_json(self, json_data: str) -> "AdaptiveCardBuilder":
-        """
-        Load adaptive card from JSON string
-
-        Args:
-            json_string (str): JSON string representing an adaptive card
-        Returns:
-            AdaptiveCardBuilder: Builder object
-        """
-        self.__card = AdaptiveCard.model_validate_json(
-            json_data,
-        )
-
-        # we have to re-collect all IDs defined in the json file in order to allow updating elements later on
-        collected_ids = AdaptiveCardBuilder.__collect_id_mappings(self.__card)
-
-        self.__items = collected_ids["items"]
-        self.__actions = collected_ids["actions"]
-
-        return self
-
     def add_item(self, item: ItemType) -> "AdaptiveCardBuilder":
         """
         Add single element, container or input to card
@@ -585,17 +572,6 @@ class AdaptiveCard(ComponentBaseModel):
     )
 
     @staticmethod
-    def new() -> AdaptiveCardBuilder:
-        """
-        Create a new adaptive card
-
-        Returns:
-             AdaptiveCardBuilder: A builder object which allows to set up an adaptive card
-                                  step by step.
-        """
-        return AdaptiveCardBuilder()
-
-    @staticmethod
     def __get_field_type_from_annotation(annotation: Any) -> Any:
         """Determine a fields type from its annotation.
 
@@ -642,6 +618,41 @@ class AdaptiveCard(ComponentBaseModel):
 
             setattr(components[id], field, value)
         return Ok(None)
+
+    @staticmethod
+    def new() -> AdaptiveCardBuilder:
+        """
+        Create a new adaptive card
+
+        Returns:
+             AdaptiveCardBuilder: A builder object which allows to set up an adaptive card
+                                  step by step.
+        """
+        return AdaptiveCardBuilder()
+
+    @staticmethod
+    def from_json(json_data: str) -> AdaptiveCardBuilder:
+        """Load and validate and existing card from a json string
+
+        Examples:
+            ````python
+            with open("path/to/card.json") as f:
+                json_string = f.read()
+
+            AdaptiveCard.from_json(json_string).add_item(TextBox(text="Hello")).create()
+            ```
+
+        Args:
+            json_data (str): Card as serialized json string
+
+        AdaptiveCardBuilder: A builder object which allows to set up an adaptive card
+                             step by step.
+        """
+        card: AdaptiveCard = AdaptiveCard.model_validate_json(
+            json_data,
+        )
+
+        return AdaptiveCardBuilder(card)
 
     def update_action(self, id: str, **kwargs) -> Result[None, str]:
         """Update an action's field value
