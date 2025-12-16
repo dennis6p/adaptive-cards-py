@@ -18,41 +18,33 @@ from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
 from pydantic.alias_generators import to_camel
 from result import Err, Ok, Result
 
-import adaptive_cards.types as ct
-from adaptive_cards import utils
+from adaptive_cards import types, utils
 
 SCHEMA: str = "http://adaptivecards.io/schemas/adaptive-card.json"
 TYPE: str = "AdaptiveCard"
 CardVersion = Literal["1.0", "1.1", "1.2", "1.3", "1.4", "1.5", "1.6"]
 VERSION: CardVersion = "1.0"
 
-InputTypes = Union[
-    "InputText",
-    "InputNumber",
+ElementT = Union[
+    "ActionSet",
+    "ColumnSet",
+    "Container",
+    "FactSet",
+    "Image",
+    "ImageSet",
+    "InputChoiceSet",
     "InputDate",
+    "InputNumber",
+    "InputText",
     "InputTime",
     "InputToggle",
-    "InputChoiceSet",
-]
-
-Element = Union[
-    "Image",
-    "TextBlock",
     "Media",
-    "CaptionSource",
     "RichTextBlock",
-]
-
-ContainerTypes = Union[
-    "ActionSet",
-    "Container",
-    "ColumnSet",
-    "FactSet",
-    "ImageSet",
     "Table",
+    "TextBlock",
 ]
 
-ActionTypes = Union[
+ActionT = Union[
     "ActionOpenUrl",
     "ActionSubmit",
     "ActionShowCard",
@@ -60,60 +52,31 @@ ActionTypes = Union[
     "ActionExecute",
 ]
 
-SelectAction = Union[
+SelectActionT = Union[
     "ActionExecute",
     "ActionOpenUrl",
     "ActionSubmit",
     "ActionToggleVisibility",
 ]
 
-ItemType = Union[Element, ContainerTypes, InputTypes]
-ActionType = ActionTypes
-
-AnnotatedItemType = Annotated[
-    Union[
-        "InputText",
-        "InputNumber",
-        "InputDate",
-        "InputTime",
-        "InputToggle",
-        "InputChoiceSet",
-        "Image",
-        "TextBlock",
-        "Media",
-        "RichTextBlock",
-        "ActionSet",
-        "Container",
-        "ColumnSet",
-        "FactSet",
-        "ImageSet",
-        "Table",
-    ],
+ElementAnnotated = Annotated[
+    ElementT,
     Field(discriminator="type"),
 ]
-AnnotatedItemNoType = Annotated[Union["CaptionSource"], Field()]
-AnnotatedItem = Annotated[Union[AnnotatedItemType, AnnotatedItemNoType], Field()]
+CaptionSourceAnnotated = Annotated[Union["CaptionSource"], Field()]
 
-AnnotatedAction = Annotated[
-    Union[
-        "ActionOpenUrl",
-        "ActionSubmit",
-        "ActionShowCard",
-        "ActionToggleVisibility",
-        "ActionExecute",
-    ],
+ActionAnnotated = Annotated[
+    ActionT,
     Field(discriminator="type"),
 ]
 
-AnnotatedSelectAction = Annotated[
-    Union[
-        "ActionExecute",
-        "ActionOpenUrl",
-        "ActionSubmit",
-        "ActionToggleVisibility",
-    ],
+SelectActionAnnotated = Annotated[
+    SelectActionT,
     Field(discriminator="type"),
 ]
+
+
+_ComponentsT = dict[Literal["items", "actions"], dict[str, Any]]
 
 
 class AdaptiveCardBuilder:
@@ -123,9 +86,7 @@ class AdaptiveCardBuilder:
         self.__init(card)
 
     @classmethod
-    def __collect_id_mappings(
-        cls, component: Any
-    ) -> dict[str, ItemType] | dict[str, ActionType]:
+    def __collect_id_mappings(cls, component: Any) -> _ComponentsT:
         """Collect all IDs from a given component and its children recursively.
 
         Note:
@@ -135,11 +96,11 @@ class AdaptiveCardBuilder:
         Args:
             component (Any): Component to collect IDs from
         Returns:
-            dict[str, ItemType] | dict[str, ActionType]: Dictionary with collected IDs and a reference to the component
+           _ComponentsT: Dictionary with collected IDs and a reference to the component
         """
-        components: dict[str, ItemType] | dict[str, ActionType] = {
-            "actions": {},
+        components: _ComponentsT = {
             "items": {},
+            "actions": {},
         }
 
         if component is None:
@@ -152,17 +113,15 @@ class AdaptiveCardBuilder:
                 components["items"].update(results["items"])
 
         if isinstance(component, AdaptiveCard):
-            results: dict[str, dict[str, ItemType] | dict[str, ActionType]] = (
-                cls.__collect_id_mappings(
-                    component.body or [] + component.actions or []
-                )
-            )
+            body: list[ElementAnnotated] = component.body or []
+            actions: list[ActionAnnotated] = component.actions or []
+            results: _ComponentsT = cls.__collect_id_mappings(body + actions)
             components["actions"].update(results["actions"])
             components["items"].update(results["items"])
 
-        id = cls.__get_id(component)
+        id = cls.__get_id(component)  # type: ignore
         if isinstance(component, BaseModel):
-            if id := cls.__get_id(component):
+            if id := cls.__get_id(component):  # type: ignore
                 key = (
                     "actions" if "Action" in getattr(component, "type", "") else "items"
                 )
@@ -180,7 +139,7 @@ class AdaptiveCardBuilder:
 
     @staticmethod
     def __get_id(
-        component: ItemType | ActionType,
+        component: AdaptiveCard | ElementAnnotated | ActionAnnotated,
     ) -> str | None:
         if not hasattr(component, "id"):
             return
@@ -189,8 +148,8 @@ class AdaptiveCardBuilder:
 
     def __init(self, card: AdaptiveCard | None) -> None:
         self.__card = card or AdaptiveCard()
-        self.__items: dict[str, ItemType] = {}
-        self.__actions: dict[str, ActionType] = {}
+        self.__items: dict[str, Any] = {}
+        self.__actions: dict[str, Any] = {}
 
         if not card:
             return
@@ -213,12 +172,12 @@ class AdaptiveCardBuilder:
         self.__card.version = version
         return self
 
-    def refresh(self, refresh: ct.Refresh) -> "AdaptiveCardBuilder":
+    def refresh(self, refresh: types.Refresh) -> "AdaptiveCardBuilder":
         """
         Set refresh mode
 
         Args:
-            refresh (ct.Refresh): Refresh mode
+            refresh (types.Refresh): Refresh mode
 
         Returns:
             AdaptiveCardBuilder: Builder object
@@ -227,13 +186,13 @@ class AdaptiveCardBuilder:
         return self
 
     def authentication(
-        self, authentication: ct.Authentication
+        self, authentication: types.Authentication
     ) -> "AdaptiveCardBuilder":
         """
         Set authentication mode
 
         Args:
-            authentication (ct.Authentication): Authentication mode
+            authentication (types.Authentication): Authentication mode
 
         Returns:
             AdaptiveCardBuilder: Builder object
@@ -241,12 +200,12 @@ class AdaptiveCardBuilder:
         self.__card.authentication = authentication
         return self
 
-    def select_action(self, select_action: SelectAction) -> "AdaptiveCardBuilder":
+    def select_action(self, select_action: SelectActionT) -> "AdaptiveCardBuilder":
         """
         Set select_action component for card
 
         Args:
-            select_action (SelectAction): Action component when selected
+            select_action (SelectActionT): Action component when selected
 
         Returns:
             AdaptiveCardBuilder: Builder object
@@ -268,13 +227,13 @@ class AdaptiveCardBuilder:
         return self
 
     def background_image(
-        self, background_image: ct.BackgroundImage
+        self, background_image: types.BackgroundImage
     ) -> "AdaptiveCardBuilder":
         """
         Set background image for card
 
         Args:
-            background_image (ct.BackgroundImage): Image show as background
+            background_image (types.BackgroundImage): Image show as background
 
         Returns:
             AdaptiveCardBuilder: Builder object
@@ -282,12 +241,12 @@ class AdaptiveCardBuilder:
         self.__card.background_image = background_image
         return self
 
-    def metadata(self, metadata: ct.Metadata) -> "AdaptiveCardBuilder":
+    def metadata(self, metadata: types.Metadata) -> "AdaptiveCardBuilder":
         """
         Set additional metadata for card
 
         Args:
-            metadata (ct.Metadata): Object with additional metadata
+            metadata (types.Metadata): Object with additional metadata
 
         Returns:
             AdaptiveCardBuilder: Builder object
@@ -348,13 +307,13 @@ class AdaptiveCardBuilder:
         return self
 
     def vertical_content_alignment(
-        self, vertical_content_align: ct.VerticalAlignment
+        self, vertical_content_align: types.VerticalAlignment
     ) -> "AdaptiveCardBuilder":
         """
         Set vertical alignment for card
 
         Args:
-            vertical_content_align (ct.VerticalAlignment): Vertical alignment of content
+            vertical_content_align (types.VerticalAlignment): Vertical alignment of content
 
         Returns:
             AdaptiveCardBuilder: Builder object
@@ -375,7 +334,7 @@ class AdaptiveCardBuilder:
         self.__card.schema_ = schema
         return self
 
-    def width(self, width: ct.MSTeamsCardWidth) -> "AdaptiveCardBuilder":
+    def width(self, width: types.MSTeamsCardWidth) -> "AdaptiveCardBuilder":
         """
         Set card width for target framework. Please note, changing this property
         will only take affect in MS Teams. Other frameworks will simply ignore this
@@ -388,19 +347,19 @@ class AdaptiveCardBuilder:
         Returns:
             AdaptiveCardBuilder: Builder object
         """
-        if width == ct.MSTeamsCardWidth.FULL:
-            self.__card.msteams = ct.MSTeams(width=width)
+        if width == types.MSTeamsCardWidth.FULL:
+            self.__card.msteams = types.MSTeams(width=width)
             return self
 
         self.__card.msteams = None
         return self
 
-    def add_item(self, item: ItemType) -> "AdaptiveCardBuilder":
+    def add_item(self, item: ElementAnnotated) -> "AdaptiveCardBuilder":
         """
         Add single element, container or input to card
 
         Args:
-            item (ItemType): Item to be added to card
+            item (ElementAnnotated): Item to be added to card
 
         Returns:
             AdaptiveCardBuilder: Builder object
@@ -415,12 +374,12 @@ class AdaptiveCardBuilder:
 
         return self
 
-    def add_items(self, items: Sequence[ItemType]) -> "AdaptiveCardBuilder":
+    def add_items(self, items: Sequence[ElementAnnotated]) -> "AdaptiveCardBuilder":
         """
         Add multiple elements, containers or inputs to card
 
         Args:
-            items (list[Element  |  ContainerTypes  |  InputTypes]): Items to be added to card
+            items (Sequence[ElementAnnotated]): Items to be added to card
 
         Returns:
             AdaptiveCardBuilder: Builder object
@@ -432,12 +391,12 @@ class AdaptiveCardBuilder:
 
         return self
 
-    def add_action(self, action: ActionType) -> "AdaptiveCardBuilder":
+    def add_action(self, action: ActionAnnotated) -> "AdaptiveCardBuilder":
         """
         Add single action to card
 
         Args:
-            action (ActionType): Action to be added
+            action (ActionAnnotated): Action to be added
 
         Returns:
             AdaptiveCardBuilder: Builder object
@@ -451,12 +410,12 @@ class AdaptiveCardBuilder:
             self.__actions[id] = action
         return self
 
-    def add_actions(self, actions: list[ActionType]) -> "AdaptiveCardBuilder":
+    def add_actions(self, actions: Sequence[ActionAnnotated]) -> "AdaptiveCardBuilder":
         """
         Add multiple actions to card
 
         Args:
-            actions (list[ActionType]): Actions to be added
+            actions (Sequence[ActionAnnotated]): Actions to be added
 
         Returns:
             AdaptiveCardBuilder: Builder object
@@ -515,8 +474,8 @@ class AdaptiveCard(ComponentBaseModel):
         msteams: Set specific properties for MS Teams as the target framework
     """
 
-    _items: dict[str, ItemType] = PrivateAttr({})
-    _actions: dict[str, ActionType] = PrivateAttr({})
+    _items: dict[str, ElementAnnotated] = PrivateAttr({})
+    _actions: dict[str, ActionAnnotated] = PrivateAttr({})
 
     type: Literal["AdaptiveCard"] = Field(
         default="AdaptiveCard", json_schema_extra=utils.get_metadata("1.0"), frozen=True
@@ -527,29 +486,29 @@ class AdaptiveCard(ComponentBaseModel):
         alias="$schema",
         json_schema_extra=utils.get_metadata("1.0", field_name="$schema"),
     )
-    refresh: Optional[ct.Refresh] = Field(
+    refresh: Optional[types.Refresh] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.4")
     )
-    authentication: Optional[ct.Authentication] = Field(
+    authentication: Optional[types.Authentication] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.4")
     )
-    body: Optional[List[AnnotatedItem]] = Field(
+    body: Optional[List[ElementAnnotated]] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    actions: Optional[List[AnnotatedAction]] = Field(
+    actions: Optional[List[ActionAnnotated]] = Field(
         default=None,
         json_schema_extra=utils.get_metadata("1.0"),
     )
-    select_action: Optional[AnnotatedSelectAction] = Field(
+    select_action: Optional[SelectActionAnnotated] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.1")
     )
     fallback_text: Optional[str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    background_image: Optional[ct.BackgroundImage | str] = Field(
+    background_image: Optional[types.BackgroundImage | str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    metadata: Optional[ct.Metadata] = Field(
+    metadata: Optional[types.Metadata] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.6")
     )
     min_height: Optional[str] = Field(
@@ -564,10 +523,10 @@ class AdaptiveCard(ComponentBaseModel):
     lang: Optional[str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    vertical_content_align: Optional[ct.VerticalAlignment] = Field(
+    vertical_content_align: Optional[types.VerticalAlignment] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.1")
     )
-    msteams: Optional[ct.MSTeams] = Field(
+    msteams: Optional[types.MSTeams] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
 
@@ -587,7 +546,7 @@ class AdaptiveCard(ComponentBaseModel):
 
     @staticmethod
     def __update(
-        components: dict[str, AnnotatedItem] | dict[str, AnnotatedAction],
+        components: dict[str, ElementAnnotated] | dict[str, ActionAnnotated],
         id: str,
         **kwargs,
     ) -> Result[None, str]:
@@ -724,7 +683,7 @@ class Action(ComponentBaseModel):
         icon_url: An optional string representing the URL of the icon associated with the
         id: An optional string representing the ID of the
         style: An optional ActionStyle enum value representing the style of the
-        fallback: An optional fallback AnnotatedAction object representing the fallback action to be
+        fallback: An optional fallback ActionAnnotated object representing the fallback action to be
         performed.
         tooltip: An optional string representing the tooltip text for the
         is_enabled: An optional boolean indicating whether the action is enabled or disabled.
@@ -741,10 +700,10 @@ class Action(ComponentBaseModel):
         default=None, json_schema_extra=utils.get_metadata("1.1")
     )
     id: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))  # pylint: disable=C0103
-    style: Optional[ct.ActionStyle] = Field(
+    style: Optional[types.ActionStyle] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
     )
-    fallback: Optional["AnnotatedAction"] = Field(
+    fallback: Optional["ActionAnnotated"] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
     )
     tooltip: Optional[str] = Field(
@@ -753,8 +712,8 @@ class Action(ComponentBaseModel):
     is_enabled: Optional[bool] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.5")
     )
-    mode: Optional[ct.ActionMode] = Field(
-        default=ct.ActionMode.PRIMARY, json_schema_extra=utils.get_metadata("1.5")
+    mode: Optional[types.ActionMode] = Field(
+        default=types.ActionMode.PRIMARY, json_schema_extra=utils.get_metadata("1.5")
     )
     requires: Optional[dict[str, str]] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
@@ -800,7 +759,7 @@ class ActionSubmit(Action):
     data: Optional[str | dict[Any, Any]] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    associated_inputs: Optional[ct.AssociatedInputs] = Field(
+    associated_inputs: Optional[types.AssociatedInputs] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.3")
     )
 
@@ -853,17 +812,17 @@ class ActionToggleVisibility(Action):
     Inherits from Action.
 
     Attributes:
-        target_elements: A list of TargetElement objects representing the target elements to toggle.
         type: The type of the action, set to "Action.ToggleVisibility".
+        target_elements: A list of TargetElement objects representing the target elements to toggle.
     """
 
-    target_elements: list[TargetElement] = Field(
-        json_schema_extra=utils.get_metadata("1.2")
-    )
     type: Literal["Action.ToggleVisibility"] = Field(
         default="Action.ToggleVisibility",
         json_schema_extra=utils.get_metadata("1.2"),
         frozen=True,
+    )
+    target_elements: list[TargetElement] = Field(
+        json_schema_extra=utils.get_metadata("1.2")
     )
 
 
@@ -893,7 +852,7 @@ class ActionExecute(Action):
     data: Optional[str | Any] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.4")
     )
-    associated_inputs: Optional[ct.AssociatedInputs] = Field(
+    associated_inputs: Optional[types.AssociatedInputs] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.4")
     )
 
@@ -914,13 +873,13 @@ class ContainerBase(ComponentBaseModel):
         height: The height style to be applied to the container.
     """
 
-    fallback: Optional[Element | AnnotatedAction | InputTypes] = Field(
+    fallback: Optional[ElementAnnotated] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
     )
     separator: Optional[bool] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
     )
-    spacing: Optional[ct.Spacing] = Field(
+    spacing: Optional[types.Spacing] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
     )
     # pylint: disable=C0103
@@ -931,7 +890,7 @@ class ContainerBase(ComponentBaseModel):
     requires: Optional[dict[str, str]] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
     )
-    height: Optional[ct.BlockElementHeight] = Field(
+    height: Optional[types.BlockElementHeight] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.1")
     )
 
@@ -949,7 +908,7 @@ class ActionSet(ContainerBase):
     type: Literal["ActionSet"] = Field(
         default="ActionSet", json_schema_extra=utils.get_metadata("1.2"), frozen=True
     )
-    actions: List[AnnotatedAction] = Field(json_schema_extra=utils.get_metadata("1.2"))
+    actions: List[ActionAnnotated] = Field(json_schema_extra=utils.get_metadata("1.2"))
 
 
 class Container(ContainerBase):
@@ -973,20 +932,20 @@ class Container(ContainerBase):
     type: Literal["Container"] = Field(
         default="Container", json_schema_extra=utils.get_metadata("1.0"), frozen=True
     )
-    items: List[AnnotatedItem] = Field(json_schema_extra=utils.get_metadata("1.0"))
-    select_action: Optional[AnnotatedSelectAction] = Field(
+    items: list[ElementAnnotated] = Field(json_schema_extra=utils.get_metadata("1.0"))
+    select_action: Optional[SelectActionAnnotated] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.1")
     )
-    style: Optional[ct.ContainerStyle] = Field(
+    style: Optional[types.ContainerStyle] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    vertical_content_alignment: Optional[ct.VerticalAlignment] = Field(
+    vertical_content_alignment: Optional[types.VerticalAlignment] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.1")
     )
     bleed: Optional[bool] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
     )
-    background_image: Optional[ct.BackgroundImage | str] = Field(
+    background_image: Optional[types.BackgroundImage | str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
     )
     min_height: Optional[str] = Field(
@@ -1018,10 +977,10 @@ class ColumnSet(ContainerBase):
     columns: Optional[list["Column"]] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    select_action: Optional[AnnotatedSelectAction] = Field(
+    select_action: Optional[SelectActionAnnotated] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.1")
     )
-    style: Optional[ct.ContainerStyle] = Field(
+    style: Optional[types.ContainerStyle] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
     )
     bleed: Optional[bool] = Field(
@@ -1030,7 +989,7 @@ class ColumnSet(ContainerBase):
     min_height: Optional[str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
     )
-    horizontal_alignment: Optional[ct.HorizontalAlignment] = Field(
+    horizontal_alignment: Optional[types.HorizontalAlignment] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
 
@@ -1059,10 +1018,10 @@ class Column(ContainerBase):
     type: Literal["Column"] = Field(
         default="Column", json_schema_extra=utils.get_metadata("1.0"), frozen=True
     )
-    items: Optional[list[Element | ContainerTypes | Input]] = Field(
+    items: Optional[list[ElementAnnotated]] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    background_image: Optional[ct.BackgroundImage | str] = Field(
+    background_image: Optional[types.BackgroundImage | str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
     )
     bleed: Optional[bool] = Field(
@@ -1077,16 +1036,16 @@ class Column(ContainerBase):
     separator: Optional[bool] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    spacing: Optional[ct.Spacing] = Field(
+    spacing: Optional[types.Spacing] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    select_action: Optional[AnnotatedSelectAction] = Field(
+    select_action: Optional[SelectActionAnnotated] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.1")
     )
-    style: Optional[ct.ContainerStyle] = Field(
+    style: Optional[types.ContainerStyle] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    vertical_content_alignment: Optional[ct.VerticalAlignment] = Field(
+    vertical_content_alignment: Optional[types.VerticalAlignment] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.1")
     )
     width: Optional[str | int] = Field(
@@ -1128,16 +1087,16 @@ class ImageSet(ContainerBase):
     Inherits from ContainerBase.
 
     Attributes:
-        images: A list of Image objects within the image set.
         type: The type of the image set. Defaults to "ImageSet".
+        images: A list of Image objects within the image set.
         image_size: The size of the images within the image set.
     """
 
-    images: list[Image] = Field(json_schema_extra=utils.get_metadata("1.0"))
     type: Literal["ImageSet"] = Field(
         default="ImageSet", json_schema_extra=utils.get_metadata("1.2"), frozen=True
     )
-    image_size: Optional[ct.ImageSize] = Field(
+    images: list[Image] = Field(json_schema_extra=utils.get_metadata("1.0"))
+    image_size: Optional[types.ImageSize] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
 
@@ -1151,10 +1110,10 @@ class TableColumnDefinition(ComponentBaseModel):
         width: The width of the table column.
     """
 
-    horizontal_cell_content_alignment: Optional[ct.HorizontalAlignment] = Field(
+    horizontal_cell_content_alignment: Optional[types.HorizontalAlignment] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.5")
     )
-    vertical_cell_content_alignment: Optional[ct.VerticalAlignment] = Field(
+    vertical_cell_content_alignment: Optional[types.VerticalAlignment] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.5")
     )
     width: Optional[str | int] = Field(
@@ -1166,6 +1125,7 @@ class TableRow(ComponentBaseModel):
     """Represents a row within a table.
 
     Attributes:
+        type: The type of the table row. Defaults to "TableRow".
         cells: The cells within the table row.
         horizontal_cell_content_alignment: The horizontal alignment of cell content.
         vertical_cell_content_alignment: The vertical alignment of cell content.
@@ -1178,10 +1138,10 @@ class TableRow(ComponentBaseModel):
     cells: Optional[list["TableCell"]] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.5")
     )
-    horizontal_cell_content_alignment: Optional[ct.HorizontalAlignment] = Field(
+    horizontal_cell_content_alignment: Optional[types.HorizontalAlignment] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.5")
     )
-    vertical_cell_content_alignment: Optional[ct.VerticalAlignment] = Field(
+    vertical_cell_content_alignment: Optional[types.VerticalAlignment] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.5")
     )
     style: Optional[str] = Field(
@@ -1221,13 +1181,13 @@ class Table(ContainerBase):
     show_grid_lines: Optional[bool] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.5")
     )
-    grid_style: Optional[ct.ContainerStyle] = Field(
+    grid_style: Optional[types.ContainerStyle] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.5")
     )
-    horizontal_cell_content_alignment: Optional[ct.HorizontalAlignment] = Field(
+    horizontal_cell_content_alignment: Optional[types.HorizontalAlignment] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.5")
     )
-    vertical_cell_content_alignment: Optional[ct.VerticalAlignment] = Field(
+    vertical_cell_content_alignment: Optional[types.VerticalAlignment] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.5")
     )
 
@@ -1250,20 +1210,20 @@ class TableCell(ComponentBaseModel):
     type: Literal["TableCell"] = Field(
         default="TableCell", json_schema_extra=utils.get_metadata("1.5"), frozen=True
     )
-    items: list[Element] = Field(json_schema_extra=utils.get_metadata("1.5"))
-    select_action: Optional[AnnotatedSelectAction] = Field(
+    items: list[ElementT] = Field(json_schema_extra=utils.get_metadata("1.5"))
+    select_action: Optional[SelectActionAnnotated] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.1")
     )
-    style: Optional[ct.ContainerStyle] = Field(
+    style: Optional[types.ContainerStyle] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.5")
     )
-    vertical_content_alignment: Optional[ct.VerticalAlignment] = Field(
+    vertical_content_alignment: Optional[types.VerticalAlignment] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.1")
     )
     bleed: Optional[bool] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
     )
-    background_image: Optional[ct.BackgroundImage | str] = Field(
+    background_image: Optional[types.BackgroundImage | str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
     )
     min_height: Optional[str] = Field(
@@ -1279,22 +1239,19 @@ class CardElement(ComponentBaseModel):
     Represents a card element.
 
     Attributes:
-        Element: The element of the card.
         separator: Indicates whether a separator should be displayed before the element.
         spacing: The spacing for the element.
         id: The ID of the element.
         is_visible: Indicates whether the element is visible.
         requires: The requirements for the element.
         height: The height of the element.
+        fallback: Describes what to do when an unknown element is encountered or the requires of this or any children can’t be met.
     """
 
-    element: Optional[Any | Element] = Field(
-        default=None, json_schema_extra=utils.get_metadata("1.2")
-    )
     separator: Optional[bool] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    spacing: Optional[ct.Spacing] = Field(
+    spacing: Optional[types.Spacing] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
     id: Optional[str] = Field(default=None, json_schema_extra=utils.get_metadata("1.0"))  # pylint: disable=C0103
@@ -1304,8 +1261,11 @@ class CardElement(ComponentBaseModel):
     requires: Optional[dict[str, str]] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
     )
-    height: Optional[ct.BlockElementHeight] = Field(
+    height: Optional[types.BlockElementHeight] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.1")
+    )
+    fallback: Optional[ElementAnnotated | types.FallbackOption] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
     )
 
 
@@ -1317,8 +1277,8 @@ class TextBlock(CardElement):
     Inherits from CardElement.
 
     Attributes:
-        text: The text content of the text block.
         type: The type of the card element.
+        text: The text content of the text block.
         color: The color of the text block.
         font_type: The font type of the text block.
         horizontal_alignment: The horizontal alignment of the text block.
@@ -1330,18 +1290,18 @@ class TextBlock(CardElement):
         style: The style of the text block.
     """
 
-    text: str = Field(json_schema_extra=utils.get_metadata("1.0"))
     type: Literal["TextBlock"] = Field(
         default="TextBlock", json_schema_extra=utils.get_metadata("1.0"), frozen=True
     )
-    color: Optional[ct.Colors] = Field(
+    text: str = Field(json_schema_extra=utils.get_metadata("1.0"))
+    color: Optional[types.Colors] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    font_type: Optional[ct.FontType] = Field(
+    font_type: Optional[types.FontType] = Field(
         default=None,
         json_schema_extra=utils.get_metadata("1.2"),
     )
-    horizontal_alignment: Optional[ct.HorizontalAlignment] = Field(
+    horizontal_alignment: Optional[types.HorizontalAlignment] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
     is_subtle: Optional[bool] = Field(
@@ -1350,16 +1310,16 @@ class TextBlock(CardElement):
     max_lines: Optional[int] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    size: Optional[ct.FontSize] = Field(
+    size: Optional[types.FontSize] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    weight: Optional[ct.FontWeight] = Field(
+    weight: Optional[types.FontWeight] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
     wrap: Optional[bool] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    style: Optional[ct.TextBlockStyle] = Field(
+    style: Optional[types.TextBlockStyle] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.5")
     )
 
@@ -1372,8 +1332,8 @@ class Image(CardElement):
     Inherits from CardElement.
 
     Attributes:
-        url: The URL of the image.
         type: The type of the card element.
+        url: The URL of the image.
         alt_text: The alternative text for the image.
         background_color: The background color of the image.
         height: The height of the image.
@@ -1384,29 +1344,29 @@ class Image(CardElement):
         width: The width of the image.
     """
 
-    url: str = Field(json_schema_extra=utils.get_metadata("1.0"))
     type: Literal["Image"] = Field(
         default="Image", json_schema_extra=utils.get_metadata("1.0"), frozen=True
     )
+    url: str = Field(json_schema_extra=utils.get_metadata("1.0"))
     alt_text: Optional[str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
     background_color: Optional[str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.1")
     )
-    height: Optional[str | ct.BlockElementHeight] = Field(
+    height: Optional[str | types.BlockElementHeight] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.1")
     )
-    horizontal_alignment: Optional[ct.HorizontalAlignment] = Field(
+    horizontal_alignment: Optional[types.HorizontalAlignment] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    select_action: Optional[AnnotatedSelectAction] = Field(
+    select_action: Optional[SelectActionAnnotated] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.1")
     )
-    size: Optional[ct.ImageSize] = Field(
+    size: Optional[types.ImageSize] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    style: Optional[ct.ImageStyle] = Field(
+    style: Optional[types.ImageStyle] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
     width: Optional[str] = Field(
@@ -1494,7 +1454,7 @@ class RichTextBlock(CardElement):
         json_schema_extra=utils.get_metadata("1.2"),
         frozen=True,
     )
-    horizontal_alignment: Optional[ct.HorizontalAlignment] = Field(
+    horizontal_alignment: Optional[types.HorizontalAlignment] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
     )
 
@@ -1523,10 +1483,10 @@ class TextRun(ComponentBaseModel):
         default="TextRun", json_schema_extra=utils.get_metadata("1.2"), frozen=True
     )
     text: str = Field(json_schema_extra=utils.get_metadata("1.2"))
-    color: Optional[ct.Colors] = Field(
+    color: Optional[types.Colors] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
     )
-    font_type: Optional[ct.FontType] = Field(
+    font_type: Optional[types.FontType] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
     )
     highlight: Optional[bool] = Field(
@@ -1538,10 +1498,10 @@ class TextRun(ComponentBaseModel):
     italic: Optional[bool] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
     )
-    select_action: Optional[AnnotatedSelectAction] = Field(
+    select_action: Optional[SelectActionAnnotated] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
     )
-    size: Optional[ct.FontSize] = Field(
+    size: Optional[types.FontSize] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
     )
     strikethrough: Optional[bool] = Field(
@@ -1550,7 +1510,7 @@ class TextRun(ComponentBaseModel):
     underline: Optional[bool] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.3")
     )
-    weight: Optional[ct.FontWeight] = Field(
+    weight: Optional[types.FontWeight] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
     )
 
@@ -1581,16 +1541,16 @@ class Input(ComponentBaseModel):
     label: Optional[str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.3")
     )
-    fallback: Optional[InputTypes] = Field(
+    fallback: Optional[ElementAnnotated | types.FallbackOption] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
     )
-    height: Optional[ct.BlockElementHeight] = Field(
+    height: Optional[types.BlockElementHeight] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.1")
     )
     separator: Optional[bool] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    spacing: Optional[ct.Spacing] = Field(
+    spacing: Optional[types.Spacing] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
     is_visible: Optional[bool] = Field(
@@ -1636,10 +1596,10 @@ class InputText(Input):
     regex: Optional[str] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.3")
     )
-    style: Optional[ct.TextInputStyle] = Field(
+    style: Optional[types.TextInputStyle] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    inline_action: Optional[AnnotatedSelectAction] = Field(
+    inline_action: Optional[SelectActionAnnotated] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.2")
     )
     value: Optional[str] = Field(
@@ -1807,7 +1767,7 @@ class InputChoiceSet(Input):
     is_multi_select: Optional[bool] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
-    style: Optional[ct.ChoiceInputStyle] = Field(
+    style: Optional[types.ChoiceInputStyle] = Field(
         default=None, json_schema_extra=utils.get_metadata("1.0")
     )
     value: Optional[str] = Field(
