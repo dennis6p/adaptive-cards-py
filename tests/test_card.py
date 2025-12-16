@@ -37,15 +37,19 @@ class TestAdaptiveCard:
             .add_item(TextBlock(text="added_afterwards", id="added_afterwards"))
             .create()
         )
+        assert card.body
         assert len(card.body) == 2
         assert card._items.get("added_afterwards") is not None
+        assert isinstance(card._items["added_afterwards"], TextBlock)
         assert card._items["added_afterwards"].text == "added_afterwards"
 
     def test_create_card_from_file_and_update(self, sample_card_small_json):
         """Test creating an AdaptiveCard from a JSON file and updating an item's field afterwards."""
         card = AdaptiveCard.from_json(sample_card_small_json).create()
+        assert card.body
         assert len(card.body) == 1
         assert card._items.get("id_1") is not None
+        assert isinstance(card._items["id_1"], TextBlock)
         assert card._items["id_1"].text == "Welcome to Adaptive Cards!"
 
         card.update_item("id_1", text="updated_text")
@@ -152,6 +156,7 @@ class TestAdaptiveCard:
     def test_update_item_from_json_success(self, sample_card_json):
         """Test updating an item's field value successfully."""
         card = AdaptiveCard.from_json(sample_card_json).create()
+        assert isinstance(card._items["id_40"], TextBlock)
         assert card._items["id_40"].text == "Total Expense Amount \t"
 
         result = card.update_item("id_40", text="Updated TextBlock")

@@ -16,7 +16,6 @@ from adaptive_cards.card import (
     Column,
     ColumnSet,
     Container,
-    ContainerTypes,
     Image,
     TargetElement,
     TextBlock,
@@ -24,10 +23,11 @@ from adaptive_cards.card import (
 from adaptive_cards.client import TeamsClient
 from adaptive_cards.validation import CardValidator, CardValidatorFactory
 
-containers: list[ContainerTypes] = []
+containers: list[Container | ColumnSet] = []
 
 icon_source: str = "https://icons8.com/icon/vNXFqyQtOSbb/launch"
 icon_url: str = "https://img.icons8.com/3d-fluency/94/launched-rocket.png"
+
 
 header_column_set: ColumnSet = ColumnSet(
     columns=[
@@ -45,6 +45,7 @@ containers.append(
         items=[header_column_set], style=types.ContainerStyle.EMPHASIS, bleed=True
     )
 )
+
 
 containers.append(
     Container(

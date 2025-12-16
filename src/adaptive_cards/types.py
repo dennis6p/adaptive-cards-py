@@ -13,7 +13,7 @@ from adaptive_cards import utils
 
 class CaseInsensitiveMixin(str, Enum):
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: str):
         # Convert the input value to lowercase for case-insensitive matching
         value = value.lower()
         for member in cls:
@@ -330,6 +330,17 @@ class ChoiceInputStyle(CaseInsensitiveMixin):
     COMPACT = "compact"
     EXPANDED = "expanded"
     FILTERED = "filtered"
+
+
+class FallbackOption(CaseInsensitiveMixin):
+    """
+    Enumerates the fallback option
+
+    Attributes:
+        DROP: Causes an element to be dropped immediately when unknown elements are encountered.
+    """
+
+    DROP = "drop"
 
 
 class TypeBaseModel(BaseModel):
