@@ -1,0 +1,103 @@
+name: Publish to PyPI
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Set release version
+        env:
+          TAG_NAME: ${{ github.event_name == 'release' && github.event.release.tag_name || format('v0.0.0.dev{0}', github.run_number) }}
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import os
+          import re
+
+          path = Path("pyproject.toml")
+          text = path.read_text()
+
+          tag = os.environ["TAG_NAME"]
+
+          version = tag.removeprefix("v")
+
+          text, count = re.subn(
+              r'^version\s*=\s*"[^"]+"',
+              f'version = "{version}"',
+              text,
+              count=1,
+              flags=re.MULTILINE,
+          )
+
+          if count != 1:
+              raise RuntimeError("Could not find project version in pyproject.toml")
+
+          path.write_text(text)
+
+          print(f"Building release version: {version}")
+          PY
+
+      - name: Build package
+        run: uv build
+
+      - name: Show distributions
+        run: ls -lah dist/
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts
+          path: dist/
+          if-no-files-found: error
+          retention-days: 30
+
+  publish:
+    name: Publish to PyPI
+    needs: build
+    if: ${{ github.event_name == 'release' }}
+    runs-on: ubuntu-latest
+
+    environment:
+      name: release
+      url: https://pypi.org/project/adaptive-cards-py/
+
+    permissions:
+      actions: read
+      id-token: write
+
+    steps:
+      - name: Download release artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: release-artifacts
+          path: dist/
+
+      - name: Show distributions
+        run: ls -lah dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
