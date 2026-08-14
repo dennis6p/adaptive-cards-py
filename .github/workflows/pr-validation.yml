@@ -1,0 +1,114 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Install dependencies
+        run: |
+          uv pip install --system ruff
+          uv pip install --system -r pyproject.toml
+          uv pip install --system pytest
+
+      - name: Lint
+        uses: chartboost/ruff-action@v1
+
+      - name: Test
+        run: uv run pytest tests/*.py
+
+  build:
+    name: Build package
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Set development version
+        env:
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import os
+          import re
+
+          path = Path("pyproject.toml")
+          text = path.read_text()
+
+          run_number = os.environ["RUN_NUMBER"]
+          version = f"0.2.4.dev{run_number}"
+
+          text, count = re.subn(
+              r'^version\s*=\s*"[^"]+"',
+              f'version = "{version}"',
+              text,
+              count=1,
+              flags=re.MULTILINE,
+          )
+
+          if count != 1:
+              raise RuntimeError("Could not find project version in pyproject.toml")
+
+          path.write_text(text)
+
+          print(f"Building version: {version}")
+          PY
+
+      - name: Build package
+        run: uv build
+
+      - name: Show distributions
+        run: |
+          ls -lah dist/
+          python -m zipfile -l dist/*.whl | head -20 || true
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
