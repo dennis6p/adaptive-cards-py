@@ -66,7 +66,6 @@ Further resources can be found here:
 * `pydantic`
 * `requests`
 * `jsonschema`
-* `mypy`
 * `result`
 
 Works with Python 3.10+

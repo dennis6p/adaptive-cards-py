@@ -16,7 +16,6 @@ dependencies = [
     "requests",
     "jsonschema",
     "pydantic>=2.10.6",
-    "mypy>=1.15.0",
     "result>=0.17.0",
 ]
 requires-python = ">=3.10"
@@ -33,6 +32,7 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
+    "mypy>=1.15.0",
     "pytest>=8.3.5",
 ]
 
