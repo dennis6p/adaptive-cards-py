@@ -348,10 +348,18 @@ class AdaptiveCardBuilder:
             AdaptiveCardBuilder: Builder object
         """
         if width == types.MSTeamsCardWidth.FULL:
-            self.__card.msteams = types.MSTeams(width=width)
+            if self.__card.msteams is None:
+                self.__card.msteams = types.MSTeams()
+            self.__card.msteams.width = width
             return self
 
         self.__card.msteams = None
+        return self
+
+    def mentions(self, users: list[types.MentionUser]) -> "AdaptiveCardBuilder":
+        if self.__card.msteams is None:
+            self.__card.msteams = types.MSTeams()
+        self.__card.msteams.entities = [user for user in users]
         return self
 
     def add_item(self, item: ElementAnnotated) -> "AdaptiveCardBuilder":

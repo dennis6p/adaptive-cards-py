@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional
+import html
+from typing import Optional, Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_serializer
 from pydantic.alias_generators import to_camel
 
 from adaptive_cards import utils
@@ -465,6 +466,30 @@ class Metadata(TypeBaseModel):
     )
 
 
+class MentionUser(TypeBaseModel):
+    """Mentionable user."""
+
+    id: str  # user email address
+    name: str  # display text
+
+    @model_serializer(mode='plain')
+    def serialize(self) -> dict[str, Any]:
+        """Generates a mentionable entity."""
+        escaped_id = html.escape(self.id)
+        escaped_name = html.escape(self.name)
+        return {
+            "type": "mention",
+            "text": f"<at>{escaped_name}</at>",
+            "mentioned": {"id": escaped_id, "name": escaped_name},
+        }
+
+    @property
+    def mention(self) -> str:
+        """Generates an @Mention string."""
+        escaped_name = html.escape(self.name)
+        return f"<at>{escaped_name}</at>"
+
+
 class MSTeams(TypeBaseModel):
     """
     Represents specific properties for MS Teams as the target framework.
@@ -474,6 +499,10 @@ class MSTeams(TypeBaseModel):
                when posted to MS Teams. Defaults to "None".
     """
 
+    entities: Optional[list[MentionUser]] = Field(
+        default=None, json_schema_extra=utils.get_metadata("1.2")
+    )
+
     width: Optional[MSTeamsCardWidth] = Field(
-        default=MSTeamsCardWidth.DEFAULT, json_schema_extra=utils.get_metadata("1.0")
+        default=None, json_schema_extra=utils.get_metadata("1.0")
     )

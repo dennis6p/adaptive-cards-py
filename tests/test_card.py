@@ -2,6 +2,7 @@ import pytest
 from result import is_err, is_ok
 
 from adaptive_cards.card import ActionSubmit, AdaptiveCard, InputText, TextBlock
+import adaptive_cards.types as types
 
 
 class TestAdaptiveCard:
@@ -245,3 +246,12 @@ class TestAdaptiveCard:
         card = AdaptiveCard.new().add_action(action_submit).version("1.3").create()
         result = card.update_action("action1", title=123)
         assert is_err(result)
+
+    def test_add_mention(self):
+        """Test adding a mention to a card."""
+        users = [types.MentionUser(id="user@example.com", name="User")]
+        card = AdaptiveCard.new().version("1.2").mentions(users).create()
+        assert isinstance(card.msteams, types.MSTeams)
+        assert isinstance(card.msteams.entities, list)
+        assert len(card.msteams.entities) == 1
+        assert card.msteams.entities == users
